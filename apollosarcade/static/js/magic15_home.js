@@ -104,15 +104,25 @@ function tictactoe() {
     window.location.pathname = 'magic_fifteen/local/';
 }
 function checkForMatch() {
-    let url = `${window.location.href}check/`;
+    let url = `${window.location.origin}${window.location.pathname}check/`;
     fetch(url).then(response => {
         // Need a loading function / animation
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
+        if (response.redirected && response.url.includes('/accounts/login/')) {
+            alert('User not authenticated, redirecting to login page');
+            window.location.pathname = '/login/';
+            return;
+        }
+        if (response.headers.get('content-type') !== 'application/json') {
+            throw new Error(`Invalid content-type. Expected 'application/json', received '${response.headers.get('content-type')}'.`);
+        }
         return response.json();
     }).then(data => {
-        window.location.pathname = data.pathname;
+        if (data) {
+            window.location.pathname = data.pathname;
+        }
     }).catch(error => {
         console.error('There has been a problem with your fetch operation: ', error);
     });
@@ -122,7 +132,7 @@ function howToPlay() {
     card === null || card === void 0 ? void 0 : card.classList.toggle('clicked');
 }
 async function fetchHowToPlay(inner) {
-    let url = `${window.location.href}how-to-play/`;
+    let url = `${window.location.origin}${window.location.pathname}how-to-play/`;
     fetch(url).then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');

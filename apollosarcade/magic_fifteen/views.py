@@ -1,26 +1,31 @@
-from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.http.response import JsonResponse
 from django.http import HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django import template
-register = template.Library()
 
 from .models import Game, GameInstruction
 from .forms import CreateLobbyForm, JoinLobbyForm
-from django.contrib.auth.models import User
-import json
 from .encoders import QuillFieldEncoder
 
+import json
+
+register = template.Library()
 # Create your views here.
 
 # Default view, auth only superusers
-@login_required
 def magic_fifteen(request):
     return render(request, 'magic_fifteen_home.html',)
 
 @login_required
 def check_for_match(request):
+    if not request.user.is_authenticated:
+        print('User not authenticated')
+        messages.warning(request, "You must be logged in to access this page.")
+        return redirect('login')  # Replace 'login' with the name of your login view
     url = 'magic_fifteen/'
     match (check_for_lobbies(request)):
         case 2:

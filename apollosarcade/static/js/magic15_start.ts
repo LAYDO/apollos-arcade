@@ -23,10 +23,12 @@ function startInit() {
 
 function showCreate() {
     create.show();
+    join.hide();
 }
 
 function showJoin() {
     join.show();
+    create.hide();
 }
 
 startInit();
