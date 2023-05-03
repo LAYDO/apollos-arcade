@@ -16,9 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views_auth import CustomLoginView, CustomLogoutView, register
+from .views import home
 
 urlpatterns = [
+    path('', home, name='home'),
+    path('login/', CustomLoginView.as_view(), name='login'),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
+    path('register/', register, name='register'),
     path("admin/", admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('player/', include('user_profiles.urls')),
+    path('magic_fifteen/', include('magic_fifteen.urls')),
 ]

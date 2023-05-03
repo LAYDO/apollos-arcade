@@ -1,0 +1,99 @@
+.mft-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.mft-row-b {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.mft-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.mft-col-top {
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+}
+
+.mft-col-b {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.selected {
+    border: 0.25rem solid var(--font-color);
+    border-radius: 0.75rem;
+    /* background-color: var(--color-primary); */
+}
+
+.disabled {
+    /* cursor: not-allowed; */
+    color: var(--font-faded50);
+    pointer-events: none;
+}
+
+.mft-button {
+    width: 10rem;
+    height: 2rem;
+    border: 0.125rem solid var(--font-color);
+    display: inherit;
+    color: var(--font-color);
+    margin: 2rem;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    cursor: pointer;
+    background-color: transparent;
+}
+
+.mft-button:hover {
+    opacity: 0.5;
+}
+
+.mft-title {
+    font-size: 2rem;
+}
+
+.mft-margin-sb {
+    margin: 0 1rem;
+}
+
+.mft-lime {
+    color: lime;
+}
+
+.mft-round {
+    font-size: 1rem;
+}
+
+.mft-square {
+    width: 8.5625rem;
+    height: 8.5625rem;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font: bold 3rem serif;
+    fill: var(--font-color);
+}
+
+.turn-disable {
+    pointer-events: none;
+}
+
+.mft-refresh {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
