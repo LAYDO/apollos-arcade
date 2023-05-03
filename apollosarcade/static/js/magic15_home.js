@@ -101,7 +101,7 @@ function drawLogo(_element) {
     }
 }
 function tictactoe() {
-    window.location.pathname = 'tictactoe';
+    window.location.pathname = 'magic_fifteen/local/';
 }
 function checkForMatch() {
     let url = `${window.location.href}check/`;

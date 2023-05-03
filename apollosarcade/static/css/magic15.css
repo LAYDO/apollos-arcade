@@ -97,3 +97,6 @@
     justify-content: center;
     align-items: center;
 }
+.mft-modal {
+    display: none;
+}

@@ -111,7 +111,7 @@ function drawLogo(_element: Element) {
 }
 
 function tictactoe() {
-    window.location.pathname = 'tictactoe';
+    window.location.pathname = 'magic_fifteen/local/';
 }
 
 function checkForMatch() {

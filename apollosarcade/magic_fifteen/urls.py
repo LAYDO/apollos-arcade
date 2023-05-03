@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path('', views.magic_fifteen, name='magic_fifteen'),
+    path('local/', views.local, name='local'),
     path('check/', views.check_for_match, name='check_for_match'),
     path('start/', views.start, name='start'),
     path('start/create', views.create_lobby, name='create_lobby'),

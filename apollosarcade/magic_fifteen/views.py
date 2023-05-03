@@ -316,7 +316,7 @@ def post(request):
                 'spaces': game.spaces,
                 'pw': game.password,
             })
-    return render(request, 'fifteen_toes_post.html', post)
+    return render(request, 'magic_fifteen_post.html', post)
 
 @login_required
 def post_rematch(request):
@@ -344,10 +344,10 @@ def post_rematch(request):
                     spaces=[0,0,0,0,0,0,0,0,0],
                 )
                 game.save()
-                return HttpResponseRedirect(f'/fifteentoes/lobby')
+                return HttpResponseRedirect(f'/magic_fifteen/lobby')
             elif (p.p2_status == 'LEFT'):
                 game_archival(p.game_id)
-                return HttpResponseRedirect('/fifteentoes')
+                return HttpResponseRedirect('/magic_fifteen')
         elif (len(p2) == 1):
             p = Game.objects.get(game_id=p2[0]['game_id'])
             p.p2_status='REMATCH'
@@ -368,11 +368,11 @@ def post_rematch(request):
                     spaces=[0,0,0,0,0,0,0,0,0],
                 )
                 game.save()
-                return HttpResponseRedirect(f'/fifteentoes/lobby')
+                return HttpResponseRedirect(f'/magic_fifteen/lobby')
             elif (p.p1_status == 'LEFT'):
                 game_archival(p.game_id)
-                return HttpResponseRedirect('/fifteentoes')
-        # return HttpResponseRedirect(f'/fifteentoes/post/')
+                return HttpResponseRedirect('/magic_fifteen')
+        # return HttpResponseRedirect(f'/magic_fifteen/post/')
         return redirect(request.META['HTTP_REFERER'])
     
 @login_required
@@ -391,7 +391,7 @@ def post_leave(request):
             p.p2_status='LEFT'
             if p.p1_status == 'LEFT':
                 game_archival(p.game_id)
-        return HttpResponseRedirect('/fifteentoes')
+        return HttpResponseRedirect('/magic_fifteen')
     
     
 def game_archival(id):
@@ -421,3 +421,6 @@ def how_to_play(request):
     quill_field_data = how_to_play["instructions"].html
     how_to_play["instructions"] = quill_field_data
     return JsonResponse(how_to_play, safe=False, encoder=QuillFieldEncoder)
+
+def local(request):
+    return render(request, 'ttt.html')

@@ -1,25 +1,25 @@
 {% extends "app.html" %} {% load static %}
 {% block page_head %}
 <title>15 Toes</title>
-<link rel="stylesheet" href="{% static '15toes/css/15t.css' %}" />
+<link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
 {% endblock %}
-{% block laydo_content_1 %}
-<div id="createModal" class="ft-modal"></div>
-<div id="joinModal" class="ft-modal"></div>
-<div class="laydo-container laydo-app">
-    <div class="ft-col">
-        <div class="ft-row ft-title">START MATCH</div>
+{% block apollos_content_1 %}
+<div id="createModal" class="mft-modal"></div>
+<div id="joinModal" class="mft-modal"></div>
+<div class="apollos-container apollos-app">
+    <div class="mft-col">
+        <div class="mft-row mft-title">START MATCH</div>
         {% csrf_token %}
-        <div class="ft-row">
-            <div class="ft-button" onclick="showCreate()">CREATE</div>
+        <div class="mft-row">
+            <div class="mft-button" onclick="showCreate()">CREATE</div>
         </div>
-        <div class="ft-row">
-            <div class="ft-button" onclick="showJoin()">JOIN</div>
+        <div class="mft-row">
+            <div class="mft-button" onclick="showJoin()">JOIN</div>
         </div>
     </div>
 </div>
 {% endblock %}
 {% block page_scripts %}
-<script type="text/javascript" src="{% static '15toes/js/15t.js' %}"></script>
-<script type="text/javascript" src="{% static '15toes/js/15t_start.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/magic15.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/magic15_start.js' %}"></script>
 {% endblock %}
