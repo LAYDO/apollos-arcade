@@ -3,7 +3,7 @@ function ft_init() {
     buildCard();
     let logo = document.getElementById('toesLogo');
     if (logo) {
-        drawLogo(logo);
+        drawHomeLogo(logo);
     }
 }
 function buildCard() {
@@ -69,7 +69,7 @@ function buildCard() {
         container.append(card);
     }
 }
-function drawLogo(_element) {
+function drawHomeLogo(_element) {
     let width = _element.clientWidth;
     let sWidth = width / 3;
     let start = sWidth / 7;
