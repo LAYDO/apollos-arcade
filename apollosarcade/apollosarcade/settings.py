@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -97,20 +97,49 @@ CHANNEL_LAYERS = {
 
 ASGI_APPLICATION = "apollosarcade.asgi.application"
 
+DEVELOPMENT_MODE = True # os.environ.get("DEVELOPMENT_MODE", "False") == "True"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'apollosarcade_db',
-        'USER': 'laydo',
-        'PASSWORD': os.environ.get('LOCAL_DB_PW'),
-        'HOST': 'localhost',
-        'PORT': '',
+from urllib.parse import urlsplit
+if DEVELOPMENT_MODE is True:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'apollosarcadedb',
+            'USER': 'apollosarcadedb',
+            'PASSWORD': os.environ.get("DATABASE_PASSWORD"),
+            'HOST': os.environ.get("DATABASE_HOST"),
+            'PORT': '25060'
+        }
     }
-}
+elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+    database_url = os.getenv('DATABASE_URL', None)
+    if database_url is None:
+        raise Exception("DATABASE_URL environment variable not defined")
+
+    parsed_url = urlsplit(database_url)
+
+    if parsed_url.scheme in ['postgres', 'postgresql']:
+        database_engine = 'django.db.backends.postgresql'
+    elif parsed_url.scheme == 'mysql':
+        database_engine = 'django.db.backends.mysql'
+    elif parsed_url.scheme == 'sqlite':
+        database_engine = 'django.db.backends.sqlite3'
+    else:
+        raise ValueError(f"Unsupported database scheme: {parsed_url.scheme}")
+
+    DATABASES = {
+        "default": {
+            "ENGINE": database_engine,
+            "NAME": parsed_url.path[1:],
+            "USER": parsed_url.username,
+            "PASSWORD": parsed_url.password,
+            "HOST": parsed_url.hostname,
+            "PORT": parsed_url.port,
+        }
+    }
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
