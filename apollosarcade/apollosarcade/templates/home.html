@@ -1,0 +1,12 @@
+{% extends "app.html" %} {% load static %} {% block page_head %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}" />
+{% endblock %}
+{% block apollos_content_1 %}
+<div class="apps-space">
+    <div class="app-claim">
+        <button class="app-button" id="magic_fifteen" onclick="redirect(event)"></button>
+        <h3 class="app-title">Magic 15</h3>
+    </div>
+</div>
+{% endblock %} {% block page_scripts %}
+{% endblock %}

@@ -1,0 +1,63 @@
+.apps-space {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.app-claim {
+    margin: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 16.5rem;
+}
+
+.app-button {
+    min-height: 6rem;
+    min-width: 6rem;
+    max-height: 6rem;
+    max-width: 6rem;
+    background-color: transparent;
+    box-shadow: rgba(0, 0, 0, 0.25) 0 0.0625rem 0.25rem;
+    border-radius: 25%;
+    cursor: pointer;
+    background-position: inherit;
+    background-size: cover;
+    background-repeat: no-repeat;
+    padding: 0;
+}
+
+@keyframes appOpen {
+    from {
+        height: 10rem;
+        width: 10rem;
+        background-color: transparent;
+    }
+
+    to {
+        transform: scale(20);
+    }
+}
+
+.app-open {
+    animation-name: appOpen;
+    animation-duration: 1s;
+}
+
+.app-title {
+    font-size: 1rem;
+}
+
+
+@media only screen and (min-width: 37.5rem) {
+    .app-button {
+        min-height: 10rem;
+        min-width: 10rem;
+    }
+
+    .app-title {
+        font-size: 2rem;
+    }
+}

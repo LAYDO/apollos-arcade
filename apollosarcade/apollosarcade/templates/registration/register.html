@@ -1,0 +1,9 @@
+{% extends 'app.html' %}
+{% block apollos_content_1 %}
+<h2>Register</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Register</button>
+</form>
+{% endblock %}

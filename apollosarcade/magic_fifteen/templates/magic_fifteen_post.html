@@ -1,0 +1,69 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+<title>15 Toes</title>
+<link rel="stylesheet" href="{% static '15toes/css/15p.css' %}" />
+{% endblock %}
+{% block laydo_content_1 %}
+<div class="laydo-container laydo-app">
+    <div class="ft-col">
+        <div class="ft-row ft-title">{{ privacy }} Lobby #{{ id }}</div>
+        <div class="ft-col">
+            <div class="ft-row-b">
+                <div class="ft-margin-sb">
+                    Winner: {{ winner }}
+                </div>
+                {% if winner_id == player_one and p1_status == 'REMATCH' %}
+                <div class="fa-solid fa-check ft-lime"></div>
+                {% elif winner_id == player_two and p2_status == 'REMATCH' %}
+                <div class="fa-solid fa-check ft-lime"></div>
+                {% endif %}
+            </div>
+            <div class="ft-row-b">
+                <div class="ft-margin-sb">
+                    Loser: {{ loser }}
+                </div>
+                {% if loser_id == player_one and p1_status == 'REMATCH' %}
+                <div class="fa-solid fa-check ft-lime"></div>
+                {% elif loser_id == player_two and p2_status == 'REMATCH' %}
+                <div class="fa-solid fa-check ft-lime"></div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="pt-col" id="mftSquares">
+            <div class="pt-row" id="squareRow0">
+                <div class="pt-square pt-border-right pt-border-bottom" id="square0">{{ spaces.0|cut:"0" }}</div>
+                <div class="pt-square pt-border-right pt-border-bottom" id="square1">{{ spaces.1|cut:"0" }}</div>
+                <div class="pt-square pt-border-bottom" id="square2">{{ spaces.2|cut:"0" }}</div>
+            </div>
+            <div class="pt-row" id="squareRow1">
+                <div class="pt-square pt-border-right pt-border-bottom" id="square3">{{ spaces.3|cut:"0" }}</div>
+                <div class="pt-square pt-border-right pt-border-bottom" id="square4">{{ spaces.4|cut:"0" }}</div>
+                <div class="pt-square pt-border-bottom" id="square5">{{ spaces.5|cut:"0" }}</div>
+            </div>
+            <div class="pt-row" id="squareRow2">
+                <div class="pt-square pt-border-right" id="square6">{{ spaces.6|cut:"0" }}</div>
+                <div class="pt-square pt-border-right" id="square7">{{ spaces.7|cut:"0" }}</div>
+                <div class="pt-square" id="square8">{{ spaces.8|cut:"0" }}</div>
+            </div>
+        </div>
+        <div id="lobbyOptions" class="ft-row">
+            <form method="post" class="ft-col" action="rematch">
+                {% csrf_token %}
+                <input class="ft-button" type="submit" value="REMATCH"></input>
+            </form>
+            <form method="post" class="ft-col" action="leave">
+                {% csrf_token %}
+                <input class="ft-button" type="submit" value="LEAVE"></input>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="ft-refresh">
+    <div class="ft-button" onclick="location.reload()">
+        <span class="fa-solid fa-rotate"></span>
+    </div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static '15toes/js/15t_lobby.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+<title>15 Toes</title>
+<link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
+{% endblock %}
+{% block apollos_content_1 %}
+<div class="apollos-container apollos-app">
+    <div class="mft-col">
+        <div class="mft-row mft-title">{{ privacy }} Lobby #{{ id }}</div>
+        <div class="mft-col">
+            <div class="mft-row-b">
+                <div class="mft-margin-sb">
+                    Player 1: {{ p1 }}
+                </div>
+                {% if p1_status == 'READY' %}
+                <div class="fa-solid fa-check mft-lime"></div>
+                {% endif %}
+            </div>
+            <div class="mft-row-b">
+                <div class="mft-margin-sb">
+                    Player 2: {% if p2 == 0 %} <div class="mft-matching"> Matching...</div> {% else %} {{ p2 }} {% endif %}
+                </div>
+                {% if p2_status == 'READY' %}
+                <div class="fa-solid fa-check mft-lime"></div>
+                {% endif %}
+            </div>
+        </div>
+        <div id="lobbyOptions" class="mft-row">
+                {% if user.get_username == p1 %}
+                    {% if p1_status == 'UNREADY' %}
+                    <form method="post" class="mft-col" action="ready">
+                        {% csrf_token %}
+                        <input class="mft-button" type="submit" value="READY"></input>
+                    </form>
+                    <form method="post" class="mft-col" action="leave">
+                        {% csrf_token %}
+                        <input class="mft-button" type="submit" value="LEAVE"></input>
+                    </form>
+                    {% elif p1_status == 'READY' %}
+                    <form method="post" class="mft-col" action="unready">
+                        {% csrf_token %}
+                        <input class="mft-button" type="submit" value="UNREADY"></input>
+                    </form>
+                    {% endif %}
+                {% elif user.get_username == p2 %}
+                    {% if p2_status == 'UNREADY' %}
+                    <form method="post" class="mft-col" action="ready">
+                        {% csrf_token %}
+                        <input class="mft-button" type="submit" value="READY"></input>
+                    </form>
+                    <form method="post" class="mft-col" action="leave">
+                        {% csrf_token %}
+                        <input class="mft-button" type="submit" value="LEAVE"></input>
+                    </form>
+                    {% elif p2_status == 'READY' %}
+                    <form method="post" class="mft-col" action="unready">
+                        {% csrf_token %}
+                        <input class="mft-button" type="submit" value="UNREADY"></input>
+                    </form>
+                    {% endif %}
+                {% endif %}
+                <form method="post" class="mft-col" action="start">
+                    {% csrf_token %}
+                    {% if p1_status == 'READY' and p2_status == 'READY' %}
+                    <input class="mft-button" type="submit" value="START"></input>
+                    {% elif status == 'IN-GAME' %}
+                    <input class="mft-button" type="submit" value="CONTINUE"></input>
+                    {% endif %}
+                </form>
+        </div>
+    </div>
+</div>
+<div class="mft-refresh">
+    <div class="mft-button" onclick="location.reload()">
+        <span class="fa-solid fa-rotate"></span>
+    </div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'js/magic15.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/magic15_lobby.js' %}"></script>
+{% endblock %}
