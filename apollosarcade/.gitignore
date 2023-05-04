@@ -165,3 +165,6 @@ package-lock.json
 
 # VS Code
 .vscode/
+
+# Random
+.DS_Store

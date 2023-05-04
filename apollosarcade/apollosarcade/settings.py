@@ -21,12 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-t6dmp_@&(+ggm)l4lub+6c+o!2x!ge0izvih4lc#28ya=h-4gs"
+SECRET_KEY = os.environ.get("APOLLO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS",'127.0.0.1,localhost,*.apollosarcade.com').split(',')
+
+CSRF_TRUSTED_ORIGINS = ['https://*.apollosarcade.com']
 
 
 # Application definition
@@ -81,11 +83,14 @@ TEMPLATES = [
     },
 ]
 
+# Get the Redis URL from the environment variable
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('localhost', 6379)],
+            "hosts": [REDIS_URL],
         },
     },
 }
