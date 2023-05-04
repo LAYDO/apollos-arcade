@@ -98,13 +98,17 @@ def join_lobby(request):
                 f = form.cleaned_data
                 if (f['join'] == 'Lobby Number'):
                     game = Game.objects.get(game_id=f['join_option'])
-                    if game.player_one == 0:
-                        game.player_one=current_user.id
-                        game.save()
-                    elif game.player_two == 0:
-                        game.player_two=current_user.id
-                        game.save()
-                    return HttpResponseRedirect(f'/magic_fifteen/lobby/')
+                    if game.privacy == 'Public' or (game.privacy == 'Private' and game.password == f['password']):
+                        if game.player_one == 0:
+                            game.player_one=current_user.id
+                            game.save()
+                        elif game.player_two == 0:
+                            game.player_two=current_user.id
+                            game.save()
+                        return HttpResponseRedirect(f'/magic_fifteen/lobby/')
+                    else:
+                        messages.error(request, "Incorrect password for the lobby you are trying to join")
+                        return HttpResponseRedirect(f'/magic_fifteen/start/')
                 else:
                     games = list(Game.objects.filter(status='LOBBY').filter(player_two=0).all().values())
                     games.extend(list(Game.objects.filter(status='LOBBY').filter(player_one=0).all().values()))

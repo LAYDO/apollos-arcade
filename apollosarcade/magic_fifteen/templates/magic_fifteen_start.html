@@ -1,11 +1,17 @@
 {% extends "app.html" %} {% load static %}
 {% block page_head %}
-<title>15 Toes</title>
+<title>Magic 15</title>
 <link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
+<link rel="stylesheet" href="{% static 'css/magic15_home.css' %}" />
 {% endblock %}
 {% block apollos_content_1 %}
 <div class="apollos-container apollos-app">
-    <div class="mft-col">
+    {% if messages %}
+    {% for message in messages %}
+    <div{% if message.tags %} class="alert alert-{{ message.tags }}" {% endif %}>{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    <div id="start_container" class="mft-col">
         <div class="mft-row mft-title">START MATCH</div>
         {% csrf_token %}
         <div class="mft-row">

@@ -1,6 +1,6 @@
 "use strict";
 class FifteenCard {
-    constructor(title, radio1, radio2, button, _element) {
+    constructor(title, radio1, radio2, button, _element, callback) {
         // Parent and card container, taking on apollos-container styling
         this.parentElement = _element;
         this.cardContainer = document.createElement('div');
@@ -58,17 +58,28 @@ class FifteenCard {
         this.textOption.setAttribute('type', 'text');
         this.textOption.setAttribute('name', `${button.toLowerCase()}_option`);
         this.textOption.id = `${button.toLowerCase()}TextOption`;
-        // this.textOption.setAttribute('placeholder', button.toLowerCase() == 'create' ? 'Password' : 'Lobby Number');
+        this.textOption.classList.add('mft-text');
+        this.textOption.setAttribute('placeholder', button.toLowerCase() == 'create' ? 'Password' : 'Lobby Number');
+        let buttRow = document.createElement('div');
+        buttRow.classList.add('mft-row-b');
         this.button = document.createElement('input');
         this.button.classList.add('mft-button');
         this.button.setAttribute('type', 'submit');
         this.button.setAttribute('value', button);
+        let cancel = document.createElement('div');
+        cancel.classList.add('mft-button');
+        cancel.textContent = 'CANCEL';
+        cancel.addEventListener('click', () => {
+            callback();
+        });
+        buttRow.append(this.button);
+        buttRow.append(cancel);
         this.cardForm.append(radRow);
         this.cardForm.append(break1);
         this.cardForm.append(this.textOption);
         this.cardForm.append(break1);
         this.cardForm.append(break1);
-        this.cardForm.append(this.button);
+        this.cardForm.append(buttRow);
         this.cardContainer.append(this.title);
         this.cardContainer.append(this.cardForm);
         this.parentElement.append(this.cardContainer);
