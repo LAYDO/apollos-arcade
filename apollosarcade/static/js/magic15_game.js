@@ -89,7 +89,6 @@ function connect() {
         if ('payload' in data) {
             data = data['payload'];
             if (data['type'] == 'move') {
-                console.log(data);
                 let roundDiv = document.getElementById('current_round');
                 if (roundDiv) {
                     roundDiv.textContent = `Round: ${data['round']}`;

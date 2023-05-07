@@ -54,13 +54,33 @@ class FifteenCard {
         radCol2.append(this.radio2);
         radRow.append(radCol1);
         radRow.append(radCol2);
+        // Text option label
+        this.textLabel = document.createElement('label');
+        this.textLabel.setAttribute('for', `${button.toLowerCase()}TextOption`);
+        this.textLabel.textContent = button.toLowerCase() == 'create' ? 'Password' : 'Lobby Number';
+        this.textLabel.setAttribute('style', 'display: none;');
+        this.textLabel.id = `${button.toLowerCase()}TextLabel`;
+        // Text option
         this.textOption = document.createElement('input');
-        this.textOption.setAttribute('style', 'visibility: hidden;');
+        this.textOption.setAttribute('style', 'display: none;');
         this.textOption.setAttribute('type', 'text');
         this.textOption.setAttribute('name', `${button.toLowerCase()}_option`);
         this.textOption.id = `${button.toLowerCase()}TextOption`;
         this.textOption.classList.add('mft-text');
         this.textOption.setAttribute('placeholder', button.toLowerCase() == 'create' ? 'Password' : 'Lobby Number');
+        // Password label
+        this.passwordLabel = document.createElement('label');
+        this.passwordLabel.setAttribute('for', `${button.toLowerCase()}_password`);
+        this.passwordLabel.textContent = 'Password';
+        this.passwordLabel.setAttribute('style', 'display: none;');
+        this.passwordLabel.id = `${button.toLowerCase()}_password_label`;
+        // Password
+        this.password = document.createElement('input');
+        this.password.setAttribute('style', 'display: none;');
+        this.password.setAttribute('type', 'password');
+        this.password.setAttribute('name', 'password');
+        this.password.id = `${button.toLowerCase()}_password`;
+        this.password.classList.add('mft-text');
         let buttRow = document.createElement('div');
         buttRow.classList.add('mft-row-b');
         this.button = document.createElement('input');
@@ -77,8 +97,14 @@ class FifteenCard {
         buttRow.append(cancel);
         this.cardForm.append(radRow);
         this.cardForm.append(break1);
-        this.cardForm.append(this.textOption);
         this.cardForm.append(break1);
+        this.cardForm.append(this.textLabel);
+        this.cardForm.append(this.textOption);
+        if (button.toLowerCase() == 'join') {
+            this.cardForm.append(break1);
+            this.cardForm.append(this.passwordLabel);
+            this.cardForm.append(this.password);
+        }
         this.cardForm.append(break1);
         this.cardForm.append(buttRow);
         this.addCsrfTokenToForm(this.cardForm);
@@ -93,10 +119,16 @@ class FifteenCard {
         this.parentElement.setAttribute('style', 'display:none;');
     }
     showText() {
-        this.textOption.setAttribute('style', 'visibility: show;');
+        this.textLabel.setAttribute('style', 'display: inherit;');
+        this.textOption.setAttribute('style', 'display: inherit;');
+        this.passwordLabel.setAttribute('style', 'display: inherit;');
+        this.password.setAttribute('style', 'display: inherit;');
     }
     hideText() {
-        this.textOption.setAttribute('style', 'visibility: hidden;');
+        this.textLabel.setAttribute('style', 'display: none;');
+        this.textOption.setAttribute('style', 'display: none;');
+        this.passwordLabel.setAttribute('style', 'display: none;');
+        this.password.setAttribute('style', 'display: none;');
     }
     addCsrfTokenToForm(formElement) {
         const csrfInput = document.createElement("input");
