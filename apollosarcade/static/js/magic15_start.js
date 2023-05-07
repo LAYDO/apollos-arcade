@@ -6,10 +6,10 @@ let join;
 let startContainer = document.getElementById('start_container');
 function startInit() {
     if (createModal) {
-        create = new FifteenCard('Match Options', 'Public', 'Private', 'CREATE', createModal, cancel);
+        create = new FifteenCard('Match Options', 'Public', 'Private', 'CREATE', createModal, cancel, csrfToken);
     }
     if (joinModal) {
-        join = new FifteenCard('Join Lobby', 'Random Lobby', 'Lobby Number', 'JOIN', joinModal, cancel);
+        join = new FifteenCard('Join Lobby', 'Random Lobby', 'Lobby Number', 'JOIN', joinModal, cancel, csrfToken);
     }
     window.onclick = (e) => {
         if (e.target == createModal) {
@@ -35,4 +35,6 @@ function cancel() {
     join.hide();
     startContainer === null || startContainer === void 0 ? void 0 : startContainer.setAttribute('style', 'display: flex;');
 }
-startInit();
+document.addEventListener('DOMContentLoaded', () => {
+    startInit();
+});

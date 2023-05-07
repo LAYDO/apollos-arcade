@@ -1,4 +1,5 @@
 class FifteenCard {
+    private csrfToken: string;
     private parentElement: Element;
     private cardContainer: Element;
     private title: Element;
@@ -8,7 +9,8 @@ class FifteenCard {
     private textOption: Element;
     private button: Element;
 
-    constructor(title: string, radio1: string, radio2: string, button: string, _element: Element, callback: Function) {
+    constructor(title: string, radio1: string, radio2: string, button: string, _element: Element, callback: Function, csrfToken: string) {
+        this.csrfToken = csrfToken;
         // Parent and card container, taking on apollos-container styling
         this.parentElement = _element;
         this.cardContainer = document.createElement('div');
@@ -107,6 +109,7 @@ class FifteenCard {
         this.cardForm.append(break1);
         this.cardForm.append(break1);
         this.cardForm.append(buttRow);
+        this.addCsrfTokenToForm(this.cardForm);
 
         this.cardContainer.append(this.title);
         this.cardContainer.append(this.cardForm);
@@ -129,4 +132,14 @@ class FifteenCard {
     hideText() {
         this.textOption.setAttribute('style', 'visibility: hidden;');
     }
+
+    addCsrfTokenToForm(formElement: Element) {
+            const csrfInput = document.createElement("input");
+            csrfInput.type = "hidden";
+            csrfInput.name = "csrfmiddlewaretoken";
+            csrfInput.value = this.csrfToken;
+
+            formElement.appendChild(csrfInput);
+        }
+
 }

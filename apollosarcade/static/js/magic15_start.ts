@@ -1,3 +1,4 @@
+declare var csrfToken: string;
 let createModal = document.getElementById('createModal');
 let joinModal = document.getElementById('joinModal');
 let create: FifteenCard;
@@ -6,10 +7,10 @@ let startContainer = document.getElementById('start_container');
 
 function startInit() {
     if (createModal) {
-        create = new FifteenCard('Match Options', 'Public', 'Private', 'CREATE', createModal, cancel);
+        create = new FifteenCard('Match Options', 'Public', 'Private', 'CREATE', createModal, cancel, csrfToken);
     }
     if (joinModal) {
-        join = new FifteenCard('Join Lobby', 'Random Lobby', 'Lobby Number', 'JOIN', joinModal, cancel);
+        join = new FifteenCard('Join Lobby', 'Random Lobby', 'Lobby Number', 'JOIN', joinModal, cancel, csrfToken);
     }
 
     window.onclick = (e: MouseEvent) => {
@@ -40,4 +41,6 @@ function cancel() {
     startContainer?.setAttribute('style', 'display: flex;');
 }
 
-startInit();
+document.addEventListener('DOMContentLoaded', () => {
+    startInit();
+});
