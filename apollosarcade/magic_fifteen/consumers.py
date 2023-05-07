@@ -1,4 +1,4 @@
-import json
+import json, traceback
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
@@ -36,15 +36,11 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
 
                 if game is None:
                     raise Exception('Game not found')
-                                
-                print(f"game.round: {game.round}, play: {play}")
-
                 if play is None:
                     raise Exception('A selection is required before clicking a square')
                 if (game.round % 2 == 0 and play % 2 != 0) or (game.round % 2 != 0 and play % 2 == 0):
                     current_player = "Player 1" if game.round % 2 != 0 else "Player 2"
                     raise Exception(f"It is {current_player}'s turn!")
-
                 if game.spaces[space] != 0:
                     raise Exception('Square is already occupied')
                 
@@ -59,16 +55,16 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                 game.spaces = newSpaces
                 game.round = newRound
 
-                win = await self.check_win(game)
+                win = self.check_win(game)
 
                 if (win):
                     game.status = 'COMPLETED'
                     if (play % 2 == 0):
-                        game.winner = game.player_two
-                        game.loser = game.player_one
+                        game.winner = game.player_two_id
+                        game.loser = game.player_one_id
                     else:
-                        game.winner = game.player_one
-                        game.loser = game.player_two
+                        game.winner = game.player_one_id
+                        game.loser = game.player_two_id
                     # game.ended = str(timezone.now())
                     game.ended = str(await sync_to_async(timezone.now)())
                     await self.save_game(game)
@@ -76,14 +72,32 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                         self.game_group_id, {
                             'type': 'send_redirect',
                             'message': {
-                                'url': f'/fifteentoes/post',
+                                'url': f'/magic_fifteen/post',
                             }
                         }
                     )
-
-
+                elif (game.round == 10 and not win):
+                    game.status = 'COMPLETED'
+                    game.winner = 0
+                    game.loser = 0
+                    # game.ended = str(timezone.now())
+                    game.ended = str(await sync_to_async(timezone.now)())
+                    await self.save_game(game)
+                    await self.channel_layer.group_send(
+                        self.game_group_id, {
+                            'type': 'send_redirect',
+                            'message': {
+                                'url': f'/magic_fifteen/post',
+                            }
+                        }
+                    )
+                
                 await self.save_game(game)
+                p1 = await self.get_player_one(game)
+                p2 = await self.get_player_two(game)
 
+                print(f"game.round: {game.round}, spaces: {game.spaces}, plays: {game.plays}, ended: {game.ended}, status: {game.status}")
+                print(f"Sending message to group: {self.game_group_id}")
                 await self.channel_layer.group_send(
                     self.game_group_id, {
                         'type': 'send_message',
@@ -91,24 +105,29 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                             'spaces': game.spaces,
                             'round': game.round,
                             'plays': game.plays,
-                            'p1': game.player_one,
-                            'p2': game.player_two,
+                            'p1': p1.id,
+                            'p2': p2.id,
                         }
                     })
+                print(f"Sent message to group: {self.game_group_id}") 
             elif response['type'] == 'heartbeat':
                 await self.send(text_data=json.dumps({
                     'type': 'heartbeat'
                 }))
         except Exception as e:
+            tb_str = traceback.format_exception(type(e), e, e.__traceback__)
+            tb_str = ''.join(tb_str)
+
             message = response.get('message', {})
             await self.channel_layer.group_send(
                 self.game_group_id, {
                     'type': 'error_message',
-                    'message': str(e),
+                    'message': f"Error: {str(e)}\nTraceback:\n{tb_str}",
                     'error_user': message.get('user_id', None),
                 })
 
     async def send_message(self, event):
+        print(f'Received event: {event}')
         await self.send(text_data=json.dumps({
             "payload": {
                 "type": "move",
@@ -130,7 +149,7 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def get_game_instance(self, game_id):
-        Game = apps.get_model('fifteen_toes', 'Game')
+        Game = apps.get_model('magic_fifteen', 'Game')
 
         # Print the game_id received
         print(f"Looking for game with ID: {game_id}")
@@ -145,17 +164,19 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
         except Game.DoesNotExist:
             return None
     
-    @sync_to_async
     def check_win(self, game):
+        print(f"Checking win for game: {game}")
         win = False
         if game.round <= 9:
-            for i in game.winningArrays:
+            winning_arrays = game.winningArrays
+            for i in winning_arrays:
                 temp = list()
                 for x in i:
                     if game.spaces[x] != 0:
                         temp.append(game.spaces[x])
                 if len(set(temp)) == 3 and sum(temp) == 15:
                     win = True
+        print(f"Win: {win}")
         return win
     
     async def error_message(self, event):
@@ -169,3 +190,12 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def save_game(self, game):
         game.save()
+        print(f"Game saved: {game}")
+
+    @database_sync_to_async
+    def get_player_one(self, game):
+        return game.player_one
+    
+    @database_sync_to_async
+    def get_player_two(self, game):
+        return game.player_two

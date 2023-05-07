@@ -9,18 +9,3 @@ class CustomLoginView(LoginView):
 
 class CustomLogoutView(LogoutView):
     template_name = 'registration/logout.html'
-
-def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
-            email = form.cleaned_data.get('email')
-            user = authenticate(username=username, password=password, email=email)
-            login(request, user)
-            return redirect('home')
-    else:
-        form = RegisterForm()
-    return render(request, 'registration/register.html', {'form': form})

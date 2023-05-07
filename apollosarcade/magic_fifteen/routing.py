@@ -7,7 +7,6 @@ websocket_urlpatterns = [
     re_path(r'^ws/game/(?P<game_id>\w+)/$', MagicFifteenConsumer.as_asgi()),
 ]
 
-
 application = ProtocolTypeRouter({
     # ...
     "websocket": AuthMiddlewareStack(

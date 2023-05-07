@@ -52,6 +52,9 @@ class Game(models.Model):
     created = models.DateTimeField(default=timezone.now)
     ended = models.DateTimeField(null=True, blank=True)
 
+    def get_winning_array(self):
+        return self.winningArrays
+
 class GameInstruction(models.Model):
     title = models.CharField(max_length=50, unique=True)
     content = QuillField()

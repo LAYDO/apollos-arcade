@@ -84,12 +84,16 @@ function connect() {
     };
     socket.onmessage = function (e) {
         let data = JSON.parse(e.data);
-        console.log(data);
         // Get current player
         let currentPlayer = data['payload']['round'] % 2 === 0 ? data['payload']['p2'] : data['payload']['p1'];
         if ('payload' in data) {
             data = data['payload'];
             if (data['type'] == 'move') {
+                console.log(data);
+                let roundDiv = document.getElementById('current_round');
+                if (roundDiv) {
+                    roundDiv.textContent = `Round: ${data['round']}`;
+                }
                 for (let i = 0; i < data['spaces'].length; i++) {
                     let square = document.getElementById(`square${i}`);
                     if (square) {
@@ -144,11 +148,11 @@ function connect() {
                 setUpNumberEventListeners();
                 // Check if the current user can play a move
                 if (currentPlayer === getCurrentUserId()) {
-                    let appElement = document.getElementById('15t_app');
+                    let appElement = document.getElementById('magic15_app');
                     appElement === null || appElement === void 0 ? void 0 : appElement.classList.remove('turn-disable');
                 }
                 else {
-                    let appElement = document.getElementById('15t_app');
+                    let appElement = document.getElementById('magic15_app');
                     appElement === null || appElement === void 0 ? void 0 : appElement.classList.add('turn-disable');
                 }
             }
@@ -156,11 +160,12 @@ function connect() {
                 console.log("Redirect message received");
                 window.location.href = data['url'];
             }
-            else if (data['type'] == 'error_message') {
+            else if (data['type'] == 'error') {
                 console.log(data);
                 let errorUser = data['error_user'];
+                alert(data['error']);
                 if (errorUser === getCurrentUserId()) {
-                    alert(data['message']);
+                    // Want to only show alert to the user who made the error
                 }
             }
         }
