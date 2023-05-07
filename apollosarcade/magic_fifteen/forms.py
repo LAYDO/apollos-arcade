@@ -21,3 +21,4 @@ class JoinLobbyForm(forms.Form):
         choices=CHOICES,
     )
     join_option = forms.CharField(max_length=10,required=False)
+    password = forms.CharField(max_length=20,required=False)
