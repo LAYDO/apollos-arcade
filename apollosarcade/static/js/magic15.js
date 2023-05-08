@@ -64,6 +64,7 @@ class FifteenCard {
         this.textOption = document.createElement('input');
         this.textOption.setAttribute('style', 'display: none;');
         this.textOption.setAttribute('type', 'text');
+        this.textOption.setAttribute('autocomplete', 'off');
         this.textOption.setAttribute('name', `${button.toLowerCase()}_option`);
         this.textOption.id = `${button.toLowerCase()}TextOption`;
         this.textOption.classList.add('mft-text');

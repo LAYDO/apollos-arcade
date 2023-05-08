@@ -169,11 +169,24 @@ function connect() {
                 console.log("Redirect message received");
                 window.location.href = data['url'];
             } else if (data['type'] == 'error') {
-                console.log(data);
-                let errorUser = data['error_user'];
-                alert(data['error']);
-                if (errorUser === getCurrentUserId()) {
+                let serverMessage = data['error'];
+                let userIdRegex = /User:\s*(\d+)/;
+                let matchedUserId = serverMessage.match(userIdRegex);
+                let userIdFromMessage = matchedUserId ? parseInt(matchedUserId[1]) : null;
+
+                let errorMessageRegex = /Error:\s*([^\n]+)/;
+                let matchedErrorMessage = serverMessage.match(errorMessageRegex);
+                let errorMessage = matchedErrorMessage ? matchedErrorMessage[1] : null;
+
+                if (userIdFromMessage === getCurrentUserId() && errorMessage) {
                     // Want to only show alert to the user who made the error
+                    let messageDiv = document.getElementById('messageModal');
+                    let messageContent = document.getElementById('messageContent');
+                    if (messageDiv && messageContent) {
+                        messageContent.textContent = errorMessage;
+                        messageContent.classList.add('alert-error');
+                        messageDiv.style.display = 'block';
+                    }
                 }
             }
         } else {

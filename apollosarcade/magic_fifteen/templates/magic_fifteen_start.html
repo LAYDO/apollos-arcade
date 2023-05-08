@@ -6,11 +6,6 @@
 {% endblock %}
 {% block apollos_content_1 %}
 <div class="apollos-container apollos-app">
-    {% if messages %}
-    {% for message in messages %}
-    <div{% if message.tags %} class="alert alert-{{ message.tags }}" {% endif %}>{{ message }}</div>
-    {% endfor %}
-    {% endif %}
     <div id="start_container" class="mft-col">
         <div class="mft-row mft-title">START MATCH</div>
         {% csrf_token %}

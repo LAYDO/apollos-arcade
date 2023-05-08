@@ -77,3 +77,21 @@ function openSocial(evt) {
         window.open("https://github.com/apollos");
     }
 }
+document.addEventListener("DOMContentLoaded", function () {
+    let modal = document.getElementById("messageModal");
+    let span = document.getElementById("message_close");
+    if (span) {
+        span.onclick = function () {
+            if (modal) {
+                modal.style.display = "none";
+            }
+        };
+    }
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+    };
+});
