@@ -4,6 +4,7 @@ from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from django.utils import timezone
 from django.apps import apps
+from django.contrib import messages
 class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         Game = apps.get_model('magic_fifteen', 'Game')
@@ -31,6 +32,7 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                 game_id = message.get('game_id', None)
                 space = message.get('space', None)
                 play = message.get('play', None)
+                user_id = message.get('user_id', None)
 
                 game = await self.get_game_instance(game_id)
 
@@ -122,8 +124,7 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
             await self.channel_layer.group_send(
                 self.game_group_id, {
                     'type': 'error_message',
-                    'message': f"Error: {str(e)}\nTraceback:\n{tb_str}",
-                    'error_user': message.get('user_id', None),
+                    'message': f"User: {user_id}\nError: {str(e)}\nTraceback:\n{tb_str}",
                 })
 
     async def send_message(self, event):
@@ -199,3 +200,4 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def get_player_two(self, game):
         return game.player_two
+

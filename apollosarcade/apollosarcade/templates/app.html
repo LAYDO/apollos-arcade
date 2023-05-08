@@ -44,6 +44,12 @@
     </div>
     <div class="apollos-flex-home">
         <div class="apollos-flex-home" id="apollos_home">
+            <div id="messageModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" id="message_close">&times;</span>
+                    <div id="messageContent" class="alert"></div>
+                </div>
+            </div>
             {% block apollos_content_1 %}
             {% endblock %}
         </div>
