@@ -17,14 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from .views_auth import CustomLoginView, CustomLogoutView
-from .views import home
+from .views import home, verify_email, request_new_verification_link
 
 urlpatterns = [
     path('', home, name='home'),
     path('accounts/', include('allauth.urls')),
+    path('accounts/login/', CustomLoginView.as_view(), name='login'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(), name='logout'),
     path("admin/", admin.site.urls),
     path('player/', include('user_profiles.urls')),
     path('magic_fifteen/', include('magic_fifteen.urls')),
+    path('verify/<uuid:verification_code>', verify_email, name='verify_email'),
+    path('request-new-verification-link/', request_new_verification_link, name='request_new_verification_link'),
 ]
