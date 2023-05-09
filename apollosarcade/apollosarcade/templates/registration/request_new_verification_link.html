@@ -1,0 +1,15 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+<title>Apollo's Arcade</title>
+{% endblock %}
+{% block apollos_content_1 %}
+<h2>Request a New Verification Link</h2>
+<form method="post">
+    {% csrf_token %}
+    <label for="email">Email:</label>
+    <input type="email" name="email" required>
+    <button type="submit">Request New Link</button>
+</form>
+{% endblock %}
+{% block page_scripts %}
+{% endblock %}
