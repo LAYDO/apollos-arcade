@@ -38,6 +38,8 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
 
                 if game is None:
                     raise Exception('Game not found')
+                if space is None or space == -1:
+                    raise Exception('Invalid space')
                 if play is None:
                     raise Exception('A selection is required before clicking a square')
                 if (game.round % 2 == 0 and play % 2 != 0) or (game.round % 2 != 0 and play % 2 == 0):
@@ -82,7 +84,6 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                     game.status = 'COMPLETED'
                     game.winner = 0
                     game.loser = 0
-                    # game.ended = str(timezone.now())
                     game.ended = str(await sync_to_async(timezone.now)())
                     await self.save_game(game)
                     await self.channel_layer.group_send(

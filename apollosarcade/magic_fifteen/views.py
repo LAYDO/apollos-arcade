@@ -344,8 +344,12 @@ def post_rematch(request):
             p.p1_status='REMATCH'
             p.save()
             if (p.p2_status == 'REMATCH'):
-                p1 = User.objects.get(id=p.winner)
-                p2 = User.objects.get(id=p.loser)
+                if (p.winner == 0 and p.loser == 0):
+                    p1 = User.objects.get(id=p.player_one_id)
+                    p2 = User.objects.get(id=p.player_two_id)
+                else:
+                    p1 = User.objects.get(id=p.winner)
+                    p2 = User.objects.get(id=p.loser)
                 game_archival(p.game_id)
                 game = Game(
                     status='LOBBY',
@@ -370,8 +374,12 @@ def post_rematch(request):
             p.p2_status='REMATCH'
             p.save()
             if (p.p1_status == 'REMATCH'):
-                p1 = User.objects.get(id=p.winner)
-                p2 = User.objects.get(id=p.loser)
+                if (p.winner == 0 and p.loser == 0):
+                    p1 = User.objects.get(id=p.player_one_id)
+                    p2 = User.objects.get(id=p.player_two_id)
+                else:
+                    p1 = User.objects.get(id=p.winner)
+                    p2 = User.objects.get(id=p.loser)
                 game_archival(p.game_id)
                 game = Game(
                     status='LOBBY',

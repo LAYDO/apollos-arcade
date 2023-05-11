@@ -139,3 +139,211 @@ class FifteenCard {
         formElement.appendChild(csrfInput);
     }
 }
+// I want to make a class for the ttt-board within magic_fifteen_game.html
+class MagicFifteenBoard {
+    constructor(board) {
+        this.round = 0;
+        this.player1Turn = true;
+        this.player2Turn = false;
+        this.board = board;
+        this.plays = [];
+        this.spaces = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        this.isMobile = window.matchMedia("only screen and (max-width: 48rem)").matches;
+        this.selectedNumber = 0;
+        this.selectedSquare = -1;
+        const contextData = document.getElementById('context-data');
+        if (contextData === null || contextData === void 0 ? void 0 : contextData.dataset.plays) {
+            this.plays = JSON.parse(contextData === null || contextData === void 0 ? void 0 : contextData.dataset.plays);
+        }
+        if (contextData === null || contextData === void 0 ? void 0 : contextData.dataset.spaces) {
+            this.spaces = JSON.parse(contextData === null || contextData === void 0 ? void 0 : contextData.dataset.spaces);
+        }
+        const gameId = contextData === null || contextData === void 0 ? void 0 : contextData.dataset.gameId;
+        const round = contextData === null || contextData === void 0 ? void 0 : contextData.dataset.round;
+        const player1 = contextData === null || contextData === void 0 ? void 0 : contextData.dataset.player1;
+        const player2 = contextData === null || contextData === void 0 ? void 0 : contextData.dataset.player2;
+        const p1 = contextData === null || contextData === void 0 ? void 0 : contextData.dataset.p1;
+        const p2 = contextData === null || contextData === void 0 ? void 0 : contextData.dataset.p2;
+        const privacy = contextData === null || contextData === void 0 ? void 0 : contextData.dataset.privacy;
+        const user = contextData === null || contextData === void 0 ? void 0 : contextData.dataset.user;
+        if (!this.isMobile) {
+            this.board.classList.add('ttt-row');
+        }
+        this.squares = document.createElement('div');
+        this.squares.classList.add('ttt-col');
+        this.squares.id = 'mftSquares';
+        this.squares.setAttribute('game_id', gameId || '');
+        let localCount = 0;
+        for (let i = 0; i < 3; i++) {
+            let squareRow = document.createElement('div');
+            squareRow.classList.add('ttt-row');
+            squareRow.id = `squareRow${i}`;
+            for (let j = 0; j < 3; j++) {
+                let square = document.createElement('div');
+                square.classList.add('mft-square');
+                square.id = `square${localCount}`;
+                switch (i) {
+                    case 0:
+                    case 1:
+                        if (j < 2) {
+                            square.classList.add('ttt-border-right');
+                            square.classList.add('ttt-border-bottom');
+                        }
+                        else {
+                            square.classList.add('ttt-border-bottom');
+                        }
+                        break;
+                    case 2:
+                        if (j < 2) {
+                            square.classList.add('ttt-border-right');
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                if (this.spaces[localCount] == 0) {
+                    square.textContent = '';
+                }
+                else {
+                    square.textContent = this.spaces[localCount].toString();
+                }
+                squareRow.append(square);
+                localCount++;
+            }
+            this.squares.append(squareRow);
+        }
+        this.playerArea = document.createElement('div');
+        this.playerArea.classList.add('ttt-col-b');
+        this.playerArea.id = 'ftPlayerArea';
+        this.playerNumbers = document.createElement('div');
+        this.playerNumbers.classList.add('ttt-row-b');
+        this.numbersOdd = document.createElement('div');
+        this.numbersOdd.classList.add('ttt-row-numbers');
+        this.numbersEven = document.createElement('div');
+        this.numbersEven.classList.add('ttt-row-numbers');
+        for (let i = 1; i < 10; i++) {
+            if (this.plays.length >= 0 && !this.plays.includes(i)) {
+                let number = document.createElement('div');
+                number.classList.add('ttt-number');
+                number.textContent = `${i}`;
+                number.id = `number${i}`;
+                if (i % 2 == 0) {
+                    this.numbersEven.append(number);
+                }
+                else {
+                    this.numbersOdd.append(number);
+                }
+            }
+        }
+        this.titleOdd = document.createElement('div');
+        this.titleOdd.classList.add('ttt-player');
+        this.titleOdd.textContent = (player1 === null || player1 === void 0 ? void 0 : player1.toString()) || 'Player 1';
+        this.titleEven = document.createElement('div');
+        this.titleEven.classList.add('ttt-player');
+        this.titleEven.textContent = (player2 === null || player2 === void 0 ? void 0 : player2.toString()) || 'Player 2';
+        this.playerOdd = document.createElement('div');
+        this.playerOdd.classList.add('ttt-col-top');
+        this.playerOdd.append(this.titleOdd);
+        this.playerOdd.append(this.numbersOdd);
+        this.playerOdd.id = 'player_one_numbers';
+        this.playerEven = document.createElement('div');
+        this.playerEven.classList.add('ttt-col-top');
+        this.playerEven.append(this.titleEven);
+        this.playerEven.append(this.numbersEven);
+        this.playerEven.id = 'player_two_numbers';
+        if (round && parseInt(round) % 2 == 0) {
+            this.playerEven.classList.remove('disabled');
+            this.playerOdd.classList.add('disabled');
+            this.player2Turn = true;
+            this.player1Turn = false;
+        }
+        else {
+            this.playerOdd.classList.remove('disabled');
+            this.playerEven.classList.add('disabled');
+            this.player1Turn = true;
+            this.player2Turn = false;
+        }
+        this.playerNumbers.append(this.playerOdd);
+        this.playerNumbers.append(this.playerEven);
+        this.playerArea.append(this.playerNumbers);
+        this.board.append(this.squares);
+        this.board.append(this.playerArea);
+    }
+    setUpSquareEventListeners(callback) {
+        // Construct and append squares to board
+        // this.squares.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            let square = document.getElementById(`square${i}`);
+            if (square != null) {
+                square.addEventListener('click', () => {
+                    var _a;
+                    try {
+                        if ((square === null || square === void 0 ? void 0 : square.textContent) != '') {
+                            throw new Error('Square already taken!');
+                        }
+                        if (this.selectedSquare == -1) {
+                            square.classList.add('ttt-square-selected');
+                            this.selectedSquare = parseInt(square.id.slice(-1));
+                        }
+                        else if (this.selectedSquare >= 0) {
+                            if (document.getElementById(`square${this.selectedSquare}`)) {
+                                (_a = document.getElementById(`square${this.selectedSquare}`)) === null || _a === void 0 ? void 0 : _a.classList.remove('ttt-square-selected');
+                            }
+                            square.classList.add('ttt-square-selected');
+                            this.selectedSquare = parseInt(square.id.slice(-1));
+                        }
+                        else {
+                            square.classList.remove('ttt-square-selected');
+                            this.selectedSquare = -1;
+                        }
+                        if (this.selectedSquare != -1 && this.selectedNumber != 0) {
+                            console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
+                            callback(this.selectedSquare, this.selectedNumber);
+                        }
+                    }
+                    catch (e) {
+                        console.log(e);
+                        let messageDiv = document.getElementById('messageModal');
+                        let messageContent = document.getElementById('messageContent');
+                        if (messageDiv && messageContent != null) {
+                            messageContent.textContent = e;
+                            messageContent.classList.add('alert-error');
+                            messageDiv.style.display = 'block';
+                        }
+                    }
+                });
+            }
+        }
+    }
+    setUpNumberEventListeners(callback) {
+        for (let i = 1; i < 10; i++) {
+            let number = document.getElementById(`number${i}`);
+            if (number != null) {
+                number.addEventListener('click', () => {
+                    if (document.querySelectorAll('.ttt-number-selected').length == 0) {
+                        number === null || number === void 0 ? void 0 : number.classList.add('ttt-number-selected');
+                        if (number === null || number === void 0 ? void 0 : number.textContent) {
+                            this.selectedNumber = parseInt(number.textContent);
+                        }
+                    }
+                    else if (document.querySelectorAll('.ttt-number-selected').length == 1) {
+                        document.querySelectorAll('.ttt-number-selected')[0].classList.remove('ttt-number-selected');
+                        number === null || number === void 0 ? void 0 : number.classList.add('ttt-number-selected');
+                        if (number === null || number === void 0 ? void 0 : number.textContent) {
+                            this.selectedNumber = parseInt(number.textContent);
+                        }
+                    }
+                    else {
+                        number === null || number === void 0 ? void 0 : number.classList.remove('ttt-number-selected');
+                        this.selectedNumber = 0;
+                    }
+                    // callback to makeMove
+                    if (this.selectedSquare != -1 && this.selectedNumber != 0) {
+                        console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
+                        callback(this.selectedSquare, this.selectedNumber);
+                    }
+                });
+            }
+        }
+    }
+}

@@ -25,6 +25,7 @@
     font: bold 1.5rem serif;
     fill: var(--font-color);
     text-decoration: underline;
+    margin: 0.25rem;
 }
 
 .ttt-number {
