@@ -100,3 +100,11 @@
 .mft-modal {
     display: none;
 }
+.ttt-number-selected {
+    border: 0.25rem solid var(--color-accent);
+    border-radius: 0.75rem;
+}
+
+.ttt-square-selected {
+    background-color: var(--glass-backdrop);
+}

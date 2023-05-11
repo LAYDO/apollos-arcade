@@ -21,8 +21,8 @@ from .views import home, verify_email, request_new_verification_link
 
 urlpatterns = [
     path('', home, name='home'),
-    path('accounts/', include('allauth.urls')),
     path('accounts/login/', CustomLoginView.as_view(), name='login'),
+    path('accounts/', include('allauth.urls')),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(), name='logout'),
     path("admin/", admin.site.urls),
