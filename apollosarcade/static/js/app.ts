@@ -1,6 +1,20 @@
 let overlay = document.getElementById('apollos_overlay');
 let navbar = document.getElementById('apollos_navbar');
 let home = document.getElementById('apollos_home');
+let navTitle = document.getElementById('apollosNavTitle');
+if (navTitle) {
+    navTitle.addEventListener('click', () => {
+        window.location.href = '/';
+    });
+}
+let navIcon = document.getElementById('apollosNavIcon');
+if (navIcon) {
+    navIcon.addEventListener('click', toggleOverlay);
+}
+let themeIcon = document.getElementById('themeIcon');
+if (themeIcon) {
+    themeIcon.addEventListener('click', toggleTheme);
+}
 
 let prevScrollPos = window.scrollY;
 window.onscroll = () => {
@@ -22,22 +36,9 @@ if (localStorage.getItem('theme') === 'theme-dark') {
     setTheme('theme-light');
 }
 
-function redirect(evt: any) {
-    var y = document.getElementsByClassName('active');
-    for (var i = 0; i < y.length; i++) {
-        y[i].className = '';
-    }
-    if (evt.currentTarget.id == 'apollosNavTitle') {
-        window.location.pathname = '';
-    } else {
-        window.location.pathname = evt.currentTarget.id.toLowerCase();
-        // document.getElementById(window.location.pathname).className = 'active';
-    }
-}
 
 
 function toggleOverlay() {
-    let navIcon = document.getElementById('apollosNavIcon');
     if (!navIcon || !overlay) {
         return;
     }

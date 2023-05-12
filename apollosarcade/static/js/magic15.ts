@@ -1,4 +1,4 @@
-class FifteenCard {
+export class FifteenCard {
     private csrfToken: string;
     private parentElement: Element;
     private cardContainer: Element;
@@ -183,7 +183,7 @@ class FifteenCard {
 }
 
 // I want to make a class for the ttt-board within magic_fifteen_game.html
-class MagicFifteenBoard {
+export class MagicFifteenBoard {
     public player1Turn: boolean;
     public player2Turn: boolean;
 

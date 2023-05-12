@@ -1,6 +1,9 @@
 let mft = document.getElementById('magic_fifteen');
 if (mft) {
     drawLogo(mft);
+    mft.addEventListener('click', () => {
+        window.location.href = '/magic_fifteen';
+    });
 }
 
 

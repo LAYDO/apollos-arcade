@@ -21,64 +21,9 @@
 
     <div class="mft-row mft-title">{{ privacy }} Game #{{ id }}</div>
     <div class="mft-row mft-round" id="current_round">Round {{ round }}</div>
-    <div id="magic15_board" class="ttt-board">
-        <!-- <div class="ttt-col" id="mftSquares" game_id="{{ id }}">
-            <div class="ttt-row" id="squareRow0">
-                <div class="mft-square ttt-border-right ttt-border-bottom" id="square0">{{ spaces.0|cut:"0" }}</div>
-                <div class="mft-square ttt-border-right ttt-border-bottom" id="square1">{{ spaces.1|cut:"0" }}</div>
-                <div class="mft-square ttt-border-bottom" id="square2">{{ spaces.2|cut:"0" }}</div>
-            </div>
-            <div class="ttt-row" id="squareRow1">
-                <div class="mft-square ttt-border-right ttt-border-bottom" id="square3">{{ spaces.3|cut:"0" }}</div>
-                <div class="mft-square ttt-border-right ttt-border-bottom" id="square4">{{ spaces.4|cut:"0" }}</div>
-                <div class="mft-square ttt-border-bottom" id="square5">{{ spaces.5|cut:"0" }}</div>
-            </div>
-            <div class="ttt-row" id="squareRow2">
-                <div class="mft-square ttt-border-right" id="square6">{{ spaces.6|cut:"0" }}</div>
-                <div class="mft-square ttt-border-right" id="square7">{{ spaces.7|cut:"0" }}</div>
-                <div class="mft-square" id="square8">{{ spaces.8|cut:"0" }}</div>
-            </div>
-        </div>
-        <div class="ttt-col-b" id="ftPlayerArea">
-            <div class="ttt-row-b">
-                {% if not round|divisibleby:2 %}
-                <div id="player_one_numbers" class="ttt-col-top">
-                    {% else %}
-                    <div id="player_one_numbers" class="ttt-col-top disabled">
-                        {% endif %}
-                    <div class="ttt-player">{{ player1|default:'Player One' }}</div>
-                    <div class="ttt-row-numbers">
-                        {% for i in spaces %}
-                            {% if not forloop.counter|divisibleby:2 %}
-                                {% if not forloop.counter in plays %}
-                                    <div class="ttt-number" id="text{{ forloop.counter0 }}">{{ forloop.counter }}</div>
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-                {% if round|divisibleby:2 %}
-                <div id="player_two_numbers" class="ttt-col-top">
-                {% else %}
-                <div id="player_two_numbers" class="ttt-col-top disabled">
-                {% endif %}
-                    <div class="ttt-player">{{ player2|default:'Player Two' }}</div>
-                    <div class="ttt-row-numbers">
-                        {% for i in spaces %}
-                            {% if forloop.counter|divisibleby:2 %}
-                                {% if not forloop.counter in plays %}
-                                    <div class="ttt-number" id="text{{ forloop.counter0 }}">{{ forloop.counter }}</div>
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div> -->
-    </div>
+    <div id="magic15_board" class="ttt-board"></div>
 </div>
 {% endblock %}
 {% block page_scripts %}
-<script type="text/javascript" src="{% static 'js/magic15.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/magic15_game.js' %}"></script>
+<script type="text/javascript" src="{% static 'magic15_game.bundle.js' %}"></script>
 {% endblock %}

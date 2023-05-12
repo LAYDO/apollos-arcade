@@ -1,3 +1,5 @@
+import { FifteenCard } from './magic15';
+
 declare var csrfToken: string;
 let createModal = document.getElementById('createModal');
 let joinModal = document.getElementById('joinModal');

@@ -1,3 +1,5 @@
+import { MagicFifteenBoard } from './magic15';
+
 let selectedElement = '';
 let magic_game: MagicFifteenBoard;
 let game_id: string;

@@ -1,3 +1,5 @@
+import { TicTacToe } from './ttt';
+
 let game: TicTacToe;
 let lastRender = 0;
 let round = 0;

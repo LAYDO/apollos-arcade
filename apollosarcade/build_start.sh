@@ -1,2 +1,2 @@
 #!/bin/bash
-tsc -p tsconfig.json && python3 manage.py runserver
+python3 manage.py collectstatic --noinput && npm run build && python3 manage.py runserver

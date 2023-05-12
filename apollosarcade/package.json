@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
   "devDependencies": {
-    "@types/node": "^18.16.3"
+    "@types/node": "^18.16.3",
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.0.4",
+    "webpack": "^5.82.1",
+    "webpack-cli": "^5.1.1"
   }
 }
