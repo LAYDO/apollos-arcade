@@ -22,7 +22,7 @@
     <div class="apollos-overlay" id="apollos_overlay">
         <!-- Overlay content -->
         <div class="apollos-overlay-content">
-            <a class="nav-link" onclick="redirect(event)" id="">Apollo's Arcade</a>
+            <a class="nav-link" id="menuNavTitle">Apollo's Arcade</a>
             {% if user.is_authenticated %}
             <a class="nav-link" id="logout" href="{% url 'logout' %}">Logout</a>
             {% else %}

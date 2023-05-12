@@ -15,6 +15,12 @@ let themeIcon = document.getElementById('themeIcon');
 if (themeIcon) {
     themeIcon.addEventListener('click', toggleTheme);
 }
+let menuNavTitle = document.getElementById('menuNavTitle');
+if (menuNavTitle) {
+    menuNavTitle.addEventListener('click', () => {
+        window.location.href = '/';
+    });
+}
 
 let prevScrollPos = window.scrollY;
 window.onscroll = () => {
