@@ -1,3 +1,4 @@
+import { apollosLocalMessage, getCurrentUserId } from "./utils";
 export class FifteenCard {
     private csrfToken: string;
     private parentElement: Element;
@@ -187,6 +188,9 @@ export class MagicFifteenBoard {
     public player1Turn: boolean;
     public player2Turn: boolean;
 
+    private app: Element;
+    public gameTitle: Element;
+    public currentRound: Element;
     private board: Element;
     private squares: Element;
     private playerNumbers: Element;
@@ -207,10 +211,10 @@ export class MagicFifteenBoard {
     public selectedNumber: number;
     public selectedSquare: number;
 
-    constructor(board: HTMLElement) {
-        this.round = 0;
+    constructor(board: HTMLElement, app: HTMLElement) {
         this.player1Turn = true;
         this.player2Turn = false;
+        this.app = app;
         this.board = board;
         this.plays = [];
         this.spaces = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -226,7 +230,7 @@ export class MagicFifteenBoard {
             this.spaces = JSON.parse(contextData?.dataset.spaces);
         }
         const gameId = contextData?.dataset.gameId;
-        const round = contextData?.dataset.round;
+        this.round = contextData?.dataset.round ? parseInt(contextData?.dataset.round) : 0;
         const player1 = contextData?.dataset.player1;
         const player2 = contextData?.dataset.player2;
         const p1 = contextData?.dataset.p1;
@@ -237,6 +241,19 @@ export class MagicFifteenBoard {
         if (!this.isMobile) {
             this.board.classList.add('ttt-row');
         }
+
+        this.gameTitle = document.createElement('div');
+        this.gameTitle.classList.add('mft-row');
+        this.gameTitle.classList.add('mft-title');
+        this.gameTitle.id = 'game_title';
+        this.gameTitle.textContent = `${privacy} Game #${gameId}`;
+
+        this.currentRound = document.createElement('div');
+        this.currentRound.classList.add('mft-row');
+        this.currentRound.classList.add('mft-round');
+        this.currentRound.id = 'current_round';
+        this.currentRound.textContent = `Round: ${this.round}`;
+
 
         this.squares = document.createElement('div');
         this.squares.classList.add('ttt-col');
@@ -327,7 +344,7 @@ export class MagicFifteenBoard {
         this.playerEven.append(this.numbersEven);
         this.playerEven.id = 'player_two_numbers';
 
-        if (round && parseInt(round) % 2 == 0) {
+        if (this.round && this.round % 2 == 0) {
             this.playerEven.classList.remove('disabled');
             this.playerOdd.classList.add('disabled');
             this.player2Turn = true;
@@ -344,13 +361,14 @@ export class MagicFifteenBoard {
 
         this.playerArea.append(this.playerNumbers);
 
+        this.app.prepend(this.gameTitle);
+        this.app.prepend(this.currentRound);
         this.board.append(this.squares);
         this.board.append(this.playerArea);
     }
 
     public setUpSquareEventListeners(callback: Function) {
         // Construct and append squares to board
-        // this.squares.innerHTML = '';
         for (let i = 0; i < 9; i++) {
             let square = document.getElementById(`square${i}`);
             if (square != null) {
@@ -378,14 +396,7 @@ export class MagicFifteenBoard {
                             callback(this.selectedSquare, this.selectedNumber);
                         }
                     } catch (e: any) {
-                        console.log(e);
-                        let messageDiv = document.getElementById('messageModal');
-                        let messageContent = document.getElementById('messageContent');
-                        if (messageDiv && messageContent != null) {
-                            messageContent.textContent = e;
-                            messageContent.classList.add('alert-error');
-                            messageDiv.style.display = 'block';
-                        }
+                        apollosLocalMessage(e, 'error');
                     }
                 });
             }
@@ -420,5 +431,74 @@ export class MagicFifteenBoard {
                 });
             }
         }
+    }
+
+    public takeTurn(data: any, callback: Function) {
+        // Migrate onmessage type 'move' from magic15_game.ts to here
+
+        // Update the current round
+        this.round = data['round'];
+        this.currentRound.textContent = `Round: ${this.round}`;
+
+        let currentPlayer: number = this.round % 2 == 0 ? data['p2'] : data['p1'];
+        if (currentPlayer == getCurrentUserId()) {
+            this.app.classList.remove('turn-disable');
+        } else {
+            this.app.classList.add('turn-disable');
+        }
+
+        // Update the spaces on the board
+        for (let i = 0; i < data['spaces'].length; i++) {
+            let square = document.getElementById(`square${i}`);
+            if (square) {
+                square.classList.remove('ttt-square-selected');
+                if (data['spaces'][i] != 0) {
+                    square.textContent = data['spaces'][i];
+                } else {
+                    square.textContent = '';
+                }
+            }
+        }
+
+        // Update the current player
+        if (this.round && this.round % 2 == 0) {
+            this.playerEven.classList.remove('disabled');
+            this.playerOdd.classList.add('disabled');
+            this.player2Turn = true;
+            this.player1Turn = false;
+        } else {
+            this.playerOdd.classList.remove('disabled');
+            this.playerEven.classList.add('disabled');
+            this.player1Turn = true;
+            this.player2Turn = false;
+        }
+
+        // Clear the player number areas
+        this.numbersOdd.innerHTML = '';
+        this.numbersEven.innerHTML = '';
+
+        // Update the numbers
+        for (let i = 1; i < 10; i++) {
+            if ((i % 2 != 0) && !data['plays'].includes(i)) {
+                let number = document.createElement('div');
+                number.classList.add('ttt-number');
+                number.id = `number${i}`;
+                number.textContent = `${i}`;
+                number.classList.remove('ttt-number-selected');
+                this.numbersOdd.append(number);
+            } else if ((i % 2 == 0) && !data['plays'].includes(i)) {
+                let number = document.createElement('div');
+                number.classList.add('ttt-number');
+                number.id = `number${i}`;
+                number.textContent = `${i}`;
+                number.classList.remove('ttt-number-selected');
+                this.numbersEven.append(number);
+            }
+        }
+
+        // Set up the numbers' event listeners
+        this.selectedSquare = -1;
+        this.selectedNumber = 0;
+        this.setUpNumberEventListeners(callback);
     }
 }

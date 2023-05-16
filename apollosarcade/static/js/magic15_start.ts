@@ -3,6 +3,8 @@ import { FifteenCard } from './magic15';
 declare var csrfToken: string;
 let createModal = document.getElementById('createModal');
 let joinModal = document.getElementById('joinModal');
+let createButton = document.getElementById('createButton');
+let joinButton = document.getElementById('joinButton');
 let create: FifteenCard;
 let join: FifteenCard;
 let startContainer = document.getElementById('start_container');
@@ -13,6 +15,14 @@ function startInit() {
     }
     if (joinModal) {
         join = new FifteenCard('Join Lobby', 'Random Lobby', 'Lobby Number', 'JOIN', joinModal, cancel, csrfToken);
+    }
+
+    if (createButton) {
+        createButton.addEventListener('click', showCreate);
+    }
+
+    if (joinButton) {
+        joinButton.addEventListener('click', showJoin);
     }
 
     window.onclick = (e: MouseEvent) => {

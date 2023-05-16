@@ -3,7 +3,7 @@ const BundleTracker = require('webpack-bundle-tracker');
 
 module.exports = {
     entry: {
-        app: './static/js/app.ts',
+        app: ['./static/js/app.ts', './static/js/utils.ts'],
         home: './static/js/home.ts',
         magic15_home: './static/js/magic15_home.ts',
         magic15_start: ['./static/js/magic15.ts','./static/js/magic15_start.ts'],

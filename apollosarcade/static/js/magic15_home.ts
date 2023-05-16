@@ -1,3 +1,5 @@
+import { apollosLocalMessage } from "./utils";
+
 function ft_init() {
     buildCard();
     let logo = document.getElementById('toesLogo');
@@ -123,8 +125,11 @@ function checkForMatch() {
         }
 
         if (response.redirected && response.url.includes('/accounts/login/')) {
-            alert('User not authenticated, redirecting to login page');
-            window.location.pathname = '/login/';
+            // alert('User not authenticated, redirecting to login page');
+            apollosLocalMessage('User not authenticated, redirecting to login page', 'warning');
+            document.getElementById('message_close')?.addEventListener('click', () => {
+                window.location.pathname = '/login/';
+            });
             return;
         }
 

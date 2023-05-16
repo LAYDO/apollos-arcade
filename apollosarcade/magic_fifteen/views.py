@@ -72,9 +72,7 @@ def create_lobby(request):
                 game = Game(
                     status='LOBBY',
                     player_one=current_user,
-                    p1_status='UNREADY',
                     player_two=None,
-                    p2_status='UNREADY',
                     round=0,
                     winner=0,
                     loser=0,
@@ -98,35 +96,35 @@ def join_lobby(request):
                 f = form.cleaned_data
                 if (f['join'] == 'Lobby Number'):
                     game = Game.objects.get(game_id=f['join_option'])
-                    if game.privacy == 'Public' or (game.privacy == 'Private' and game.password == f['password']):
+                    if game.privacy == 'Public' or (game.privacy == 'Private' and game.password == f['password']) or game.status != 'REMATCH':
                         if game.player_one == None:
                             game.player_one=current_user
-                            game.save()
                         elif game.player_two == None:
                             game.player_two=current_user
-                            game.save()
+                        game.status = 'READY'
+                        game.save()
                         return HttpResponseRedirect(f'/magic_fifteen/lobby/')
                     else:
                         messages.error(request, "Incorrect password for the lobby you are trying to join")
                         return HttpResponseRedirect(f'/magic_fifteen/start/')
                 else:
-                    games = list(Game.objects.filter(status='LOBBY').filter(player_two=None).all().values())
-                    games.extend(list(Game.objects.filter(status='LOBBY').filter(player_one=None).all().values()))
+                    games = list(Game.objects.filter(status='LOBBY', player_two=None).exclude(status='REMATCH').all().values())
+                    games.extend(list(Game.objects.filter(status='LOBBY', player_one=None).exclude(status='REMATCH').all().values()))
                     game = Game.objects.get(game_id=games[0]['game_id'])
                     if game.player_one == None:
                         game.player_one=current_user
-                        game.save()
                     elif game.player_two == None:
                         game.player_two=current_user
-                        game.save()
+                    game.status = 'READY'
+                    game.save()
                     return HttpResponseRedirect(f'/magic_fifteen/lobby/')
 
 @login_required
 def lobby(request):
     current_user = request.user
     lobby = {}
-    p1 = list(Game.objects.filter(player_one=current_user).exclude(status='ARCHIVE').all().values())
-    p2 = list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').all().values())
+    p1 = list(Game.objects.filter(player_one=current_user, status=['LOBBY','REMATCH']).all().values())
+    p2 = list(Game.objects.filter(player_one=current_user, status=['LOBBY','REMATCH']).all().values())
     if (len(p1) == 1):
         player2 = None
         if (p1[0]['player_two_id'] != None):
@@ -135,9 +133,7 @@ def lobby(request):
             'id': p1[0]['game_id'],
             'status': p1[0]['status'],
             'p1': current_user.username,
-            'p1_status': p1[0]['p1_status'],
             'p2': 'Waiting for player...' if player2 == None else player2,
-            'p2_status': p1[0]['p2_status'],
             'privacy': p1[0]['privacy'],
             'pw': p1[0]['password'],
         })
@@ -149,45 +145,11 @@ def lobby(request):
             'id': p2[0]['game_id'],
             'status': p2[0]['status'],
             'p1': 'Waiting for player...' if player1 == None else player1,
-            'p1_status': p2[0]['p1_status'],
             'p2': current_user.username,
-            'p2_status': p2[0]['p2_status'],
             'privacy': p2[0]['privacy'],
             'pw': p2[0]['password'],
         })
     return render(request, 'magic_fifteen_lobby.html', lobby)
-    
-@login_required
-def game_ready(request):
-    if request.method == 'POST':
-        current_user = request.user
-        p1 = list(Game.objects.filter(player_one=current_user).exclude(status='ARCHIVE').all().values())
-        p2 = list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').all().values())
-        if (len(p1) == 1):
-            p = Game.objects.get(game_id=p1[0]['game_id'])
-            p.p1_status='READY'
-            p.save()
-        elif (len(p2) == 1):
-            p = Game.objects.get(game_id=p2[0]['game_id'])
-            p.p2_status='READY'
-            p.save()
-        return redirect(request.META['HTTP_REFERER'])
-
-@login_required
-def game_unready(request):
-    if request.method == 'POST':
-        current_user = request.user
-        p1 = list(Game.objects.filter(player_one=current_user).exclude(status='ARCHIVE').all().values())
-        p2 = list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').all().values())
-        if (len(p1) == 1):
-            p = Game.objects.get(game_id=p1[0]['game_id'])
-            p.p1_status='UNREADY'
-            p.save()
-        elif (len(p2) == 1):
-            p = Game.objects.get(game_id=p2[0]['game_id'])
-            p.p2_status='UNREADY'
-            p.save()
-        return redirect(request.META['HTTP_REFERER'])
     
 @login_required
 def game_leave(request):
@@ -197,12 +159,10 @@ def game_leave(request):
         p2 = list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').all().values())
         if (len(p1) == 1):
             p = Game.objects.get(game_id=p1[0]['game_id'])
-            p.p1_status='UNREADY'
             p.player_one=None
             p.save()
         elif (len(p2) == 1):
             p = Game.objects.get(game_id=p2[0]['game_id'])
-            p.p2_status='UNREADY'
             p.player_two=None
             p.save()
         return HttpResponseRedirect('/magic_fifteen')
@@ -218,8 +178,6 @@ def game_start_continue(request):
         if lobby:
             print(('STARTING GAME #{}').format(lobby.game_id))
             lobby.status='IN-GAME'
-            lobby.p1_status='IN-GAME'
-            lobby.p2_status='IN-GAME'
             lobby.round=1
             lobby.save()
             return HttpResponseRedirect(f'/magic_fifteen/game/{lobbyNum}')
@@ -303,8 +261,8 @@ def post(request):
     lobbies.extend(list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').exclude(status='COMPLETED').all().values()))
     if len(lobbies) > 0:
         return HttpResponseRedirect(f'/magic_fifteen/lobby')
-    games = list(Game.objects.filter(player_one=current_user).filter(status='COMPLETED').all().values())
-    games.extend(list(Game.objects.filter(player_two=current_user).filter(status='COMPLETED').all().values()))
+    games = list(Game.objects.filter(player_one=current_user, status='COMPLETED').all().values())
+    games.extend(list(Game.objects.filter(player_two=current_user, status='COMPLETED').all().values()))
     if (len(games) == 1):
         game = Game.objects.get(game_id=games[0]['game_id'])
         if (game):
@@ -319,8 +277,6 @@ def post(request):
                 'privacy': game.privacy,
                 'player_one': game.player_one_id,
                 'player_two': game.player_two_id,
-                'p1_status': game.p1_status,
-                'p2_status': game.p2_status,
                 'winner_id': winner.id,
                 'loser_id': loser.id,
                 'winner': winner.username,
@@ -337,8 +293,8 @@ def post(request):
 def post_rematch(request):
     if request.method == 'POST':
         current_user = request.user
-        p1 = list(Game.objects.filter(player_one=current_user).exclude(status='ARCHIVE').all().values())
-        p2 = list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').all().values())
+        p1 = list(Game.objects.filter(player_one=current_user, status='COMPLETED').all().values())
+        p2 = list(Game.objects.filter(player_two=current_user, status='COMPLETED').all().values())
         if (len(p1) == 1):
             p = Game.objects.get(game_id=p1[0]['game_id'])
             p.p1_status='REMATCH'
@@ -406,13 +362,10 @@ def post_rematch(request):
 def post_leave(request):
     if request.method == 'POST':
         current_user = request.user
-        p1 = list(Game.objects.filter(player_one=current_user).exclude(status='ARCHIVE').all().values())
-        p2 = list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').all().values())
+        p1 = list(Game.objects.filter(player_one=current_user, status='COMPLETED').all().values())
+        p2 = list(Game.objects.filter(player_two=current_user, status='COMPLETED').all().values())
         if (len(p1) == 1):
             p = Game.objects.get(game_id=p1[0]['game_id'])
-            p.p1_status='LEFT'
-            p.p2_status == 'COMPLETED'
-            p.save()
             game_archival(p.game_id)
         elif (len(p2) == 1):
             p = Game.objects.get(game_id=p2[0]['game_id'])

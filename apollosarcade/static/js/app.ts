@@ -42,8 +42,6 @@ if (localStorage.getItem('theme') === 'theme-dark') {
     setTheme('theme-light');
 }
 
-
-
 function toggleOverlay() {
     if (!navIcon || !overlay) {
         return;
@@ -74,16 +72,6 @@ function setTheme(themeName: string) {
     document.documentElement.className = themeName;
 }
 
-function openSocial(evt: any) {
-    let social = evt.currentTarget.id.replace("Icon", "").toLowerCase();
-    if (social === "twitter") {
-        window.open("https://www.twitter.com/apollos1213");
-    } else if (social === "linked") {
-        window.open("https://www.linkedin.com/in/landen-robinson-97683620/");
-    } else if (social === "github") {
-        window.open("https://github.com/apollos");
-    }
-}
 
 document.addEventListener("DOMContentLoaded", function () {
     let modal = document.getElementById("messageModal");
