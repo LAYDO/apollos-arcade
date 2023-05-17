@@ -361,8 +361,8 @@ export class MagicFifteenBoard {
 
         this.playerArea.append(this.playerNumbers);
 
-        this.app.prepend(this.gameTitle);
         this.app.prepend(this.currentRound);
+        this.app.prepend(this.gameTitle);
         this.board.append(this.squares);
         this.board.append(this.playerArea);
     }

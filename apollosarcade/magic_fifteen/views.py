@@ -47,9 +47,10 @@ def check_for_lobbies(request):
     lobbies.extend(list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').all().values()))
     txt = '{} in {} lobbies'
     print(txt.format(current_user.username,len(lobbies)))
-    if (len(lobbies) == 1):
-        if lobbies[0]['status'] == 'COMPLETED':
-            return 2
+    if (len(lobbies) >= 1):
+        for lobby in lobbies:
+            if lobby['status'] == 'COMPLETED' and ((lobby['p1_status'] == 'POST' and lobby['p2_status'] == 'POST') or (lobby['p1_status'] == 'REMATCH' and lobby['p2_status'] == 'POST') or (lobby['p1_status'] == 'POST' and lobby['p2_status'] == 'REMATCH')):
+                return 2
         return 1
     else:
         return 0
@@ -122,48 +123,64 @@ def join_lobby(request):
 @login_required
 def lobby(request):
     current_user = request.user
+    print(f'Current user id: {current_user.id}')
     lobby = {}
-    p1 = list(Game.objects.filter(player_one=current_user, status=['LOBBY','REMATCH']).all().values())
-    p2 = list(Game.objects.filter(player_one=current_user, status=['LOBBY','REMATCH']).all().values())
-    if (len(p1) == 1):
-        player2 = None
-        if (p1[0]['player_two_id'] != None):
-            player2 = User.objects.get(id=p1[0]['player_two_id']).username
-        lobby.update({
-            'id': p1[0]['game_id'],
-            'status': p1[0]['status'],
-            'p1': current_user.username,
-            'p2': 'Waiting for player...' if player2 == None else player2,
-            'privacy': p1[0]['privacy'],
-            'pw': p1[0]['password'],
-        })
-    elif (len(p2) == 1):
-        player1 = None
-        if (p2[0]['player_one_id'] != None):
-            player1 = User.objects.get(id=p2[0]['player_one_id']).username
-        lobby.update({
-            'id': p2[0]['game_id'],
-            'status': p2[0]['status'],
-            'p1': 'Waiting for player...' if player1 == None else player1,
-            'p2': current_user.username,
-            'privacy': p2[0]['privacy'],
-            'pw': p2[0]['password'],
-        })
+    try:
+        p1 = list(Game.objects.filter(player_one=current_user, status='LOBBY').all().values())
+        p1.extend(list(Game.objects.filter(player_one=current_user, status='REMATCH').all().values()))
+        p1.extend(list(Game.objects.filter(player_one=current_user, status='READY').all().values()))
+        p1.extend(list(Game.objects.filter(player_one=current_user, status='IN-GAME').all().values()))
+        p2 = list(Game.objects.filter(player_two=current_user, status='LOBBY').all().values())
+        p2.extend(list(Game.objects.filter(player_two=current_user, status='REMATCH').all().values()))
+        p2.extend(list(Game.objects.filter(player_two=current_user, status='READY').all().values()))
+        p2.extend(list(Game.objects.filter(player_two=current_user, status='IN-GAME').all().values()))
+        print(f'p1: {p1}\np2: {p2}')
+        if (len(p1) == 1):
+            print(f'p1: {p1[0]}')
+            player2 = None
+            if (p1[0]['player_two_id'] != None):
+                player2 = User.objects.get(id=p1[0]['player_two_id']).username
+            lobby.update({
+                'id': p1[0]['game_id'],
+                'status': p1[0]['status'],
+                'p1': current_user.username,
+                'p2': 'Waiting for player...' if player2 == None else player2,
+                'privacy': p1[0]['privacy'],
+                'pw': p1[0]['password'],
+            })
+        elif (len(p2) == 1):
+            print(f'p2: {p2[0]}')
+            player1 = None
+            if (p2[0]['player_one_id'] != None):
+                player1 = User.objects.get(id=p2[0]['player_one_id']).username
+            lobby.update({
+                'id': p2[0]['game_id'],
+                'status': p2[0]['status'],
+                'p1': 'Waiting for player...' if player1 == None else player1,
+                'p2': current_user.username,
+                'privacy': p2[0]['privacy'],
+                'pw': p2[0]['password'],
+            })
+    except:
+        raise Exception('Lobby not found!')
+        
     return render(request, 'magic_fifteen_lobby.html', lobby)
-    
+
 @login_required
-def game_leave(request):
+def lobby_leave(request):
     if request.method == 'POST':
         current_user = request.user
-        p1 = list(Game.objects.filter(player_one=current_user).exclude(status='ARCHIVE').all().values())
-        p2 = list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').all().values())
+        p1 = list(Game.objects.filter(player_one=current_user,status=['LOBBY','REMATCH']).all().values())
+        p2 = list(Game.objects.filter(player_two=current_user,status=['LOBBY','REMATCH']).all().values())
         if (len(p1) == 1):
             p = Game.objects.get(game_id=p1[0]['game_id'])
             p.player_one=None
+            p.status='LOBBY'
             p.save()
         elif (len(p2) == 1):
             p = Game.objects.get(game_id=p2[0]['game_id'])
             p.player_two=None
+            p.status='LOBBY'
             p.save()
         return HttpResponseRedirect('/magic_fifteen')
 
@@ -178,6 +195,8 @@ def game_start_continue(request):
         if lobby:
             print(('STARTING GAME #{}').format(lobby.game_id))
             lobby.status='IN-GAME'
+            lobby.p1_status='IN-GAME'
+            lobby.p2_status='IN-GAME'
             lobby.round=1
             lobby.save()
             return HttpResponseRedirect(f'/magic_fifteen/game/{lobbyNum}')
@@ -192,8 +211,8 @@ def game_start_continue(request):
         
 def player_active_lobby(request):
     current_user = request.user
-    games = list(Game.objects.filter(status='LOBBY').filter(player_two=current_user).all().values())
-    games.extend(list(Game.objects.filter(status='LOBBY').filter(player_one=current_user).all().values()))
+    games = list(Game.objects.filter(status='READY').filter(player_two=current_user).all().values())
+    games.extend(list(Game.objects.filter(status='READY').filter(player_one=current_user).all().values()))
     if len(games) == 1:
         return games[0]['game_id']
     else:
@@ -239,142 +258,24 @@ def game(request, game_id):
         'round': match.round,
     })
     return render(request, 'magic_fifteen_game.html', game)
-    
-def checkWin(game):
-    if game.round <= 9:
-        for i in game.winningArrays:
-            temp = list()
-            for x in i:
-                if game.spaces[x] != 0:
-                    temp.append(game.spaces[x])
-            if (len(temp) == 3 and sum(temp) == 15):
-                return True
-            temp.clear()
-    return False
-    
 
 @login_required
-def post(request):
-    current_user = request.user
-    post = {}
-    lobbies = list(Game.objects.filter(player_one=current_user).exclude(status='ARCHIVE').exclude(status='COMPLETED').all().values())
-    lobbies.extend(list(Game.objects.filter(player_two=current_user).exclude(status='ARCHIVE').exclude(status='COMPLETED').all().values()))
-    if len(lobbies) > 0:
-        return HttpResponseRedirect(f'/magic_fifteen/lobby')
-    games = list(Game.objects.filter(player_one=current_user, status='COMPLETED').all().values())
-    games.extend(list(Game.objects.filter(player_two=current_user, status='COMPLETED').all().values()))
-    if (len(games) == 1):
-        game = Game.objects.get(game_id=games[0]['game_id'])
-        if (game):
-            if (game.round == 10 and game.winner == 0 and game.loser == 0):
-                winner = User.objects.get(id=game.player_one_id)
-                loser = User.objects.get(id=game.player_two_id)
-            else:
-                winner = User.objects.get(id=game.winner)
-                loser = User.objects.get(id=game.loser)
-            post.update({
-                'id': game.game_id,
-                'privacy': game.privacy,
-                'player_one': game.player_one_id,
-                'player_two': game.player_two_id,
-                'winner_id': winner.id,
-                'loser_id': loser.id,
-                'winner': winner.username,
-                'loser': loser.username,
-                'spaces': game.spaces,
-                'pw': game.password,
-                'round': game.round,
-            })
-            return render(request, 'magic_fifteen_post.html', post)
-    else:
-        return HttpResponseRedirect(f'/magic_fifteen/')
-
-@login_required
-def post_rematch(request):
+def game_leave(request, game_id):
     if request.method == 'POST':
         current_user = request.user
-        p1 = list(Game.objects.filter(player_one=current_user, status='COMPLETED').all().values())
-        p2 = list(Game.objects.filter(player_two=current_user, status='COMPLETED').all().values())
-        if (len(p1) == 1):
-            p = Game.objects.get(game_id=p1[0]['game_id'])
-            p.p1_status='REMATCH'
-            p.save()
-            if (p.p2_status == 'REMATCH'):
-                if (p.winner == 0 and p.loser == 0):
-                    p1 = User.objects.get(id=p.player_one_id)
-                    p2 = User.objects.get(id=p.player_two_id)
-                else:
-                    p1 = User.objects.get(id=p.winner)
-                    p2 = User.objects.get(id=p.loser)
-                game_archival(p.game_id)
-                game = Game(
-                    status='LOBBY',
-                    player_one=p1,
-                    p1_status='UNREADY',
-                    player_two=p2,
-                    p2_status='UNREADY',
-                    round=0,
-                    winner=0,
-                    loser=0,
-                    privacy='Public',
-                    plays=[],
-                    spaces=[0,0,0,0,0,0,0,0,0],
-                )
-                game.save()
-                return HttpResponseRedirect(f'/magic_fifteen/lobby')
-            elif (p.p2_status == 'LEFT'):
-                game_archival(p.game_id)
-                return HttpResponseRedirect('/magic_fifteen')
-        elif (len(p2) == 1):
-            p = Game.objects.get(game_id=p2[0]['game_id'])
-            p.p2_status='REMATCH'
-            p.save()
-            if (p.p1_status == 'REMATCH'):
-                if (p.winner == 0 and p.loser == 0):
-                    p1 = User.objects.get(id=p.player_one_id)
-                    p2 = User.objects.get(id=p.player_two_id)
-                else:
-                    p1 = User.objects.get(id=p.winner)
-                    p2 = User.objects.get(id=p.loser)
-                game_archival(p.game_id)
-                game = Game(
-                    status='LOBBY',
-                    player_one=p1,
-                    p1_status='UNREADY',
-                    player_two=p2,
-                    p2_status='UNREADY',
-                    round=0,
-                    winner=0,
-                    loser=0,
-                    privacy='Public',
-                    plays=[],
-                    spaces=[0,0,0,0,0,0,0,0,0],
-                )
-                game.save()
-                return HttpResponseRedirect(f'/magic_fifteen/lobby')
-            elif (p.p1_status == 'LEFT'):
-                game_archival(p.game_id)
-                return HttpResponseRedirect('/magic_fifteen')
-        # return HttpResponseRedirect(f'/magic_fifteen/post/')
-        return redirect(request.META['HTTP_REFERER'])
-    
-@login_required
-def post_leave(request):
-    if request.method == 'POST':
-        current_user = request.user
-        p1 = list(Game.objects.filter(player_one=current_user, status='COMPLETED').all().values())
-        p2 = list(Game.objects.filter(player_two=current_user, status='COMPLETED').all().values())
-        if (len(p1) == 1):
-            p = Game.objects.get(game_id=p1[0]['game_id'])
-            game_archival(p.game_id)
-        elif (len(p2) == 1):
-            p = Game.objects.get(game_id=p2[0]['game_id'])
-            p.p2_status='LEFT'
-            p.p1_status == 'COMPLETED'
-            p.save()
-            game_archival(p.game_id)
+        match = Game.objects.get(game_id=game_id)
+        if (match and match.status == 'IN-GAME'):
+            if (match.player_one == current_user):
+                match.p1_status='ABANDONED'
+                match.winner=match.player_two_id
+                match.loser=match.player_one_id
+            elif (match.player_two == current_user):
+                match.p2_status='ABANDONED'
+                match.winner=match.player_one_id
+                match.loser=match.player_two_id
+            match.status='COMPLETED'
+            match.save()
         return HttpResponseRedirect('/magic_fifteen')
-    
     
 def game_archival(id):
     to_be_archived = Game.objects.get(game_id=id)

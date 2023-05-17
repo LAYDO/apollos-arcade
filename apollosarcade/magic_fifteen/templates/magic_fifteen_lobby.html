@@ -15,14 +15,14 @@
             </div>
             <div class="mft-row-b">
                 <div class="mft-margin-sb">
-                    Player 2: {% if p2 == 0 %} <div class="mft-matching"> Matching...</div> {% else %} {{ p2 }} {% endif %}
+                    Player 2: {{ p2 }}
                 </div>
             </div>
         </div>
         <div id="lobbyOptions" class="mft-row">
                 <form method="post" class="mft-col" action="start">
                     {% csrf_token %}
-                    {% if status == 'READY' %}
+                    {% if status == 'READY'%}
                     <input class="mft-button" type="submit" value="START"></input>
                     {% elif status == 'IN-GAME' %}
                     <input class="mft-button" type="submit" value="CONTINUE"></input>
@@ -32,6 +32,11 @@
                     {% csrf_token %}
                     <input class="mft-button" type="submit" value="LEAVE"></input>
                 </form>
+        </div>
+        <div class="mft-refresh">
+            <div id="lobbyRefresh" class="mft-button">
+                <span class="fa-solid fa-rotate"></span>
+            </div>
         </div>
     </div>
 </div>
