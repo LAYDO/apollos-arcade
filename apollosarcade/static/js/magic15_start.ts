@@ -1,4 +1,4 @@
-import { FifteenCard } from './magic15';
+import { FifteenCard } from './FifteenCard';
 
 declare var csrfToken: string;
 let createModal = document.getElementById('createModal');

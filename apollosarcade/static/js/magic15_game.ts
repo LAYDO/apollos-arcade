@@ -1,4 +1,4 @@
-import { MagicFifteenBoard } from './magic15';
+import { MagicFifteenBoard } from './MagicFifteenBoard';
 import { getCurrentUserId, apollosServerMessage, apollosLocalMessage } from './utils';
 
 let magic_game: MagicFifteenBoard;
@@ -76,80 +76,6 @@ function connect() {
             data = data['payload'];
             if (data['type'] == 'move') {
                 magic_game.takeTurn(data, makeMove);
-                // Update the current round
-                // let roundDiv = document.getElementById('current_round');
-                // if (roundDiv) {
-                //     roundDiv.textContent = `Round: ${data['round']}`;
-                // }
-                // // Update the spaces on the board
-                // for (let i = 0; i < data['spaces'].length; i++) {
-                //     let square = document.getElementById(`square${i}`);
-                //     if (square) {
-                //         square.classList.remove('ttt-square-selected');
-                //         if (data['spaces'][i] == 0) {
-                //             square.textContent = '';
-                //         } else {
-                //             square.textContent = data['spaces'][i];
-                //         }
-                //     }
-                // }
-
-                // let p1Numbers = document.getElementById('player_one_numbers');
-                // let p2Numbers = document.getElementById('player_two_numbers');
-
-                // // Update the current player
-                // if (data['round'] % 2 == 0) {
-                //     p2Numbers?.classList.remove('disabled');
-                //     p1Numbers?.classList.add('disabled');
-                // } else {
-                //     p1Numbers?.classList.remove('disabled');
-                //     p2Numbers?.classList.add('disabled');
-                // }
-                // Update the player one numbers
-                // const playerOneNumbersContainer = p1Numbers?.querySelector('.ttt-row-numbers');
-                // if (playerOneNumbersContainer) {
-                //     playerOneNumbersContainer.innerHTML = '';
-                //     for (let i = 1; i < 10; i++) {
-                //         if ((i) % 2 !== 0 && !data['plays'].includes((i))) {
-                //             const numberDiv = document.createElement('div');
-                //             numberDiv.className = 'ttt-number';
-                //             numberDiv.id = 'number' + i;
-                //             numberDiv.textContent = (i).toString();
-                //             playerOneNumbersContainer.appendChild(numberDiv);
-                //         }
-                //     }
-                // }
-
-                // // Update the player two numbers
-                // const playerTwoNumbersContainer = p2Numbers?.querySelector('.ttt-row-numbers');
-                // if (playerTwoNumbersContainer) {
-                //     playerTwoNumbersContainer.innerHTML = '';
-                //     for (let i = 1; i < 10; i++) {
-                //         if ((i) % 2 === 0 && !data['plays'].includes((i))) {
-                //             const numberDiv = document.createElement('div');
-                //             numberDiv.className = 'ttt-number';
-                //             numberDiv.id = 'number' + i;
-                //             numberDiv.textContent = (i).toString();
-                //             playerTwoNumbersContainer.appendChild(numberDiv);
-                //         }
-                //     }
-                // }
-
-                // // Set up the numbers' event listeners for each message
-                // magic_game.selectedSquare = -1;
-                // magic_game.selectedNumber = 0;
-                // magic_game.setUpNumberEventListeners(makeMove);
-
-                // Check if the current user can play a move
-
-                // let currentPlayer = data['round'] % 2 === 0 ? data['p2'] : data['p1'];
-                // if (currentPlayer === getCurrentUserId()) {
-                //     let appElement = document.getElementById('magic15_app');
-                //     appElement?.classList.remove('turn-disable');
-                // } else {
-                //     let appElement = document.getElementById('magic15_app');
-                //     appElement?.classList.add('turn-disable');
-                // }
             } else if (data['type'] == 'redirect') {
                 console.log("Redirect message received");
                 apollosLocalMessage(data['reason'], 'info')

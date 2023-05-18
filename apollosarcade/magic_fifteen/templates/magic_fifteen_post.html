@@ -4,74 +4,11 @@
 <link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
 <link rel="stylesheet" href="{% static 'css/magic15_post.css' %}" />
 {% endblock %}
-{% block apollos_content_1 %}
-<div class="apollos-container apollos-app">
-    <div class="mft-col">
-        <div class="mft-row mft-title">{{ privacy }} Lobby #{{ id }}</div>
-        <div class="mft-col">
-            <div class="mft-row-b">
-                <div class="mft-margin-sb">
-                    {% if round == 10 %}
-                    Draw: {{ winner }}
-                    {% else %}
-                    Winner: {{ winner }}
-                    {% endif %}
-                </div>
-                {% if winner_id == player_one and p1_status == 'REMATCH' %}
-                <div class="fa-solid fa-check mft-lime"></div>
-                {% elif winner_id == player_two and p2_status == 'REMATCH' %}
-                <div class="fa-solid fa-check mft-lime"></div>
-                {% endif %}
-            </div>
-            <div class="mft-row-b">
-                <div class="mft-margin-sb">
-                    {% if round == 10 %}
-                    Draw: {{ loser }}
-                    {% else %}
-                    Try again: {{ loser }}
-                    {% endif %}
-                </div>
-                {% if loser_id == player_one and p1_status == 'REMATCH' %}
-                <div class="fa-solid fa-check mft-lime"></div>
-                {% elif loser_id == player_two and p2_status == 'REMATCH' %}
-                <div class="fa-solid fa-check mft-lime"></div>
-                {% endif %}
-            </div>
-        </div>
-        <div class="pt-col" id="mftSquares">
-            <div class="pt-row" id="squareRow0">
-                <div class="pt-square pt-border-right pt-border-bottom" id="square0">{{ spaces.0|cut:"0" }}</div>
-                <div class="pt-square pt-border-right pt-border-bottom" id="square1">{{ spaces.1|cut:"0" }}</div>
-                <div class="pt-square pt-border-bottom" id="square2">{{ spaces.2|cut:"0" }}</div>
-            </div>
-            <div class="pt-row" id="squareRow1">
-                <div class="pt-square pt-border-right pt-border-bottom" id="square3">{{ spaces.3|cut:"0" }}</div>
-                <div class="pt-square pt-border-right pt-border-bottom" id="square4">{{ spaces.4|cut:"0" }}</div>
-                <div class="pt-square pt-border-bottom" id="square5">{{ spaces.5|cut:"0" }}</div>
-            </div>
-            <div class="pt-row" id="squareRow2">
-                <div class="pt-square pt-border-right" id="square6">{{ spaces.6|cut:"0" }}</div>
-                <div class="pt-square pt-border-right" id="square7">{{ spaces.7|cut:"0" }}</div>
-                <div class="pt-square" id="square8">{{ spaces.8|cut:"0" }}</div>
-            </div>
-        </div>
-        <div id="lobbyOptions" class="mft-row">
-            <form method="post" class="mft-col" action="rematch">
-                {% csrf_token %}
-                <input class="mft-button" type="submit" value="REMATCH"></input>
-            </form>
-            <form method="post" class="mft-col" action="leave">
-                {% csrf_token %}
-                <input class="mft-button" type="submit" value="LEAVE"></input>
-            </form>
-        </div>
-    </div>
-    <div class="mft-refresh">
-        <div class="mft-button" onclick="location.reload()">
-            <span class="fa-solid fa-rotate"></span>
-        </div>
-    </div>
+{% block apollos_content_1 %} {% csrf_token %}
+<div id="context-data-post" style="display:none;" data-spaces="{{ spaces|safe }}" data-game-id="{{ id }}"
+    data-round="{{ round }}" data-winner="{{ winner }}" data-loser="{{ loser }}" data-privacy="{{ privacy }}">
 </div>
+<div id="magicFifteenPost" class="apollos-container apollos-app"></div>
 {% endblock %}
 {% block page_scripts %}
 <script type="text/javascript" src="{% static 'magic15_post.bundle.js' %}"></script>

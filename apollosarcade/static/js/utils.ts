@@ -8,6 +8,11 @@ export function apollosLocalMessage(message: string, type: string) {
         content.classList.add(`alert-${type}`);
         modal.style.display = 'block';
         closeButton.replaceWith(closeButton.cloneNode(true));
+        if (type === 'error') {
+            closeButton.addEventListener('click', () => {
+                window.location.reload();
+            });
+        }
     }
 }
 

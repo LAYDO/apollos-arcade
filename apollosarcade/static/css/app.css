@@ -364,12 +364,14 @@ body {
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
 }
 
 .modal-content {
-    margin: 15% auto;
+    margin: 5% auto;
     border: 1px solid #888;
-    width: 66%;
+    width: 33%;
+    pointer-events: all;
 }
 
 .close {
