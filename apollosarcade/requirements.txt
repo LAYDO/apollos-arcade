@@ -17,6 +17,7 @@ Django==4.2
 django-allauth==0.54.0
 django-quill-editor==0.1.40
 django-sendgrid-v5==1.2.2
+django-webpack-loader==1.8.1
 djangorestframework==3.14.0
 google-api-core==2.11.0
 google-api-python-client==2.86.0
