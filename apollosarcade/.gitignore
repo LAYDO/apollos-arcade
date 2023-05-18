@@ -170,3 +170,9 @@ node_modules/
 
 # whitenoise
 staticfiles/
+
+# Webpack
+/dist/
+/static/dist/
+webpack-stats.json
+*.bundle.js

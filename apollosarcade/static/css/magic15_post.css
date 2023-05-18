@@ -94,3 +94,7 @@
 .pt-border-bottom {
     border-bottom: 0.25rem solid var(--font-faded);
 }
+.mft-win-highlight {
+    background-color: var(--glass-backdrop);
+    /* color: var(--color-primary); */
+}

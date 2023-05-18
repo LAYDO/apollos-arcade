@@ -1,4 +1,4 @@
-class TicTacToe {
+export class TicTacToe {
     public player1Turn: boolean;
     public player2Turn: boolean;
 

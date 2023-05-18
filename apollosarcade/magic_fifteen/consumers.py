@@ -1,4 +1,5 @@
 import json, traceback
+from django.contrib.auth.models import User
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
@@ -63,6 +64,8 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
 
                 if (win):
                     game.status = 'COMPLETED'
+                    game.p1_status = 'POST'
+                    game.p2_status = 'POST'
                     if (play % 2 == 0):
                         game.winner = game.player_two_id
                         game.loser = game.player_one_id
@@ -72,16 +75,20 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                     # game.ended = str(timezone.now())
                     game.ended = str(await sync_to_async(timezone.now)())
                     await self.save_game(game)
+                    winner = await self.get_winner_name(game)
                     await self.channel_layer.group_send(
                         self.game_group_id, {
                             'type': 'send_redirect',
                             'message': {
                                 'url': f'/magic_fifteen/post',
+                                'reason': f'{winner} wins!',
                             }
                         }
                     )
                 elif (game.round == 10 and not win):
                     game.status = 'COMPLETED'
+                    game.p1_status = 'POST'
+                    game.p2_status = 'POST'
                     game.winner = 0
                     game.loser = 0
                     game.ended = str(await sync_to_async(timezone.now)())
@@ -91,6 +98,7 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                             'type': 'send_redirect',
                             'message': {
                                 'url': f'/magic_fifteen/post',
+                                'reason': 'Tie game!',
                             }
                         }
                     )
@@ -145,7 +153,8 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'payload': {
                 'type': 'redirect',
-                'url': event['message']['url']
+                'url': event['message']['url'],
+                'reason': event['message']['reason'],
             }
         }))
 
@@ -201,4 +210,8 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def get_player_two(self, game):
         return game.player_two
+    
+    @database_sync_to_async
+    def get_winner_name(self, game):
+        return User.objects.get(id=game.winner).username
 
