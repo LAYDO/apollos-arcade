@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django import template
+from django.db.models import Q
 
 from .models import Game, GameInstruction
 from .encoders import QuillFieldEncoder
@@ -194,3 +195,6 @@ def how_to_play(request):
 
 def local(request):
     return render(request, 'ttt.html')
+
+def get_games(user, in_statuses, ex_statuses):
+    return Game.objects.filter(Q(player_one=user) | Q(player_two=user)).filter(status__in=in_statuses).exclude(status__in=ex_statuses)

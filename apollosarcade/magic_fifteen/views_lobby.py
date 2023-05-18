@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from .views import game_archival, check_for_lobbies
+from .views import check_for_lobbies, get_games
 
 from .models import Game
 from .forms import CreateLobbyForm, JoinLobbyForm
@@ -62,8 +62,7 @@ def join_lobby(request):
                         messages.error(request, "Incorrect password for the lobby you are trying to join")
                         return HttpResponseRedirect(f'/magic_fifteen/start/')
                 else:
-                    games = list(Game.objects.filter(status='LOBBY', player_two=None).exclude(status='REMATCH').all().values())
-                    games.extend(list(Game.objects.filter(status='LOBBY', player_one=None).exclude(status='REMATCH').all().values()))
+                    games = get_games(current_user, ['LOBBY'], ['REMATCH'])
                     game = Game.objects.get(game_id=games[0]['game_id'])
                     if game.player_one == None:
                         game.player_one=current_user
@@ -79,40 +78,32 @@ def lobby(request):
     print(f'Current user id: {current_user.id}')
     lobby = {}
     try:
-        p1 = list(Game.objects.filter(player_one=current_user, status='LOBBY').all().values())
-        p1.extend(list(Game.objects.filter(player_one=current_user, status='REMATCH').all().values()))
-        p1.extend(list(Game.objects.filter(player_one=current_user, status='READY').all().values()))
-        p1.extend(list(Game.objects.filter(player_one=current_user, status='IN-GAME').all().values()))
-        p2 = list(Game.objects.filter(player_two=current_user, status='LOBBY').all().values())
-        p2.extend(list(Game.objects.filter(player_two=current_user, status='REMATCH').all().values()))
-        p2.extend(list(Game.objects.filter(player_two=current_user, status='READY').all().values()))
-        p2.extend(list(Game.objects.filter(player_two=current_user, status='IN-GAME').all().values()))
-        print(f'p1: {p1}\np2: {p2}')
-        if (len(p1) == 1):
-            print(f'p1: {p1[0]}')
+        found = get_games(current_user, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
+        if (len(found) == 1 and found[0].player_one == current_user):
+            print(f'p1: {found[0]}')
             player2 = None
-            if (p1[0]['player_two_id'] != None):
-                player2 = User.objects.get(id=p1[0]['player_two_id']).username
+            if (found[0].player_two != None):
+                player2 = User.objects.get(id=found[0].player_two_id).username
             lobby.update({
-                'id': p1[0]['game_id'],
-                'status': p1[0]['status'],
+                'id': found[0].game_id,
+                'status': found[0].status,
                 'p1': current_user.username,
                 'p2': 'Waiting for player...' if player2 == None else player2,
-                'privacy': p1[0]['privacy'],
-                'pw': p1[0]['password'],
+                'privacy': found[0].privacy,
+                'pw': found[0].password,
             })
-        elif (len(p2) == 1):
-            print(f'p2: {p2[0]}')
+        elif (len(found) == 1 and found[0].player_two == current_user):
+            print(f'p2: {found[0]}')
             player1 = None
-            if (p2[0]['player_one_id'] != None):
-                player1 = User.objects.get(id=p2[0]['player_one_id']).username
+            if (found[0].player_one != None):
+                player1 = User.objects.get(id=found[0].player_one_id).username
             lobby.update({
-                'id': p2[0]['game_id'],
-                'status': p2[0]['status'],
+                'id': found[0].game_id,
+                'status': found[0].status,
                 'p1': 'Waiting for player...' if player1 == None else player1,
                 'p2': current_user.username,
-                'privacy': p2[0]['privacy'],
-                'pw': p2[0]['password'],
+                'privacy': found[0].privacy,
+                'pw': found[0].password,
             })
     except:
         raise Exception('Lobby not found!')
@@ -123,36 +114,32 @@ def lobby(request):
 def lobby_leave(request):
     if request.method == 'POST':
         current_user = request.user
-        p1 = list(Game.objects.filter(player_one=current_user, status='LOBBY').all().values())
-        p1.extend(list(Game.objects.filter(player_one=current_user, status='REMATCH').all().values()))
-        p1.extend(list(Game.objects.filter(player_one=current_user, status='READY').all().values()))
-        p1.extend(list(Game.objects.filter(player_one=current_user, status='IN-GAME').all().values()))
-        p2 = list(Game.objects.filter(player_two=current_user, status='LOBBY').all().values())
-        p2.extend(list(Game.objects.filter(player_two=current_user, status='REMATCH').all().values()))
-        p2.extend(list(Game.objects.filter(player_two=current_user, status='READY').all().values()))
-        p2.extend(list(Game.objects.filter(player_two=current_user, status='IN-GAME').all().values()))
-        if (len(p1) == 1):
-            p = Game.objects.get(game_id=p1[0]['game_id'])
-            if (p.status == 'IN-GAME'):
-                p.winner=p.player_two_id
-                p.loser=p.player_one_id
-                p.status='COMPLETED'
-                p.p1_status='ABANDONED'
-                p.p2_status='POST'
-            else:
-                p.player_one=None
-                p.status='LOBBY'
-            p.save()
-        elif (len(p2) == 1):
-            p = Game.objects.get(game_id=p2[0]['game_id'])
-            if (p.status == 'IN-GAME'):
-                p.winner=p.player_one_id
-                p.loser=p.player_two_id
-                p.status='COMPLETED'
-                p.p2_status='ABANDONED'
-                p.p1_status='POST'
-            else:
-                p.player_two=None
-                p.status='LOBBY'
-            p.save()
+        try:
+            found = get_games(current_user, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
+            if (len(found) == 1 and found[0].player_one == current_user):
+                p = Game.objects.get(game_id=found[0].game_id)
+                if (p.status == 'IN-GAME'):
+                    p.winner=p.player_two_id
+                    p.loser=p.player_one_id
+                    p.status='COMPLETED'
+                    p.p1_status='ABANDONED'
+                    p.p2_status='POST'
+                else:
+                    p.player_one=None
+                    p.status='LOBBY'
+                p.save()
+            elif (len(found) == 1 and found[0].player_two == current_user):
+                p = Game.objects.get(game_id=found[0].game_id)
+                if (p.status == 'IN-GAME'):
+                    p.winner=p.player_one_id
+                    p.loser=p.player_two_id
+                    p.status='COMPLETED'
+                    p.p2_status='ABANDONED'
+                    p.p1_status='POST'
+                else:
+                    p.player_two=None
+                    p.status='LOBBY'
+                p.save()
+        except:
+            raise Exception('Lobby not found!')
         return HttpResponseRedirect('/magic_fifteen')

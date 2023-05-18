@@ -5,6 +5,7 @@ export class MagicFifteenPost {
     private winnerElement: Element;
     private loserElement: Element;
     private squares: Element;
+    private csrfToken: string;
 
     public winner: string;
     public loser: string;
@@ -23,8 +24,9 @@ export class MagicFifteenPost {
 
     private isMobile: boolean;
 
-    constructor(app: HTMLElement) {
+    constructor(app: HTMLElement, csrfToken: string) {
         this.app = app;
+        this.csrfToken = csrfToken;
         this.spaces = [0, 0, 0, 0, 0, 0, 0, 0, 0];
         this.isMobile = window.matchMedia("only screen and (max-width: 48rem)").matches;
 
@@ -149,6 +151,10 @@ export class MagicFifteenPost {
 
         rematchForm.append(rematchButton);
         leaveForm.append(leaveButton);
+
+        this.addCsrfTokenToForm(rematchForm);
+        this.addCsrfTokenToForm(leaveForm);
+
         lobbyOptions.append(rematchForm);
         lobbyOptions.append(leaveForm);
 
@@ -208,5 +214,13 @@ export class MagicFifteenPost {
                 }
             }
         }
+    }
+
+    addCsrfTokenToForm(form: HTMLFormElement) {
+        const csrfToken = document.createElement('input');
+        csrfToken.setAttribute('type', 'hidden');
+        csrfToken.setAttribute('name', 'csrfmiddlewaretoken');
+        csrfToken.setAttribute('value', this.csrfToken);
+        form.append(csrfToken);
     }
 }

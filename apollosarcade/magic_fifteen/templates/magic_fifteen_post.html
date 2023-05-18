@@ -4,12 +4,13 @@
 <link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
 <link rel="stylesheet" href="{% static 'css/magic15_post.css' %}" />
 {% endblock %}
-{% block apollos_content_1 %} {% csrf_token %}
+{% block apollos_content_1 %} 
 <div id="context-data-post" style="display:none;" data-spaces="{{ spaces|safe }}" data-game-id="{{ id }}"
     data-round="{{ round }}" data-winner="{{ winner }}" data-loser="{{ loser }}" data-privacy="{{ privacy }}">
 </div>
-<div id="magicFifteenPost" class="apollos-container apollos-app"></div>
+<div id="magicFifteenPost" class="apollos-container apollos-app">{% csrf_token %}</div>
 {% endblock %}
 {% block page_scripts %}
+<script>let csrfToken = "{{ csrf_token }}";</script>
 <script type="text/javascript" src="{% static 'magic15_post.bundle.js' %}"></script>
 {% endblock %}

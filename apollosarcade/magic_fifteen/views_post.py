@@ -4,20 +4,18 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from .models import Game
-from .views import game_archival
+from .views import game_archival, get_games
 
 @login_required
 def post(request):
     current_user = request.user
     post = {}
-    lobbies = list(Game.objects.filter(player_one=current_user,status=['LOBBY','REMATCH']).all().values())
-    lobbies.extend(list(Game.objects.filter(player_two=current_user,status=['LOBBY','REMATCH']).all().values()))
+    lobbies = get_games(current_user, ['LOBBY','REMATCH'], [])
     if len(lobbies) > 0:
         return HttpResponseRedirect(f'/magic_fifteen/lobby')
-    games = list(Game.objects.filter(player_one=current_user, status='COMPLETED').all().values())
-    games.extend(list(Game.objects.filter(player_two=current_user, status='COMPLETED').all().values()))
+    games = get_games(current_user, ['COMPLETED'], [])
     if (len(games) == 1):
-        game = Game.objects.get(game_id=games[0]['game_id'])
+        game = Game.objects.get(game_id=games[0].game_id)
         if (game):
             if (game.round == 10 and game.winner == 0 and game.loser == 0):
                 winner = User.objects.get(id=game.player_one_id)
@@ -67,8 +65,8 @@ def post_rematch(request):
             elif getattr(game_to_rematch, other_player_status) == 'REMATCH':
                 handle_existing_rematch(game_to_rematch, p1)
                 return HttpResponseRedirect('/magic_fifteen/lobby')
-        # return redirect(request.META['HTTP_REFERER'])
-
+            else:
+                return HttpResponseRedirect('/magic_fifteen/lobby')
 
 def create_rematch(game, is_player_one):
     if game.winner == 0 and game.loser == 0:
