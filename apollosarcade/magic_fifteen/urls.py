@@ -18,5 +18,4 @@ urlpatterns = [
     path('post/rematch', views_post.post_rematch, name='post_rematch'),
     path('post/leave', views_post.post_leave, name='post_leave'),
     path('how-to-play/', views.how_to_play, name='how_to_play'),
-    path('clicked/', views.user_click, name='user_click'),
 ]

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'webpack_loader',
     'user_profiles',
     'magic_fifteen',
+    'guest',
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

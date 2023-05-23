@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
-from apollosarcade.models import Guest
+from guest.models import Guest
 
 class Command(BaseCommand):
     help = 'Removes guest accounts that have not been active in the last week'

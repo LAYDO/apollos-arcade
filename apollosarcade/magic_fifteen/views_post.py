@@ -1,14 +1,13 @@
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from .models import Game
 from .views import game_archival, get_games
+from apollosarcade.utils import get_player
 
-@login_required
 def post(request):
-    current_user = request.user
+    current_user = get_player(request)
     post = {}
     lobbies = get_games(current_user, ['LOBBY','REMATCH'], [])
     if len(lobbies) > 0:
@@ -40,10 +39,9 @@ def post(request):
     else:
         return HttpResponseRedirect(f'/magic_fifteen/')
 
-@login_required
 def post_rematch(request):
     if request.method == 'POST':
-        current_user = request.user
+        current_user = get_player(request)
         p1 = Game.objects.filter(player_one=current_user, status='COMPLETED').first()
         p2 = Game.objects.filter(player_two=current_user, status='COMPLETED').first()
 
@@ -93,7 +91,6 @@ def create_rematch(game, is_player_one):
         spaces=[0, 0, 0, 0, 0, 0, 0, 0, 0],
     )
     rematch_game.save()
-    # return HttpResponseRedirect('/magic_fifteen/lobby')
 
 def create_new_lobby_game(game, cu):
     new_game = Game(
@@ -111,8 +108,6 @@ def create_new_lobby_game(game, cu):
     )
     new_game.save()
     game_archival(game.game_id)
-    # return HttpResponseRedirect('/magic_fifteen/lobby')
-
 
 def handle_existing_rematch(game, is_player_one):
     rematch = Game.objects.filter(player_one=(game.player_two if is_player_one else game.player_one), status='REMATCH').first()
@@ -127,12 +122,10 @@ def handle_existing_rematch(game, is_player_one):
             rematch.p1_status = 'REMATCH'
         rematch.status = 'READY'
         rematch.save()
-        # return HttpResponseRedirect('/magic_fifteen/lobby')
     
-@login_required
 def post_leave(request):
     if request.method == 'POST':
-        current_user = request.user
+        current_user = get_player(request)
         player_one_game = Game.objects.filter(player_one=current_user, status='COMPLETED').first()
         player_two_game = Game.objects.filter(player_two=current_user, status='COMPLETED').first()
 

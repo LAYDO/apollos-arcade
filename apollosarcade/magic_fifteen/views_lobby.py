@@ -1,28 +1,27 @@
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.contrib.contenttypes.models import ContentType
 
 from .views import check_for_lobbies, get_games
+from apollosarcade.utils import get_player
 
 from .models import Game
 from .forms import CreateLobbyForm, JoinLobbyForm
+from guest.models import Guest
 
-
-
-
-@login_required
 def create_lobby(request):
     if request.method == 'POST':
         if (check_for_lobbies(request)):
             return
         else:
             form = CreateLobbyForm(request.POST)
-            current_user = request.user
+            current_user = get_player(request)
             if form.is_valid():
                 f = form.cleaned_data
                 print(f['create_option'])
+                user_content_type = ContentType.objects.get_for_model(current_user)
                 game = Game(
                     status='LOBBY',
                     player_one=current_user,
@@ -38,23 +37,34 @@ def create_lobby(request):
                 game.save()
                 return HttpResponseRedirect(f'/magic_fifteen/lobby/')
             
-@login_required
 def join_lobby(request):
     if request.method == 'POST':
         if (check_for_lobbies(request) > 0):
             return
         else:
             form = JoinLobbyForm(request.POST)
-            current_user = request.user
+            current_user = get_player(request)
             if form.is_valid():
                 f = form.cleaned_data
+                user_content_type = ContentType.objects.get_for_model(current_user)
+                guest_content_type = ContentType.objects.get_for_model(Guest)
+                print(f'ContentType for Guest: {guest_content_type}')
+
+                user = get_player(request)
+                user_content_type = ContentType.objects.get_for_model(user)
+                print(f'ContentType for user: {user_content_type}')
+
+                content_type_16 = ContentType.objects.get(id=16)
+                print(f'ContentType with id=16: {content_type_16}')
+                print(f'Are they the same? {content_type_16 == guest_content_type}')
+
                 if (f['join'] == 'Lobby Number'):
                     game = Game.objects.get(game_id=f['join_option'])
                     if game.privacy == 'Public' or (game.privacy == 'Private' and game.password == f['password']) or game.status != 'REMATCH':
-                        if game.player_one == None:
-                            game.player_one=current_user
+                        if game.player_one== None:
+                            game.player_one = current_user
                         elif game.player_two == None:
-                            game.player_two=current_user
+                            game.player_two = current_user
                         game.status = 'READY'
                         game.save()
                         return HttpResponseRedirect(f'/magic_fifteen/lobby/')
@@ -62,8 +72,11 @@ def join_lobby(request):
                         messages.error(request, "Incorrect password for the lobby you are trying to join")
                         return HttpResponseRedirect(f'/magic_fifteen/start/')
                 else:
-                    games = get_games(current_user, ['LOBBY'], ['REMATCH'])
-                    game = Game.objects.get(game_id=games[0]['game_id'])
+                    games = Game.objects.filter(status__in=['LOBBY']).exclude(status__in=['REMATCH'])
+                    if (games):
+                        game = Game.objects.get(game_id=games[0].game_id)
+                    else:
+                        raise Exception('No lobbies found')
                     if game.player_one == None:
                         game.player_one=current_user
                     elif game.player_two == None:
@@ -72,9 +85,8 @@ def join_lobby(request):
                     game.save()
                     return HttpResponseRedirect(f'/magic_fifteen/lobby/')
 
-@login_required
 def lobby(request):
-    current_user = request.user
+    current_user = get_player(request)
     print(f'Current user id: {current_user.id}')
     lobby = {}
     try:
@@ -83,7 +95,10 @@ def lobby(request):
             print(f'p1: {found[0]}')
             player2 = None
             if (found[0].player_two != None):
-                player2 = User.objects.get(id=found[0].player_two_id).username
+                if (ContentType.objects.get_for_model(found[0].player_two_content_type)== 'user'):
+                    player2 = User.objects.get(id=found[0].player_two_object_id).username
+                else:
+                    player2 = Guest.objects.get(id=found[0].player_two_object_id).username            
             lobby.update({
                 'id': found[0].game_id,
                 'status': found[0].status,
@@ -96,7 +111,10 @@ def lobby(request):
             print(f'p2: {found[0]}')
             player1 = None
             if (found[0].player_one != None):
-                player1 = User.objects.get(id=found[0].player_one_id).username
+                if (ContentType.objects.get_for_model(found[0].player_one_content_type)== 'user'):
+                    player1 = User.objects.get(id=found[0].player_one_object_id).username
+                else:
+                    player1 = Guest.objects.get(id=found[0].player_one_object_id).username
             lobby.update({
                 'id': found[0].game_id,
                 'status': found[0].status,
@@ -110,10 +128,9 @@ def lobby(request):
         
     return render(request, 'magic_fifteen_lobby.html', lobby)
 
-@login_required
 def lobby_leave(request):
     if request.method == 'POST':
-        current_user = request.user
+        current_user = get_player(request)
         try:
             found = get_games(current_user, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
             if (len(found) == 1 and found[0].player_one == current_user):
