@@ -93,3 +93,23 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     };
 });
+
+let socials = document.getElementsByClassName('socicon');
+for (let i = 0; i < socials.length; i++) {
+    socials[i].addEventListener('click', openSocial);
+}
+
+function openSocial(event: Event) {
+    let element = event.target as HTMLElement;
+    let social = element.id.replace("Icon", "").toLowerCase();
+    switch (social) {
+        case 'twitter':
+            window.open("https://twitter.com/_apollosarcade");
+            break;
+        case 'instagram':
+            window.open("https://www.instagram.com/_apollosarcade/");
+            break;
+        default:
+            break;
+    }
+}

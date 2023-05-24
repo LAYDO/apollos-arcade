@@ -117,34 +117,42 @@ function tictactoe() {
 }
 
 function checkForMatch() {
-    let url = `${window.location.origin}${window.location.pathname}check/`;
-    fetch(url).then(response => {
-        // Need a loading function / animation
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+    apollosLocalMessage('Multiplayer is not yet available, coming soon!', 'warning');
+    document.getElementById('message_close')?.addEventListener('click', () => {
+        let modal = document.getElementById("messageModal");
+        if (modal) {
+            modal.style.display = "none";
         }
-
-        if (response.redirected && response.url.includes('/accounts/login/')) {
-            // alert('User not authenticated, redirecting to login page');
-            apollosLocalMessage('User not authenticated, redirecting to login page', 'warning');
-            document.getElementById('message_close')?.addEventListener('click', () => {
-                window.location.pathname = '/login/';
-            });
-            return;
-        }
-
-        if (response.headers.get('content-type') !== 'application/json') {
-            throw new Error(`Invalid content-type. Expected 'application/json', received '${response.headers.get('content-type')}'.`);
-        }
-
-        return response.json();
-    }).then(data => {
-        if (data) {
-            window.location.pathname = data.pathname;
-        }
-    }).catch(error => {
-        console.error('There has been a problem with your fetch operation: ', error);
     });
+    // Disabled until Guest implementation is complete
+    // let url = `${window.location.origin}${window.location.pathname}check/`;
+    // fetch(url).then(response => {
+    //     // Need a loading function / animation
+    //     if (!response.ok) {
+    //         throw new Error('Network response was not ok');
+    //     }
+
+    //     if (response.redirected && response.url.includes('/accounts/login/')) {
+    //         // alert('User not authenticated, redirecting to login page');
+    //         apollosLocalMessage('User not authenticated, redirecting to login page', 'warning');
+    //         document.getElementById('message_close')?.addEventListener('click', () => {
+    //             window.location.pathname = '/login/';
+    //         });
+    //         return;
+    //     }
+
+    //     if (response.headers.get('content-type') !== 'application/json') {
+    //         throw new Error(`Invalid content-type. Expected 'application/json', received '${response.headers.get('content-type')}'.`);
+    //     }
+
+    //     return response.json();
+    // }).then(data => {
+    //     if (data) {
+    //         window.location.pathname = data.pathname;
+    //     }
+    // }).catch(error => {
+    //     console.error('There has been a problem with your fetch operation: ', error);
+    // });
 }
 
 

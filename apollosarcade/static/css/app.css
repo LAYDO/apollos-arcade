@@ -368,18 +368,19 @@ body {
 }
 
 .modal-content {
-    margin: 5% auto;
+    margin: 15% auto;
     border: 1px solid #888;
-    width: 33%;
+    width: 67%;
     pointer-events: all;
 }
 
 .close {
-    color: #aaa;
+    color: #000;
     float: right;
     top: 0;
     font-size: 3rem;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .close:hover,

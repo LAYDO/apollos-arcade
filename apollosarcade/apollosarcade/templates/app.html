@@ -1,6 +1,6 @@
+<!DOCTYPE html>
 {% load static %}{% load render_bundle from webpack_loader %}
 {% render_bundle 'app' %}
-<!DOCTYPE html>
 <html lang="en" class="theme-light">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="Website design and development for small businesses, weddings, and portfolios." />
@@ -58,6 +58,10 @@
     <div class="apollos-flex-home">
         <div class="apollos-footer">
             <div class="apollos-net-footer">{% block apollos_footer %}{% endblock %}</div>
+            <div class="apollos-net-footer">
+                <span id="twitterIcon" class="fab fa-twitter socicon"></span>
+                <span id="instagramIcon" class="fab fa-instagram socicon"></span>
+            </div>
             <div class="apollos-net-footer">Development by</div>
             <a href="https://www.laydo.net">LaydoNet</a>
         </div>
