@@ -118,6 +118,12 @@ function tictactoe() {
 
 function checkForMatch() {
     apollosLocalMessage('Multiplayer is not yet available, coming soon!', 'warning');
+    document.getElementById('message_close')?.addEventListener('click', () => {
+        let modal = document.getElementById("messageModal");
+        if (modal) {
+            modal.style.display = "none";
+        }
+    });
     // Disabled until Guest implementation is complete
     // let url = `${window.location.origin}${window.location.pathname}check/`;
     // fetch(url).then(response => {
