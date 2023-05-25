@@ -412,9 +412,3 @@ body {
     border-color: #ebccd1;
     color: #a94442;
 }
-
-.site-space {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-}

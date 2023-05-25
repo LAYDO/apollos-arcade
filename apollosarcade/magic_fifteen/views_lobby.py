@@ -21,7 +21,6 @@ def create_lobby(request):
             if form.is_valid():
                 f = form.cleaned_data
                 print(f['create_option'])
-                user_content_type = ContentType.objects.get_for_model(current_user)
                 game = Game(
                     status='LOBBY',
                     player_one=current_user,
@@ -46,18 +45,6 @@ def join_lobby(request):
             current_user = get_player(request)
             if form.is_valid():
                 f = form.cleaned_data
-                user_content_type = ContentType.objects.get_for_model(current_user)
-                guest_content_type = ContentType.objects.get_for_model(Guest)
-                print(f'ContentType for Guest: {guest_content_type}')
-
-                user = get_player(request)
-                user_content_type = ContentType.objects.get_for_model(user)
-                print(f'ContentType for user: {user_content_type}')
-
-                content_type_16 = ContentType.objects.get(id=16)
-                print(f'ContentType with id=16: {content_type_16}')
-                print(f'Are they the same? {content_type_16 == guest_content_type}')
-
                 if (f['join'] == 'Lobby Number'):
                     game = Game.objects.get(game_id=f['join_option'])
                     if game.privacy == 'Public' or (game.privacy == 'Private' and game.password == f['password']) or game.status != 'REMATCH':
@@ -95,7 +82,7 @@ def lobby(request):
             print(f'p1: {found[0]}')
             player2 = None
             if (found[0].player_two != None):
-                if (ContentType.objects.get_for_model(found[0].player_two_content_type)== 'user'):
+                if (str(ContentType.objects.get_for_model(found[0].player_two)).lower() == 'auth | user'):
                     player2 = User.objects.get(id=found[0].player_two_object_id).username
                 else:
                     player2 = Guest.objects.get(id=found[0].player_two_object_id).username            
@@ -111,7 +98,7 @@ def lobby(request):
             print(f'p2: {found[0]}')
             player1 = None
             if (found[0].player_one != None):
-                if (ContentType.objects.get_for_model(found[0].player_one_content_type)== 'user'):
+                if (str(ContentType.objects.get_for_model(found[0].player_one)).lower() == 'auth | user'):
                     player1 = User.objects.get(id=found[0].player_one_object_id).username
                 else:
                     player1 = Guest.objects.get(id=found[0].player_one_object_id).username

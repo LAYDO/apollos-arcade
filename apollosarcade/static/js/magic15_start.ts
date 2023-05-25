@@ -9,12 +9,15 @@ let create: FifteenCard;
 let join: FifteenCard;
 let startContainer = document.getElementById('start_container');
 
+const contextData = document.getElementById('context-data-start');
+const guest = contextData?.dataset.guest == 'True' ? true : false;
+
 function startInit() {
     if (createModal) {
-        create = new FifteenCard('Match Options', 'Public', 'Private', 'CREATE', createModal, cancel, csrfToken);
+        create = new FifteenCard('Match Options', 'Public', 'Private', 'CREATE', createModal, cancel, csrfToken, guest);
     }
     if (joinModal) {
-        join = new FifteenCard('Join Lobby', 'Random Lobby', 'Lobby Number', 'JOIN', joinModal, cancel, csrfToken);
+        join = new FifteenCard('Join Lobby', 'Random Lobby', 'Lobby Number', 'JOIN', joinModal, cancel, csrfToken, guest);
     }
 
     if (createButton) {

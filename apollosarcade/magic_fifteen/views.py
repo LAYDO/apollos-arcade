@@ -40,8 +40,6 @@ def check_for_lobbies(request):
 def check_for_match(request):
     if not request.user.is_authenticated:
         print('User not authenticated')
-        # messages.warning(request, "You must be logged in to access this page.")
-        # return redirect('login') 
     url = 'magic_fifteen/'
     match (check_for_lobbies(request)):
         case 2:
@@ -57,7 +55,17 @@ def check_for_match(request):
     return JsonResponse(match, safe=False)
 
 def start(request):
-    return render(request, 'magic_fifteen_start.html',)
+    context = {}
+    current_user = get_player(request)
+    if (current_user.__class__ == Guest):
+        context.update({
+            'guest': True,
+        })
+    else:
+        context.update({
+            'guest': False,
+        })
+    return render(request, 'magic_fifteen_start.html', context)
 
 def game_start_continue(request):
     if request.method == 'POST':
@@ -87,7 +95,7 @@ def player_active_lobby(request):
     current_user = get_player(request)
     games = get_games(current_user, status=['READY'])
     if len(games) == 1:
-        return games[0]['game_id']
+        return games[0].game_id
     else:
         return 0
         
@@ -95,7 +103,7 @@ def player_active_game(request):
     current_user = get_player(request)
     games = get_games(current_user, status=['IN-GAME'])
     if len(games) == 1:
-        return games[0]['game_id']
+        return games[0].game_id
     else:
         return 0
     
@@ -107,9 +115,12 @@ def game(request, game_id):
         return HttpResponseRedirect('/magic_fifteen/post')
     if (current_user == match.player_one):
         try:
-            player2 = User.objects.get(username=match.player_two.username)
+            if (str(ContentType.objects.get_for_model(match.player_two)) == 'auth | user'):
+                player2 = User.objects.get(id=match.player_two_object_id)
+            else:
+                player2 = Guest.objects.get(id=match.player_two_object_id)
             game.update({
-                'player1': current_user,
+                'player1': current_user.username,
                 'player2': player2.username,
                 'p1': current_user.id,
                 'p2': player2.id,
@@ -118,10 +129,13 @@ def game(request, game_id):
             raise Exception('Game was abandoned by player 2')
     elif (current_user == match.player_two):
         try:
-            player1 = User.objects.get(username=match.player_one.username)
+            if (str(ContentType.objects.get_for_model(match.player_one)) == 'auth | user'):
+                player1 = User.objects.get(id=match.player_one_object_id)
+            else:
+                player1 = Guest.objects.get(id=match.player_one_object_id)
             game.update({
                 'player1': player1.username,
-                'player2': current_user,
+                'player2': current_user.username,
                 'p1': player1.id,
                 'p2': current_user.id,
             })
@@ -135,6 +149,7 @@ def game(request, game_id):
         'spaces': match.spaces,
         'plays': match.plays,
         'round': match.round,
+        'current': current_user.id,
     })
     return render(request, 'magic_fifteen_game.html', game)
 
@@ -162,10 +177,10 @@ def game_archival(id):
     to_be_archived.status = 'ARCHIVE'
     to_be_archived.save()
 
-# Custom filter for front-end to cut out zeroes on board used in spaces attribute
-@register.filter(name='cut')
-def cut(value, arg):
-    return value.replace(arg, '')
+# # Custom filter for front-end to cut out zeroes on board used in spaces attribute
+# @register.filter(name='cut')
+# def cut(value, arg):
+#     return value.replace(arg, '')
 
 def how_to_play(request):
     how_to_play = {}
@@ -179,33 +194,19 @@ def how_to_play(request):
 def local(request):
     return render(request, 'ttt.html')
 
-# def get_games(user, status=None, exclude_status=None, player_field=None):
-#     user_content_type = ContentType.objects.get_for_model(user)
-#     games = Game.objects.filter((Q(player_one_content_type_id=user_content_type) & Q(player_one_object_id=user.id)) | (Q(player_two_content_type_id=user_content_type) & Q(player_two_object_id=user.id)))
-
-#     if status:
-#         games = games.filter(status__in=status)
-
-#     if exclude_status:
-#         games = games.exclude(status__in=exclude_status)
-
-#     if player_field:
-#         games = games.filter(**{player_field: user})
-
-#     return games
 def get_games(user, status=None, exclude_status=None, player_field=None):
     user_content_type = ContentType.objects.get_for_model(user)
 
-    print(f"user_content_type: {user_content_type}, user.id: {user.id}")
+    # print(f"user_content_type: {user_content_type}, user.id: {user.id}")
     games = Game.objects.filter((Q(player_one_content_type=user_content_type) & Q(player_one_object_id=user.id)) | (Q(player_two_content_type=user_content_type) & Q(player_two_object_id=user.id)))
-    print(f"games after initial filter: {games}")
+    # print(f"games after initial filter: {games}")
     if status:
         games = games.filter(status__in=status)
-        print(f"games after status filter: {games}")
+        # print(f"games after status filter: {games}")
     if exclude_status:
         games = games.exclude(status__in=exclude_status)
-        print(f"games after exclude_status filter: {games}")
+        # print(f"games after exclude_status filter: {games}")
     if player_field:
         games = games.filter(**{player_field: user})
-        print(f"games after player_field filter: {games}")
+        # print(f"games after player_field filter: {games}")
     return games

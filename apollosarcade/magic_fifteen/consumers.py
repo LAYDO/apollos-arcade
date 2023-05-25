@@ -67,11 +67,11 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                     game.p1_status = 'POST'
                     game.p2_status = 'POST'
                     if (play % 2 == 0):
-                        game.winner = game.player_two_id
-                        game.loser = game.player_one_id
+                        game.winner = game.player_two_object_id
+                        game.loser = game.player_one_object_id
                     else:
-                        game.winner = game.player_one_id
-                        game.loser = game.player_two_id
+                        game.winner = game.player_one_object_id
+                        game.loser = game.player_two_object_id
                     # game.ended = str(timezone.now())
                     game.ended = str(await sync_to_async(timezone.now)())
                     await self.save_game(game)

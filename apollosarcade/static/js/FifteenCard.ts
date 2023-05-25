@@ -12,7 +12,7 @@ export class FifteenCard {
     private passwordLabel: Element;
     private password: Element;
 
-    constructor(title: string, radio1: string, radio2: string, button: string, _element: Element, callback: Function, csrfToken: string) {
+    constructor(title: string, radio1: string, radio2: string, button: string, _element: Element, callback: Function, csrfToken: string, guest: boolean = true) {
         this.csrfToken = csrfToken;
         // Parent and card container, taking on apollos-container styling
         this.parentElement = _element;
@@ -78,7 +78,9 @@ export class FifteenCard {
         radCol2.append(this.radio2);
 
         radRow.append(radCol1);
-        radRow.append(radCol2);
+        if (button.toLowerCase() == 'join' || (button.toLowerCase() == 'create' && !guest)) {
+            radRow.append(radCol2);
+        }
         // Text option label
         this.textLabel = document.createElement('label');
         this.textLabel.setAttribute('for', `${button.toLowerCase()}TextOption`);
@@ -134,7 +136,7 @@ export class FifteenCard {
         this.cardForm.append(break1);
         this.cardForm.append(this.textLabel);
         this.cardForm.append(this.textOption);
-        if (button.toLowerCase() == 'join') {
+        if (button.toLowerCase() == 'join' && !guest) {
             this.cardForm.append(break1);
             this.cardForm.append(this.passwordLabel)
             this.cardForm.append(this.password);
