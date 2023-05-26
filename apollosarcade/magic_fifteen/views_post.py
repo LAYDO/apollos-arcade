@@ -1,10 +1,11 @@
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from .models import Game
 from .views import game_archival, get_games
-from apollosarcade.utils import get_player
+from apollosarcade.utils import get_player, get_player_by_content_type
 
 def post(request):
     current_user = get_player(request)
@@ -17,16 +18,20 @@ def post(request):
         game = Game.objects.get(game_id=games[0].game_id)
         if (game):
             if (game.round == 10 and game.winner == 0 and game.loser == 0):
-                winner = User.objects.get(id=game.player_one_id)
-                loser = User.objects.get(id=game.player_two_id)
+                winner = get_player_by_content_type(game.player_one_content_type, game.player_one_object_id)
+                loser = get_player_by_content_type(game.player_two_content_type, game.player_two_object_id)
             else:
-                winner = User.objects.get(id=game.winner)
-                loser = User.objects.get(id=game.loser)
+                if (game.winner == game.player_one_object_id):
+                    winner = get_player_by_content_type(game.player_one_content_type, game.winner)
+                    loser = get_player_by_content_type(game.player_two_content_type, game.loser)
+                else:
+                    winner = get_player_by_content_type(game.player_two_content_type, game.winner)
+                    loser = get_player_by_content_type(game.player_one_content_type, game.loser)
             post.update({
                 'id': game.game_id,
                 'privacy': game.privacy,
-                'player_one': game.player_one_id,
-                'player_two': game.player_two_id,
+                'player_one': game.player_one_object_id,
+                'player_two': game.player_two_object_id,
                 'winner_id': winner.id,
                 'loser_id': loser.id,
                 'winner': winner.username,
@@ -68,13 +73,16 @@ def post_rematch(request):
 
 def create_rematch(game, is_player_one):
     if game.winner == 0 and game.loser == 0:
-        new_player_id = game.player_one_id if is_player_one else game.player_two_id
-    elif game.winner == (game.player_one_id if is_player_one else game.player_two_id):
+        new_player_id = game.player_one_object_id if is_player_one else game.player_two_object_id
+        new_player_content_type = game.player_one_content_type if is_player_one else game.player_two_content_type
+    elif game.winner == (game.player_one_object_id if is_player_one else game.player_two_object_id):
         new_player_id = game.winner
+        new_player_content_type = game.player_one_content_type if is_player_one else game.player_two_content_type
     else:
         new_player_id = game.loser
+        new_player_content_type = game.player_one_content_type if is_player_one else game.player_two_content_type
 
-    new_player = User.objects.get(id=new_player_id)
+    new_player = get_player_by_content_type(new_player_content_type, new_player_id)
 
     rematch_game = Game(
         status='REMATCH',

@@ -25,3 +25,12 @@ def get_player_by_content_type(content_type, object_id):
             raise Exception('Player not found')
     except:
         raise Exception('Player not found')
+    
+def get_player_by_id(player_id):
+    try:
+        return User.objects.get(id=player_id)
+    except User.DoesNotExist:
+        try:
+            return Guest.objects.get(id=player_id)
+        except Guest.DoesNotExist:
+            raise Exception('Player not found')

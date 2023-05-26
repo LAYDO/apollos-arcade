@@ -5,7 +5,8 @@ from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from django.utils import timezone
 from django.apps import apps
-from django.contrib import messages
+# from django.contrib import messages
+from guest.models import Guest
 class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         Game = apps.get_model('magic_fifteen', 'Game')
@@ -213,5 +214,9 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     
     @database_sync_to_async
     def get_winner_name(self, game):
-        return User.objects.get(id=game.winner).username
+        user = User.objects.get(id=game.winner).username
+        if (user):
+            return user
+        else:
+            return Guest.objects.get(id=game.winner).username
 
