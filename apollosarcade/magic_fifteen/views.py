@@ -93,7 +93,7 @@ def game_start_continue(request):
         
 def player_active_lobby(request):
     current_user = get_player(request)
-    games = get_games(current_user, status=['READY'])
+    games = get_games(current_user, ['READY'])
     if len(games) == 1:
         return games[0].game_id
     else:
@@ -101,7 +101,7 @@ def player_active_lobby(request):
         
 def player_active_game(request):
     current_user = get_player(request)
-    games = get_games(current_user, status=['IN-GAME'])
+    games = get_games(current_user, ['IN-GAME'])
     if len(games) == 1:
         return games[0].game_id
     else:
