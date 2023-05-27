@@ -1,3 +1,5 @@
+import { apollosLocalMessage } from "./utils";
+
 export class FifteenCard {
     private csrfToken: string;
     private parentElement: Element;
@@ -28,7 +30,11 @@ export class FifteenCard {
         this.cardForm = document.createElement('form');
         this.cardForm.classList.add('mft-col');
         this.cardForm.setAttribute('action', button.toLowerCase());
-        this.cardForm.setAttribute('method', 'post');
+        // this.cardForm.setAttribute('method', 'post');
+        this.cardForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.submitForm();
+        });
 
         // Radio row
         let radRow = document.createElement('div');
@@ -180,6 +186,25 @@ export class FifteenCard {
         csrfInput.value = this.csrfToken;
 
         formElement.appendChild(csrfInput);
+    }
+
+    submitForm() {
+        const formData = new FormData(this.cardForm as HTMLFormElement);
+        fetch(this.cardForm.getAttribute('action')!, {
+            method: 'POST',
+            body: formData,
+        }).then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error);
+                });
+            }
+        }).catch(error => {
+            apollosLocalMessage(error.message, 'error');
+            document.getElementById('message_close')!.addEventListener('click', () => {
+                document.getElementById('messageModal')!.setAttribute('style', 'display: none;');
+            });
+        });
     }
 
 }

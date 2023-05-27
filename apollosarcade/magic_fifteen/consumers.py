@@ -1,5 +1,6 @@
 import json, traceback
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
@@ -214,9 +215,12 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     
     @database_sync_to_async
     def get_winner_name(self, game):
-        user = User.objects.get(id=game.winner).username
-        if (user):
-            return user
+        if (game.winner == game.player_one_object_id):
+            winner = game.player_one
+        else:
+            winner = game.player_two
+        if (str(ContentType.objects.get_for_model(winner)) == 'auth | user'):
+            return User.objects.get(id=game.winner).username
         else:
             return Guest.objects.get(id=game.winner).username
 
