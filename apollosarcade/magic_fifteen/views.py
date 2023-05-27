@@ -23,7 +23,7 @@ def magic_fifteen(request):
 
 def check_for_lobbies(request):
     current_user = get_player(request)
-    lobbies = get_games(current_user, status=['READY','IN-GAME','COMPLETED'],exclude_status=['ARCHIVE'])
+    lobbies = get_games(current_user,['LOBBY','READY','IN-GAME','COMPLETED'],exclude_status=['ARCHIVE'])
     # txt = '{} in {} lobbies'
     # print(txt.format(current_user.username,len(lobbies)))
     if (len(lobbies) >= 1):
