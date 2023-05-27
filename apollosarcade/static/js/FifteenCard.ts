@@ -199,6 +199,12 @@ export class FifteenCard {
                     throw new Error(data.error);
                 });
             }
+            return response.json();
+        }).then(data => {
+            console.log(data);
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
         }).catch(error => {
             apollosLocalMessage(error.message, 'error');
             document.getElementById('message_close')!.addEventListener('click', () => {

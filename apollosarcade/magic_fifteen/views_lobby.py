@@ -34,7 +34,8 @@ def create_lobby(request):
                     spaces=[0,0,0,0,0,0,0,0,0],
                 )
                 game.save()
-                return HttpResponseRedirect(f'/magic_fifteen/lobby/')
+                # return HttpResponseRedirect(f'/magic_fifteen/lobby/')
+                return JsonResponse({'redirect': '/magic_fifteen/lobby/'})
             
 def join_lobby(request):
     if request.method == 'POST':
@@ -58,13 +59,13 @@ def join_lobby(request):
                                 game.player_two = current_user
                             game.status = 'READY'
                             game.save()
-                            return HttpResponseRedirect(f'/magic_fifteen/lobby/')
                         elif(game.privacy == 'Private' and fClean['password'] == game.password):
+                            if game.has_players():
+                                game.status = 'READY'
                             if game.player_one== None:
                                 game.player_one = current_user
                             elif game.player_two == None:
                                 game.player_two = current_user
-                            game.status = 'READY'
                             game.save()
                         elif (game.privacy == 'Private' and fClean['password'] == ''):
                             raise LobbyError("This lobby is private, please enter the password")
@@ -82,7 +83,8 @@ def join_lobby(request):
                             game.player_two=current_user
                         game.status = 'READY'
                         game.save()
-                        return HttpResponseRedirect(f'/magic_fifteen/lobby/')
+                    # return HttpResponseRedirect(f'/magic_fifteen/lobby/')
+                    return JsonResponse({'redirect': '/magic_fifteen/lobby/'})
             except LobbyError as e:
                 return JsonResponse({'error': str(e)}, status=400)
 
@@ -108,6 +110,7 @@ def lobby(request):
                 'privacy': found[0].privacy,
                 'pw': found[0].password,
             })
+            return render(request, 'magic_fifteen_lobby.html', lobby)
         elif (len(found) == 1 and found[0].player_two == current_user):
             print(f'p2: {found[0]}')
             player1 = None
@@ -124,12 +127,12 @@ def lobby(request):
                 'privacy': found[0].privacy,
                 'pw': found[0].password,
             })
+            return render(request, 'magic_fifteen_lobby.html', lobby)
         else:
             raise LobbyError('Lobby not found!')
     except LobbyError as e:
         return JsonResponse({'error': str(e)}, status=400)
         
-    return render(request, 'magic_fifteen_lobby.html', lobby)
 
 def lobby_leave(request):
     if request.method == 'POST':
@@ -159,7 +162,9 @@ def lobby_leave(request):
                 else:
                     p.player_two=None
                     p.status='LOBBY'
-                p.save()
+            p.save()
+            if p.has_players() == False:
+                p.delete()
         except:
             raise Exception('Lobby not found!')
         return HttpResponseRedirect('/magic_fifteen')
