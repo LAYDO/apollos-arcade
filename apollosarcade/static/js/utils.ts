@@ -34,7 +34,7 @@ export function apollosServerMessage(message: string, type: string) {
 
 export function getCurrentUserId() {
     let appElement = document.getElementById('magic15_app');
-    let id = (appElement?.dataset.userId)?.toString();
+    let id = (appElement?.dataset.current)?.toString();
     if (id) {
         return parseInt(id);
     } else {

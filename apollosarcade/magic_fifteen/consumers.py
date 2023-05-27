@@ -1,11 +1,13 @@
 import json, traceback
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from django.utils import timezone
 from django.apps import apps
-from django.contrib import messages
+# from django.contrib import messages
+from guest.models import Guest
 class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         Game = apps.get_model('magic_fifteen', 'Game')
@@ -67,11 +69,11 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
                     game.p1_status = 'POST'
                     game.p2_status = 'POST'
                     if (play % 2 == 0):
-                        game.winner = game.player_two_id
-                        game.loser = game.player_one_id
+                        game.winner = game.player_two_object_id
+                        game.loser = game.player_one_object_id
                     else:
-                        game.winner = game.player_one_id
-                        game.loser = game.player_two_id
+                        game.winner = game.player_one_object_id
+                        game.loser = game.player_two_object_id
                     # game.ended = str(timezone.now())
                     game.ended = str(await sync_to_async(timezone.now)())
                     await self.save_game(game)
@@ -213,5 +215,12 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
     
     @database_sync_to_async
     def get_winner_name(self, game):
-        return User.objects.get(id=game.winner).username
+        if (game.winner == game.player_one_object_id):
+            winner = game.player_one
+        else:
+            winner = game.player_two
+        if (str(ContentType.objects.get_for_model(winner)) == 'auth | user'):
+            return User.objects.get(id=game.winner).username
+        else:
+            return Guest.objects.get(id=game.winner).username
 

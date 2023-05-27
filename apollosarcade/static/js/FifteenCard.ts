@@ -1,3 +1,5 @@
+import { apollosLocalMessage } from "./utils";
+
 export class FifteenCard {
     private csrfToken: string;
     private parentElement: Element;
@@ -12,7 +14,7 @@ export class FifteenCard {
     private passwordLabel: Element;
     private password: Element;
 
-    constructor(title: string, radio1: string, radio2: string, button: string, _element: Element, callback: Function, csrfToken: string) {
+    constructor(title: string, radio1: string, radio2: string, button: string, _element: Element, callback: Function, csrfToken: string, guest: boolean = true) {
         this.csrfToken = csrfToken;
         // Parent and card container, taking on apollos-container styling
         this.parentElement = _element;
@@ -28,7 +30,11 @@ export class FifteenCard {
         this.cardForm = document.createElement('form');
         this.cardForm.classList.add('mft-col');
         this.cardForm.setAttribute('action', button.toLowerCase());
-        this.cardForm.setAttribute('method', 'post');
+        // this.cardForm.setAttribute('method', 'post');
+        this.cardForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.submitForm();
+        });
 
         // Radio row
         let radRow = document.createElement('div');
@@ -78,7 +84,9 @@ export class FifteenCard {
         radCol2.append(this.radio2);
 
         radRow.append(radCol1);
-        radRow.append(radCol2);
+        if (button.toLowerCase() == 'join' || (button.toLowerCase() == 'create' && !guest)) {
+            radRow.append(radCol2);
+        }
         // Text option label
         this.textLabel = document.createElement('label');
         this.textLabel.setAttribute('for', `${button.toLowerCase()}TextOption`);
@@ -134,7 +142,7 @@ export class FifteenCard {
         this.cardForm.append(break1);
         this.cardForm.append(this.textLabel);
         this.cardForm.append(this.textOption);
-        if (button.toLowerCase() == 'join') {
+        if (button.toLowerCase() == 'join' && !guest) {
             this.cardForm.append(break1);
             this.cardForm.append(this.passwordLabel)
             this.cardForm.append(this.password);
@@ -178,6 +186,25 @@ export class FifteenCard {
         csrfInput.value = this.csrfToken;
 
         formElement.appendChild(csrfInput);
+    }
+
+    submitForm() {
+        const formData = new FormData(this.cardForm as HTMLFormElement);
+        fetch(this.cardForm.getAttribute('action')!, {
+            method: 'POST',
+            body: formData,
+        }).then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error);
+                });
+            }
+        }).catch(error => {
+            apollosLocalMessage(error.message, 'error');
+            document.getElementById('message_close')!.addEventListener('click', () => {
+                document.getElementById('messageModal')!.setAttribute('style', 'display: none;');
+            });
+        });
     }
 
 }

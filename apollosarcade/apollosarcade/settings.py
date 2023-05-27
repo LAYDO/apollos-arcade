@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("APOLLO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True # os.environ.get("DEBUG", "False") == "True"
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS",'127.0.0.1,localhost,*.apollosarcade.com,https://apollos-arcade-u3itp.ondigitalocean.app').split(',')
 
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'webpack_loader',
     'user_profiles',
     'magic_fifteen',
+    'guest',
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -86,6 +87,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apollosarcade.middleware.GuestMiddleware",
 ]
 
 ROOT_URLCONF = "apollosarcade.urls"
@@ -123,7 +125,7 @@ CHANNEL_LAYERS = {
 
 ASGI_APPLICATION = "apollosarcade.asgi.application"
 
-DEVELOPMENT_MODE = True # os.environ.get("DEVELOPMENT_MODE", "False") == "True"
+DEVELOPMENT_MODE = os.environ.get("DEVELOPMENT_MODE", "False") == "True"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -133,11 +135,11 @@ if DEVELOPMENT_MODE is True:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'apollosarcadedb',
-            'USER': 'apollosarcadedb',
-            'PASSWORD': os.environ.get("DATABASE_PASSWORD"),
-            'HOST': os.environ.get("DATABASE_HOST"),
-            'PORT': '25060'
+            'NAME': 'apollosarcadelocal',
+            'USER': 'laydo',
+            'PASSWORD': os.environ.get("LOCAL_DB_PW"),
+            'HOST': 'localhost',
+            'PORT': '5432'
         }
     }
 elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':

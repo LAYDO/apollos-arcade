@@ -9,14 +9,14 @@
 <div id="context-data" style="display:none;" data-spaces="{{ spaces|safe }}" data-game-id="{{ id }}"
     data-round="{{ round }}" data-player1="{{ player1|default:'Player One' }}"
     data-player2="{{ player2|default:'Player Two' }}" data-plays="{{ plays|safe }}" data-p1="{{ p1 }}"
-    data-p2="{{ p2 }}" data-privacy="{{ privacy }}" data-user="{{ user.id }}">
+    data-p2="{{ p2 }}" data-privacy="{{ privacy }}">
 </div>
-{% if round|divisibleby:2 and user.id == p2 %}
-<div id="magic15_app" class="apollos-container apollos-app" data-user-id="{{ user.id }}">
-{% elif not round|divisibleby:2 and user.id == p1 %}
-<div id="magic15_app" class="apollos-container apollos-app" data-user-id="{{ user.id }}">
+{% if round|divisibleby:2 and current == p2 %}
+<div id="magic15_app" class="apollos-container apollos-app" data-current="{{ current }}">
+{% elif not round|divisibleby:2 and current == p1 %}
+<div id="magic15_app" class="apollos-container apollos-app" data-current="{{ current }}">
 {% else %}
-<div id="magic15_app" class="apollos-container apollos-app turn-disable" data-user-id="{{ user.id }}">
+<div id="magic15_app" class="apollos-container apollos-app turn-disable" data-current="{{ current }}">
 {% endif %}
     <div id="magic15_board" class="ttt-board"></div>
 </div>

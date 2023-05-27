@@ -52,7 +52,6 @@ export class MagicFifteenBoard {
         const p1 = contextData?.dataset.p1;
         const p2 = contextData?.dataset.p2;
         const privacy = contextData?.dataset.privacy;
-        const user = contextData?.dataset.user;
 
         if (!this.isMobile) {
             this.board.classList.add('ttt-row');
@@ -250,8 +249,6 @@ export class MagicFifteenBoard {
     }
 
     public takeTurn(data: any, callback: Function) {
-        // Migrate onmessage type 'move' from magic15_game.ts to here
-
         // Update the current round
         this.round = data['round'];
         this.currentRound.textContent = `Round: ${this.round}`;

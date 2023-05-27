@@ -1,14 +1,14 @@
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
 from .models import Game
 from .views import game_archival, get_games
+from apollosarcade.utils import get_player, get_player_by_content_type
 
-@login_required
 def post(request):
-    current_user = request.user
+    current_user = get_player(request)
     post = {}
     lobbies = get_games(current_user, ['LOBBY','REMATCH'], [])
     if len(lobbies) > 0:
@@ -18,16 +18,20 @@ def post(request):
         game = Game.objects.get(game_id=games[0].game_id)
         if (game):
             if (game.round == 10 and game.winner == 0 and game.loser == 0):
-                winner = User.objects.get(id=game.player_one_id)
-                loser = User.objects.get(id=game.player_two_id)
+                winner = get_player_by_content_type(game.player_one_content_type, game.player_one_object_id)
+                loser = get_player_by_content_type(game.player_two_content_type, game.player_two_object_id)
             else:
-                winner = User.objects.get(id=game.winner)
-                loser = User.objects.get(id=game.loser)
+                if (game.winner == game.player_one_object_id):
+                    winner = get_player_by_content_type(game.player_one_content_type, game.winner)
+                    loser = get_player_by_content_type(game.player_two_content_type, game.loser)
+                else:
+                    winner = get_player_by_content_type(game.player_two_content_type, game.winner)
+                    loser = get_player_by_content_type(game.player_one_content_type, game.loser)
             post.update({
                 'id': game.game_id,
                 'privacy': game.privacy,
-                'player_one': game.player_one_id,
-                'player_two': game.player_two_id,
+                'player_one': game.player_one_object_id,
+                'player_two': game.player_two_object_id,
                 'winner_id': winner.id,
                 'loser_id': loser.id,
                 'winner': winner.username,
@@ -40,12 +44,11 @@ def post(request):
     else:
         return HttpResponseRedirect(f'/magic_fifteen/')
 
-@login_required
 def post_rematch(request):
     if request.method == 'POST':
-        current_user = request.user
-        p1 = Game.objects.filter(player_one=current_user, status='COMPLETED').first()
-        p2 = Game.objects.filter(player_two=current_user, status='COMPLETED').first()
+        current_user = get_player(request)
+        p1 = Game.objects.filter(player_one_object_id=current_user.id, status='COMPLETED').first()
+        p2 = Game.objects.filter(player_two_object_id=current_user.id, status='COMPLETED').first()
 
         game_to_rematch = p1 or p2
 
@@ -60,23 +63,29 @@ def post_rematch(request):
                 create_rematch(game_to_rematch, p1)
                 return HttpResponseRedirect('/magic_fifteen/lobby')
             elif getattr(game_to_rematch, other_player_status) == 'LEFT':
-                create_new_lobby_game(game_to_rematch, current_user)
+                create_new_lobby_game(current_user, game_to_rematch)
                 return HttpResponseRedirect('/magic_fifteen/lobby')
             elif getattr(game_to_rematch, other_player_status) == 'REMATCH':
                 handle_existing_rematch(game_to_rematch, p1)
                 return HttpResponseRedirect('/magic_fifteen/lobby')
             else:
                 return HttpResponseRedirect('/magic_fifteen/lobby')
+        else:
+            create_new_lobby_game(current_user)
+            return HttpResponseRedirect('/magic_fifteen/lobby')
 
 def create_rematch(game, is_player_one):
     if game.winner == 0 and game.loser == 0:
-        new_player_id = game.player_one_id if is_player_one else game.player_two_id
-    elif game.winner == (game.player_one_id if is_player_one else game.player_two_id):
+        new_player_id = game.player_one_object_id if is_player_one else game.player_two_object_id
+        new_player_content_type = game.player_one_content_type if is_player_one else game.player_two_content_type
+    elif game.winner == (game.player_one_object_id if is_player_one else game.player_two_object_id):
         new_player_id = game.winner
+        new_player_content_type = game.player_one_content_type if is_player_one else game.player_two_content_type
     else:
         new_player_id = game.loser
+        new_player_content_type = game.player_one_content_type if is_player_one else game.player_two_content_type
 
-    new_player = User.objects.get(id=new_player_id)
+    new_player = get_player_by_content_type(new_player_content_type, new_player_id)
 
     rematch_game = Game(
         status='REMATCH',
@@ -93,9 +102,8 @@ def create_rematch(game, is_player_one):
         spaces=[0, 0, 0, 0, 0, 0, 0, 0, 0],
     )
     rematch_game.save()
-    # return HttpResponseRedirect('/magic_fifteen/lobby')
 
-def create_new_lobby_game(game, cu):
+def create_new_lobby_game(cu, game = None):
     new_game = Game(
         status='LOBBY',
         player_one=cu,
@@ -110,13 +118,12 @@ def create_new_lobby_game(game, cu):
         spaces=[0,0,0,0,0,0,0,0,0],
     )
     new_game.save()
-    game_archival(game.game_id)
-    # return HttpResponseRedirect('/magic_fifteen/lobby')
-
+    if game and game != None:
+        game_archival(game.game_id)
 
 def handle_existing_rematch(game, is_player_one):
-    rematch = Game.objects.filter(player_one=(game.player_two if is_player_one else game.player_one), status='REMATCH').first()
-    rematch = rematch or Game.objects.filter(player_two=(game.player_two if is_player_one else game.player_one), status='REMATCH').first()
+    rematch = Game.objects.filter(player_one_object_id=(game.player_two_object_id if is_player_one else game.player_one_object_id), status='REMATCH').first()
+    rematch = rematch or Game.objects.filter(player_two_object_id=(game.player_two_object_id if is_player_one else game.player_one_object_id), status='REMATCH').first()
     if rematch:
         game_archival(game.game_id)
         if rematch.player_one is not None:
@@ -127,14 +134,12 @@ def handle_existing_rematch(game, is_player_one):
             rematch.p1_status = 'REMATCH'
         rematch.status = 'READY'
         rematch.save()
-        # return HttpResponseRedirect('/magic_fifteen/lobby')
     
-@login_required
 def post_leave(request):
     if request.method == 'POST':
-        current_user = request.user
-        player_one_game = Game.objects.filter(player_one=current_user, status='COMPLETED').first()
-        player_two_game = Game.objects.filter(player_two=current_user, status='COMPLETED').first()
+        current_user = get_player(request)
+        player_one_game = Game.objects.filter(player_one_object_id=current_user.id, status='COMPLETED').first()
+        player_two_game = Game.objects.filter(player_two_object_id=current_user.id, status='COMPLETED').first()
 
         if player_one_game:
             handle_leave(player_one_game, True)
@@ -150,9 +155,9 @@ def handle_leave(game, is_player_one):
     game.save()
 
     if is_player_one and game.p2_status == 'REMATCH' or not is_player_one and game.p1_status == 'REMATCH':
-        rematch = Game.objects.filter(player_one=(game.player_two if is_player_one else game.player_one), status='REMATCH').first()
+        rematch = Game.objects.filter(player_one_object_id=(game.player_two_object_id if is_player_one else game.player_one_object_id), status='REMATCH').first()
         if rematch:
             rematch.status='LOBBY'
             rematch.save()
-    if game.p1_status in ['LEFT', 'REMATCH'] and game.p2_status in ['LEFT', 'REMATCH']:
-        game_archival(game.game_id)
+    # if game.p1_status in ['LEFT', 'REMATCH'] and game.p2_status in ['LEFT', 'REMATCH']:
+    game_archival(game.game_id)

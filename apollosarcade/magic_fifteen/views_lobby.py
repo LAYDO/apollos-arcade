@@ -1,25 +1,23 @@
-from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
+from django.contrib.contenttypes.models import ContentType
+
+from apollosarcade.utils import get_player
+from apollosarcade.error_handler import LobbyError
+from guest.models import Guest
 
 from .views import check_for_lobbies, get_games
-
 from .models import Game
 from .forms import CreateLobbyForm, JoinLobbyForm
 
-
-
-
-@login_required
 def create_lobby(request):
     if request.method == 'POST':
         if (check_for_lobbies(request)):
             return
         else:
             form = CreateLobbyForm(request.POST)
-            current_user = request.user
+            current_user = get_player(request)
             if form.is_valid():
                 f = form.cleaned_data
                 print(f['create_option'])
@@ -38,19 +36,46 @@ def create_lobby(request):
                 game.save()
                 return HttpResponseRedirect(f'/magic_fifteen/lobby/')
             
-@login_required
 def join_lobby(request):
     if request.method == 'POST':
         if (check_for_lobbies(request) > 0):
             return
         else:
-            form = JoinLobbyForm(request.POST)
-            current_user = request.user
-            if form.is_valid():
-                f = form.cleaned_data
-                if (f['join'] == 'Lobby Number'):
-                    game = Game.objects.get(game_id=f['join_option'])
-                    if game.privacy == 'Public' or (game.privacy == 'Private' and game.password == f['password']) or game.status != 'REMATCH':
+            try:
+                form = JoinLobbyForm(request.POST)
+                current_user = get_player(request)
+                if form.is_valid():
+                    fClean = form.cleaned_data
+                    print(f"Password: {fClean['password']}")
+                    if (fClean['join'] == 'Lobby Number'):
+                        game = Game.objects.get(game_id=fClean['join_option'])
+                        if game.privacy == 'Public':
+                            if game.status == 'REMATCH':
+                                raise LobbyError("This lobby is currently in a rematch, please join another lobby")
+                            if game.player_one== None:
+                                game.player_one = current_user
+                            elif game.player_two == None:
+                                game.player_two = current_user
+                            game.status = 'READY'
+                            game.save()
+                            return HttpResponseRedirect(f'/magic_fifteen/lobby/')
+                        elif(game.privacy == 'Private' and fClean['password'] == game.password):
+                            if game.player_one== None:
+                                game.player_one = current_user
+                            elif game.player_two == None:
+                                game.player_two = current_user
+                            game.status = 'READY'
+                            game.save()
+                        elif (game.privacy == 'Private' and fClean['password'] == ''):
+                            raise LobbyError("This lobby is private, please enter the password")
+                        else:
+                            raise LobbyError("Incorrect password for the lobby you are trying to join")
+                    else:
+                        games = Game.objects.filter(status__in=['LOBBY']).exclude(status__in=['REMATCH'])
+                        if (games):
+                            game = Game.objects.get(game_id=games[0].game_id)
+                        else:
+                            raise LobbyError('No lobbies found')
                         if game.player_one == None:
                             game.player_one=current_user
                         elif game.player_two == None:
@@ -58,23 +83,11 @@ def join_lobby(request):
                         game.status = 'READY'
                         game.save()
                         return HttpResponseRedirect(f'/magic_fifteen/lobby/')
-                    else:
-                        messages.error(request, "Incorrect password for the lobby you are trying to join")
-                        return HttpResponseRedirect(f'/magic_fifteen/start/')
-                else:
-                    games = get_games(current_user, ['LOBBY'], ['REMATCH'])
-                    game = Game.objects.get(game_id=games[0]['game_id'])
-                    if game.player_one == None:
-                        game.player_one=current_user
-                    elif game.player_two == None:
-                        game.player_two=current_user
-                    game.status = 'READY'
-                    game.save()
-                    return HttpResponseRedirect(f'/magic_fifteen/lobby/')
+            except LobbyError as e:
+                return JsonResponse({'error': str(e)}, status=400)
 
-@login_required
 def lobby(request):
-    current_user = request.user
+    current_user = get_player(request)
     print(f'Current user id: {current_user.id}')
     lobby = {}
     try:
@@ -83,7 +96,10 @@ def lobby(request):
             print(f'p1: {found[0]}')
             player2 = None
             if (found[0].player_two != None):
-                player2 = User.objects.get(id=found[0].player_two_id).username
+                if (str(ContentType.objects.get_for_model(found[0].player_two)).lower() == 'auth | user'):
+                    player2 = User.objects.get(id=found[0].player_two_object_id).username
+                else:
+                    player2 = Guest.objects.get(id=found[0].player_two_object_id).username            
             lobby.update({
                 'id': found[0].game_id,
                 'status': found[0].status,
@@ -96,7 +112,10 @@ def lobby(request):
             print(f'p2: {found[0]}')
             player1 = None
             if (found[0].player_one != None):
-                player1 = User.objects.get(id=found[0].player_one_id).username
+                if (str(ContentType.objects.get_for_model(found[0].player_one)).lower() == 'auth | user'):
+                    player1 = User.objects.get(id=found[0].player_one_object_id).username
+                else:
+                    player1 = Guest.objects.get(id=found[0].player_one_object_id).username
             lobby.update({
                 'id': found[0].game_id,
                 'status': found[0].status,
@@ -105,15 +124,16 @@ def lobby(request):
                 'privacy': found[0].privacy,
                 'pw': found[0].password,
             })
-    except:
-        raise Exception('Lobby not found!')
+        else:
+            raise LobbyError('Lobby not found!')
+    except LobbyError as e:
+        return JsonResponse({'error': str(e)}, status=400)
         
     return render(request, 'magic_fifteen_lobby.html', lobby)
 
-@login_required
 def lobby_leave(request):
     if request.method == 'POST':
-        current_user = request.user
+        current_user = get_player(request)
         try:
             found = get_games(current_user, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
             if (len(found) == 1 and found[0].player_one == current_user):
