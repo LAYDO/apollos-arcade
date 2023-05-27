@@ -60,6 +60,9 @@ class Game(models.Model):
 
     def get_winning_array(self):
         return self.winningArrays
+    
+    def has_players(self):
+        return self.player_one is not None and self.player_two is not None
 
 class GameInstruction(models.Model):
     title = models.CharField(max_length=50, unique=True)
