@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'user_profiles',
     'magic_fifteen',
     'guest',
+    'local',
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

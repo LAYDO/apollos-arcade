@@ -5,9 +5,9 @@
 {% endblock %}
 {% block apollos_content_1 %}
 <div class="apollos-container apollos-app">
-    <div class="mft-col">
+    <div class="apollos-flex-col">
         <div class="mft-row mft-title">{{ privacy }} Lobby #{{ id }}</div>
-        <div class="mft-col">
+        <div class="apollos-flex-col">
             <div class="mft-row-b">
                 <div class="mft-margin-sb">
                     Player 1: {{ p1 }}
@@ -20,7 +20,7 @@
             </div>
         </div>
         <div id="lobbyOptions" class="mft-row">
-                <form method="post" class="mft-col" action="start">
+                <form method="post" class="apollos-flex-col" action="start">
                     {% csrf_token %}
                     {% if status == 'READY'%}
                     <input class="mft-button" type="submit" value="START"></input>
@@ -28,7 +28,7 @@
                     <input class="mft-button" type="submit" value="CONTINUE"></input>
                     {% endif %}
                 </form>
-                <form method="post" class="mft-col" action="leave">
+                <form method="post" class="apollos-flex-col" action="leave">
                     {% csrf_token %}
                     <input class="mft-button" type="submit" value="LEAVE"></input>
                 </form>

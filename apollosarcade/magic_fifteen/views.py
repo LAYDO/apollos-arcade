@@ -1,18 +1,16 @@
-from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.http.response import JsonResponse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django import template
 from django.db.models import Q
 
 from .models import Game, GameInstruction
 from .encoders import QuillFieldEncoder
 from apollosarcade.utils import get_player
+from apollosarcade.error_handler import LobbyError
 from guest.models import Guest
-
-import json
 
 register = template.Library()
 # Create your views here.
@@ -24,8 +22,6 @@ def magic_fifteen(request):
 def check_for_lobbies(request):
     current_user = get_player(request)
     lobbies = get_games(current_user,['LOBBY','READY','IN-GAME','COMPLETED'],exclude_status=['ARCHIVE'])
-    # txt = '{} in {} lobbies'
-    # print(txt.format(current_user.username,len(lobbies)))
     if (len(lobbies) >= 1):
         for lobby in lobbies:
             if lobby.status == 'COMPLETED' and ((lobby.p1_status == 'POST' and lobby.p2_status == 'POST') or (lobby.p1_status == 'REMATCH' and lobby.p2_status == 'POST') or (lobby.p1_status == 'POST' and lobby.p2_status == 'REMATCH')):
@@ -38,8 +34,6 @@ def check_for_lobbies(request):
         return 0
 
 def check_for_match(request):
-    if not request.user.is_authenticated:
-        print('User not authenticated')
     url = 'magic_fifteen/'
     match (check_for_lobbies(request)):
         case 2:
@@ -68,44 +62,24 @@ def start(request):
     return render(request, 'magic_fifteen_start.html', context)
 
 def game_start_continue(request):
-    if request.method == 'POST':
-        try:
-            lobbyNum = player_active_lobby(request)
-            lobby = Game.objects.get(game_id=lobbyNum)
-        except Game.DoesNotExist:
-            lobby = None
-        if lobby:
-            print(('STARTING GAME #{}').format(lobby.game_id))
-            lobby.status='IN-GAME'
-            lobby.p1_status='IN-GAME'
-            lobby.p2_status='IN-GAME'
-            lobby.round=1
-            lobby.save()
-            return HttpResponseRedirect(f'/magic_fifteen/game/{lobbyNum}')
-        try:
-            gameNum = player_active_game(request)
-            game = Game.objects.get(game_id=gameNum)
-        except Game.DoesNotExist:
-            game = None
-        if game:
-            print(('CONTINUING GAME #{}').format(game.game_id))
-            return HttpResponseRedirect(f'/magic_fifteen/game/{game.game_id}')
-        
-def player_active_lobby(request):
+    # See if the player is already in a lobby
     current_user = get_player(request)
-    games = get_games(current_user, ['READY'])
-    if len(games) == 1:
-        return games[0].game_id
-    else:
-        return 0
-        
-def player_active_game(request):
-    current_user = get_player(request)
-    games = get_games(current_user, ['IN-GAME'])
-    if len(games) == 1:
-        return games[0].game_id
-    else:
-        return 0
+    try:
+        games = get_games(current_user, ['READY','LOBBY','REMATCH'])
+        if len(games) == 1:
+            # If so, redirect them to the lobby
+            return HttpResponseRedirect(f'/magic_fifteen/lobby/{games[0].game_id}')
+
+        # See if the player is already in a game
+        games = get_games(current_user, ['IN-GAME'])
+        if len(games) == 1:
+            # If so, redirect them to the game
+            return HttpResponseRedirect(f'/magic_fifteen/game/{games[0].game_id}')
+    
+        # Otherwise, they are not in a game or a lobby
+        raise LobbyError('You are not in a game lobby or active game')
+    except LobbyError as e:
+        return JsonResponse({'error': str(e)}, status=400)
     
 def game(request, game_id):
     current_user = get_player(request)
@@ -177,11 +151,6 @@ def game_archival(id):
     to_be_archived.status = 'ARCHIVE'
     to_be_archived.save()
 
-# # Custom filter for front-end to cut out zeroes on board used in spaces attribute
-# @register.filter(name='cut')
-# def cut(value, arg):
-#     return value.replace(arg, '')
-
 def how_to_play(request):
     how_to_play = {}
     instructions = GameInstruction.objects.get(id=1)
@@ -190,9 +159,6 @@ def how_to_play(request):
     quill_field_data = how_to_play["instructions"].html
     how_to_play["instructions"] = quill_field_data
     return JsonResponse(how_to_play, safe=False, encoder=QuillFieldEncoder)
-
-def local(request):
-    return render(request, 'ttt.html')
 
 def get_games(user, status=None, exclude_status=None, player_field=None):
     user_content_type = ContentType.objects.get_for_model(user)

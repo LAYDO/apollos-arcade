@@ -45,14 +45,14 @@ export class MagicFifteenPost {
         if (!this.isMobile) {
             this.app.classList.add('mft-row');
         } else {
-            this.app.classList.add('mft-col');
+            this.app.classList.add('apollos-flex-col');
         }
 
         let boardContainer = document.createElement('div');
-        boardContainer.classList.add('mft-col');
+        boardContainer.classList.add('apollos-flex-col');
 
         let buttonContainer = document.createElement('div');
-        buttonContainer.classList.add('mft-col');
+        buttonContainer.classList.add('apollos-flex-col');
 
         this.gameTitle = document.createElement('div');
         this.gameTitle.classList.add('mft-row');
@@ -61,7 +61,7 @@ export class MagicFifteenPost {
         this.gameTitle.textContent = `${privacy} Post Game #${gameId}`;
 
         let outcomeContainer = document.createElement('div');
-        outcomeContainer.classList.add('mft-col');
+        outcomeContainer.classList.add('apollos-flex-col');
 
         this.winnerElement = document.createElement('div');
         this.winnerElement.classList.add('mft-row-b');
@@ -128,7 +128,7 @@ export class MagicFifteenPost {
         lobbyOptions.id = 'lobbyOptions';
 
         let rematchForm = document.createElement('form');
-        rematchForm.classList.add('mft-col');
+        rematchForm.classList.add('apollos-flex-col');
         rematchForm.id = 'rematchForm';
         rematchForm.setAttribute('action', 'rematch');
         rematchForm.setAttribute('method', 'post');
@@ -139,7 +139,7 @@ export class MagicFifteenPost {
         rematchButton.setAttribute('value', 'REMATCH');
 
         let leaveForm = document.createElement('form');
-        leaveForm.classList.add('mft-col');
+        leaveForm.classList.add('apollos-flex-col');
         leaveForm.id = 'leaveForm';
         leaveForm.setAttribute('action', 'leave');
         leaveForm.setAttribute('method', 'post');

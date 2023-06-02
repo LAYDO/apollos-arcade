@@ -19,7 +19,7 @@ function buildCard() {
 
         let front = document.createElement('div');
         front.classList.add('mft-card-front');
-        front.classList.add('mft-col');
+        front.classList.add('apollos-flex-col');
         front.id = 'mft_front';
         // Create elements for front
         let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

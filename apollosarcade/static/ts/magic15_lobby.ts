@@ -5,7 +5,7 @@ let lobbyRefeshButton = document.getElementById('lobbyRefresh');
 if (!isMobile) {
     lobbyOptions?.classList.add('mft-row');
 } else {
-    lobbyOptions?.classList.add('mft-col');
+    lobbyOptions?.classList.add('apollos-flex-col');
 }
 
 lobbyRefeshButton?.addEventListener('click', () => {

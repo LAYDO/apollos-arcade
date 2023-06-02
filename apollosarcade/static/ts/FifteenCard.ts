@@ -28,7 +28,7 @@ export class FifteenCard {
 
         // Form
         this.cardForm = document.createElement('form');
-        this.cardForm.classList.add('mft-col');
+        this.cardForm.classList.add('apollos-flex-col');
         this.cardForm.setAttribute('action', button.toLowerCase());
         // this.cardForm.setAttribute('method', 'post');
         this.cardForm.addEventListener('submit', (e) => {
@@ -42,11 +42,11 @@ export class FifteenCard {
 
         // Radio columns
         let radCol1 = document.createElement('div');
-        radCol1.classList.add('mft-col');
+        radCol1.classList.add('apollos-flex-col');
         radCol1.setAttribute('style', 'margin-right:1rem;'); // For a little space between the lads
 
         let radCol2 = document.createElement('div');
-        radCol2.classList.add('mft-col');
+        radCol2.classList.add('apollos-flex-col');
 
         // Radio options
         this.radio1 = document.createElement('input');

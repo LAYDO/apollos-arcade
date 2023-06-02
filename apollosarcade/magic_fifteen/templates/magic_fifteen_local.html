@@ -1,14 +1,9 @@
-{% extends "app.html" %} {% load static %}
+{% extends "local.html" %} {% load static %}
 {% block page_head %}
 <title>Magic 15</title>
 <link rel="stylesheet" href="{% static 'css/ttt.css' %}" />
 {% endblock %}
-{% block apollos_content_1 %}
-<div class="apollos-container apollos-app">
-    <div class="container-title">Magic 15 (Local)</div>
-    <div class="ttt-board" id="tttBoard"></div>
-</div>
-{% endblock %}
+{% block game_title %}Magic 15 (Local){% endblock %}
 {% block page_scripts %}
 <script type="text/javascript" src="{% static 'magic15_local.bundle.js' %}"></script>
 {% endblock %}

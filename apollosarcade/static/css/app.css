@@ -51,7 +51,9 @@ body {
     text-align: left;
     padding-left: 1rem;
     padding-top: 0.5rem;
+    margin-bottom: 3rem;
     color: var(--font-faded);
+    font-size: 1.5rem;
 }
 
 .apollos-overlay {

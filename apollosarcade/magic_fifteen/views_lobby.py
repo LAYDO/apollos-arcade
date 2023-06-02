@@ -34,7 +34,6 @@ def create_lobby(request):
                     spaces=[0,0,0,0,0,0,0,0,0],
                 )
                 game.save()
-                # return HttpResponseRedirect(f'/magic_fifteen/lobby/')
                 return JsonResponse({'redirect': '/magic_fifteen/lobby/'})
             
 def join_lobby(request):
@@ -83,19 +82,18 @@ def join_lobby(request):
                             game.player_two=current_user
                         game.status = 'READY'
                         game.save()
-                    # return HttpResponseRedirect(f'/magic_fifteen/lobby/')
                     return JsonResponse({'redirect': '/magic_fifteen/lobby/'})
             except LobbyError as e:
                 return JsonResponse({'error': str(e)}, status=400)
 
 def lobby(request):
     current_user = get_player(request)
-    print(f'Current user id: {current_user.id}')
+    # print(f'Current user id: {current_user.id}')
     lobby = {}
     try:
         found = get_games(current_user, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
         if (len(found) == 1 and found[0].player_one == current_user):
-            print(f'p1: {found[0]}')
+            # print(f'p1: {found[0]}')
             player2 = None
             if (found[0].player_two != None):
                 if (str(ContentType.objects.get_for_model(found[0].player_two)).lower() == 'auth | user'):
@@ -112,7 +110,7 @@ def lobby(request):
             })
             return render(request, 'magic_fifteen_lobby.html', lobby)
         elif (len(found) == 1 and found[0].player_two == current_user):
-            print(f'p2: {found[0]}')
+            # print(f'p2: {found[0]}')
             player1 = None
             if (found[0].player_one != None):
                 if (str(ContentType.objects.get_for_model(found[0].player_one)).lower() == 'auth | user'):
@@ -162,9 +160,11 @@ def lobby_leave(request):
                 else:
                     p.player_two=None
                     p.status='LOBBY'
+            else:
+                raise LobbyError('Lobby not found!')
             p.save()
             if p.has_players() == False:
                 p.delete()
-        except:
-            raise Exception('Lobby not found!')
+        except LobbyError as e:
+            return JsonResponse({'error': str(e)}, status=400)
         return HttpResponseRedirect('/magic_fifteen')

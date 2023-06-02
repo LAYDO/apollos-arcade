@@ -1,49 +1,25 @@
-export class TicTacToe {
-    public player1Turn: boolean;
-    public player2Turn: boolean;
+import { LocalGame } from './LocalGame';
+export class TicTacToe extends LocalGame {
 
-    private board: Element;
+
     private squares: Element;
-    private playerNumbers: Element;
     public numbersOdd: Element;
     public numbersEven: Element;
-    public titleEven: Element;
-    public titleOdd: Element;
-    public playerEven: Element;
-    public playerOdd: Element;
-    public playerArea: Element;
 
-    public round: number;
     public plays: Array<number>;
 
-    private isMobile: boolean;
+    private selectedElement: string;
+    private winningArrays: Array<Array<number>>;
 
-    public selectedElement: string;
-
-    public winningArrays: Array<Array<number>>;
-
-    public restartButton: Element;
 
     constructor(board: HTMLElement) {
-        this.round = 0;
-        this.player1Turn = true;
-        this.player2Turn = false;
-        this.board = board;
+        super(board);
+
         this.plays = [];
-        this.isMobile = window.matchMedia("only screen and (max-width: 48rem)").matches;
         this.selectedElement = '';
 
-        if (!this.isMobile) {
-            this.board.classList.add('ttt-row');
-        }
         this.squares = document.createElement('div');
         this.squares.classList.add('ttt-col');
-
-        this.playerArea = document.createElement('div');
-        this.playerArea.classList.add('ttt-col-b');
-
-        this.playerNumbers = document.createElement('div');
-        this.playerNumbers.classList.add('ttt-row-b');
 
         this.numbersOdd = document.createElement('div');
         this.numbersOdd.classList.add('ttt-row-numbers');
@@ -118,35 +94,15 @@ export class TicTacToe {
             }
         }
 
-        // Titles
-        this.titleOdd = document.createElement('div');
-        this.titleOdd.classList.add('ttt-player');
-        this.titleOdd.textContent = 'Player 1';
-
-        this.titleEven = document.createElement('div');
-        this.titleEven.classList.add('ttt-player');
-        this.titleEven.textContent = 'Player 2';
+        // Append squares and numbers to board
+        this.boardArea.append(this.squares);
+        this.playerOneContent.append(this.numbersOdd);
+        this.playerTwoContent.append(this.numbersEven);
 
 
-        // Player Containers
-        this.playerOdd = document.createElement('div');
-        this.playerOdd.classList.add('ttt-col-top');
-        this.playerOdd.append(this.titleOdd);
-        this.playerOdd.append(this.numbersOdd);
-
-        this.playerEven = document.createElement('div');
-        this.playerEven.classList.add('ttt-col-top');
-        this.playerEven.append(this.titleEven);
-        this.playerEven.append(this.numbersEven);
-
-        this.playerNumbers.append(this.playerOdd);
-        this.playerNumbers.append(this.playerEven);
-
-        this.playerArea.append(this.playerNumbers);
-
-        // Append squares and numbers
-        this.board.append(this.squares);
-        this.board.append(this.playerArea);
+        this.restartButton.addEventListener('click', () => {
+            new TicTacToe(this.board);
+        });
 
         this.winningArrays = [
             [0, 1, 2],
@@ -159,15 +115,51 @@ export class TicTacToe {
             [2, 4, 6]
         ];
 
-        let row: Element = document.createElement('div');
-        row.classList.add('ttt-row');
+        window.requestAnimationFrame(this.loop.bind(this));
+    }
 
-        this.restartButton = document.createElement('div');
-        this.restartButton.classList.add('ttt-restart');
-        this.restartButton.textContent = 'Restart';
+    protected update(progress: number): void {
+        for (let s = 0; s < 9; s++) {
+            let square = document.getElementById(`square${s}`);
+            square?.addEventListener('click', () => {
+                if (this.selectedElement != null || this.selectedElement != "") {
+                    let t = document.getElementById(`text${parseInt(this.selectedElement) - 1}`);
+                    if (t) {
+                        t.classList.remove('selected');
+                        square?.append(t);
+                        this.plays[s] = parseInt(this.selectedElement);
+                        this.selectedElement = '';
+                        this.round++;
+                        this.player1Turn = !this.player1Turn;
+                        this.player2Turn = !this.player2Turn;
+                        for (let n of this.numbersOdd.children) {
+                            n.classList.toggle('disabled');
+                        }
+                        for (let n of this.numbersEven.children) {
+                            n.classList.toggle('disabled');
+                        }
+                    }
+                }
+            })
+        }
+    }
 
-        row.append(this.restartButton);
-        this.playerArea.append(row);
+    protected checkWin(): void {
+        if (this.round < 9) {
+            // Run thru winning arrays to check win
+            for (let i of this.winningArrays) {
+                let temp: Array<number> = [];
+                for (let j of i) {
+                    temp.push(this.plays[j]);
+                }
+                if (temp.reduce((a, b) => a + b, 0) == 15) {
+                    this.drawEnd(2);
+                }
+            }
+        } else {
+            // Catch for tie
+            this.drawEnd(1);
+        }
     }
 
     drawEnd(n: number) {
@@ -176,16 +168,16 @@ export class TicTacToe {
 
         switch (n) {
             case 1:
-                this.playerOdd.innerHTML = '';
-                this.playerEven.innerHTML = '';
-                this.playerOdd.textContent = 'TIE';
+                this.playerOne.innerHTML = '';
+                this.playerTwo.innerHTML = '';
+                this.playerOne.textContent = 'TIE';
                 break;
             case 2:
                 if (!this.player1Turn) {
-                    this.playerEven.innerHTML = '';
+                    this.playerTwo.innerHTML = '';
                     this.numbersOdd.innerHTML = 'WINS';
                 } else {
-                    this.playerOdd.innerHTML = '';
+                    this.playerOne.innerHTML = '';
                     this.numbersEven.innerHTML = 'WINS';
                 }
                 break;
