@@ -132,7 +132,6 @@ body {
     margin-top: 4rem;
 }
 
-.apollos-title,
 .apollos-bottom {
     display: flex;
     flex-direction: column;
@@ -144,7 +143,6 @@ body {
     /* border: 0.125rem solid green; */
     justify-content: center;
     align-items: center;
-    height: 75%;
 }
 
 .apollos-bottom {
@@ -413,4 +411,8 @@ body {
     background-color: #f2dede;
     border-color: #ebccd1;
     color: #a94442;
+}
+
+.apollos-round {
+    font-size: 1rem;
 }

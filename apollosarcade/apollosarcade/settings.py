@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'magic_fifteen',
     'guest',
     'local',
+    'game',
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

@@ -1,0 +1,22 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+{% endblock %}
+{% block apollos_content_1 %}{% csrf_token %}
+<div id="context-data" style="display:none;" data-spaces="{{ spaces|safe }}" data-game-id="{{ id }}"
+    data-round="{{ round }}" data-player1="{{ player1|default:'Player One' }}"
+    data-player2="{{ player2|default:'Player Two' }}" data-plays="{{ plays|safe }}" data-p1="{{ p1 }}"
+    data-p2="{{ p2 }}" data-privacy="{{ privacy }}">
+</div>
+{% if round|divisibleby:2 and current == p2 %}
+<div id="mpApp" class="apollos-container apollos-app" data-current="{{ current }}">
+{% elif not round|divisibleby:2 and current == p1 %}
+<div id="mpApp" class="apollos-container apollos-app" data-current="{{ current }}">
+{% else %}
+<div id="mpApp" class="apollos-container apollos-app turn-disable" data-current="{{ current }}">
+{% endif %}
+    <div id="mpBoard" class="ttt-board"></div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'aa_game.bundle.js' %}"></script>
+{% endblock %}

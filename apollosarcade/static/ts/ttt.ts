@@ -118,6 +118,14 @@ export class TicTacToe extends LocalGame {
         window.requestAnimationFrame(this.loop.bind(this));
     }
 
+    protected loop(timestamp: number): void {
+        let progress = timestamp - this.lastRender;
+        this.update(progress);
+        this.checkWin();
+        this.lastRender = timestamp;
+        window.requestAnimationFrame(this.loop.bind(this));
+    }
+
     protected update(progress: number): void {
         for (let s = 0; s < 9; s++) {
             let square = document.getElementById(`square${s}`);
@@ -168,16 +176,16 @@ export class TicTacToe extends LocalGame {
 
         switch (n) {
             case 1:
-                this.playerOne.innerHTML = '';
-                this.playerTwo.innerHTML = '';
-                this.playerOne.textContent = 'TIE';
+                this.playerOneElement.innerHTML = '';
+                this.playerTwoElement.innerHTML = '';
+                this.playerOneElement.textContent = 'TIE';
                 break;
             case 2:
                 if (!this.player1Turn) {
-                    this.playerTwo.innerHTML = '';
+                    this.playerTwoElement.innerHTML = '';
                     this.numbersOdd.innerHTML = 'WINS';
                 } else {
-                    this.playerOne.innerHTML = '';
+                    this.playerOneElement.innerHTML = '';
                     this.numbersEven.innerHTML = 'WINS';
                 }
                 break;

@@ -1,12 +1,11 @@
 export abstract class LocalGame {
 
-    private game: any;  // Reference to game class
     protected lastRender = 0;
     protected board: HTMLElement;
     protected boardArea: HTMLElement;
     protected playerArea: HTMLElement;
-    protected playerOne: HTMLElement;
-    protected playerTwo: HTMLElement;
+    protected playerOneElement: HTMLElement;
+    protected playerTwoElement: HTMLElement;
     protected oneTitle: HTMLElement;
     protected twoTitle: HTMLElement;
     protected playerOneContent: HTMLElement;
@@ -23,7 +22,6 @@ export abstract class LocalGame {
     constructor(board: HTMLElement) {
         this.board = board;
         this.board.innerHTML = '';
-        this.game = this;
 
         this.round = 0;
         this.player1Turn = true;
@@ -40,37 +38,37 @@ export abstract class LocalGame {
         this.playerArea = document.createElement('div');
         this.playerArea.classList.add('ttt-col-b');
 
-        this.playerOne = document.createElement('div');
-        this.playerOne.classList.add('ttt-col-top');
+        this.playerOneElement = document.createElement('div');
+        this.playerOneElement.classList.add('ttt-col-top');
 
         this.oneTitle = document.createElement('div');
         this.oneTitle.classList.add('ttt-player');
         this.oneTitle.textContent = 'Player 1';
 
         this.playerOneContent = document.createElement('div');
-        this.playerOneContent.classList.add('ttt-player-content');
+        this.playerOneContent.classList.add('apollos-flex-row');
 
-        this.playerOne.append(this.oneTitle);
-        this.playerOne.append(this.playerOneContent);
+        this.playerOneElement.append(this.oneTitle);
+        this.playerOneElement.append(this.playerOneContent);
 
-        this.playerTwo = document.createElement('div');
-        this.playerTwo.classList.add('ttt-col-top');
+        this.playerTwoElement = document.createElement('div');
+        this.playerTwoElement.classList.add('ttt-col-top');
 
         this.twoTitle = document.createElement('div');
         this.twoTitle.classList.add('ttt-player');
         this.twoTitle.textContent = 'Player 2';
 
         this.playerTwoContent = document.createElement('div');
-        this.playerTwoContent.classList.add('ttt-player-content');
+        this.playerTwoContent.classList.add('apollos-flex-row');
 
-        this.playerTwo.append(this.twoTitle);
-        this.playerTwo.append(this.playerTwoContent);
+        this.playerTwoElement.append(this.twoTitle);
+        this.playerTwoElement.append(this.playerTwoContent);
 
         let playerRow: Element = document.createElement('div');
         playerRow.classList.add('ttt-row');
 
-        playerRow.append(this.playerOne);
-        playerRow.append(this.playerTwo);
+        playerRow.append(this.playerOneElement);
+        playerRow.append(this.playerTwoElement);
 
         this.playerArea.append(playerRow);
 
@@ -87,16 +85,8 @@ export abstract class LocalGame {
         this.board.append(this.boardArea);
         this.board.append(this.playerArea);
     }
-
-    protected loop(timestamp: number): void {
-        let progress = timestamp - this.lastRender;
-        this.update(progress);
-        this.checkWin();
-        this.lastRender = timestamp;
-        window.requestAnimationFrame(this.loop.bind(this));
-    }
     
-    // protected abstract loop(timestamp: number): void;
+    protected abstract loop(timestamp: number): void;
     protected abstract update(progress: number): void;
     protected abstract checkWin(): void;
 }

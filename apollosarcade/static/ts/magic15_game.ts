@@ -12,11 +12,12 @@ let heartbeatInterval = 30000; // 30 seconds
 let heartbeatTimeout: any;
 
 function magic15() {
-    let app = document.getElementById('magic15_app');
-    let board = document.getElementById('magic15_board');
-    if (app && board) {
+    let app = document.getElementById('mpApp');
+    let board = document.getElementById('mpBoard');
+    let data = document.getElementById('context-data');
+    if (app && board && data) {
         board.innerHTML = '';
-        magic_game = new MagicFifteenBoard(board, app);
+        magic_game = new MagicFifteenBoard(app, board, data);
         magic_game.setUpSquareEventListeners(makeMove);
         magic_game.setUpNumberEventListeners(makeMove);
         game_id = document.getElementById('context-data')?.dataset.gameId || '';

@@ -1,6 +1,6 @@
 import { apollosLocalMessage } from "./utils";
 
-export class FifteenCard {
+export class StartCard {
     private csrfToken: string;
     private parentElement: Element;
     private cardContainer: Element;

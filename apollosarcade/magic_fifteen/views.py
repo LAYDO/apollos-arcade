@@ -6,7 +6,8 @@ from django.shortcuts import render
 from django import template
 from django.db.models import Q
 
-from .models import Game, GameInstruction
+from .models import Game
+from game.models import GameInstruction
 from .encoders import QuillFieldEncoder
 from apollosarcade.utils import get_player
 from apollosarcade.error_handler import LobbyError
@@ -67,8 +68,15 @@ def game_start_continue(request):
     try:
         games = get_games(current_user, ['READY','LOBBY','REMATCH'])
         if len(games) == 1:
-            # If so, redirect them to the lobby
-            return HttpResponseRedirect(f'/magic_fifteen/lobby/{games[0].game_id}')
+            # If so, update lobby status to IN-GAME and redirect them to the game
+            lobby = games[0]
+            print(('STARTING GAME #{}').format(lobby.game_id))
+            lobby.status='IN-GAME'
+            lobby.p1_status='IN-GAME'
+            lobby.p2_status='IN-GAME'
+            lobby.round=1
+            lobby.save()
+            return HttpResponseRedirect(f'/magic_fifteen/game/{lobby.game_id}')
 
         # See if the player is already in a game
         games = get_games(current_user, ['IN-GAME'])
@@ -80,71 +88,6 @@ def game_start_continue(request):
         raise LobbyError('You are not in a game lobby or active game')
     except LobbyError as e:
         return JsonResponse({'error': str(e)}, status=400)
-    
-def game(request, game_id):
-    current_user = get_player(request)
-    game = {}
-    match = Game.objects.get(game_id=game_id)
-    if (match.status == 'COMPLETED' or match.round == 10):
-        return HttpResponseRedirect('/magic_fifteen/post')
-    if (current_user == match.player_one):
-        try:
-            if (str(ContentType.objects.get_for_model(match.player_two)) == 'auth | user'):
-                player2 = User.objects.get(id=match.player_two_object_id)
-            else:
-                player2 = Guest.objects.get(id=match.player_two_object_id)
-            game.update({
-                'player1': current_user.username,
-                'player2': player2.username,
-                'p1': current_user.id,
-                'p2': player2.id,
-            })
-        except User.DoesNotExist:
-            raise Exception('Game was abandoned by player 2')
-    elif (current_user == match.player_two):
-        try:
-            if (str(ContentType.objects.get_for_model(match.player_one)) == 'auth | user'):
-                player1 = User.objects.get(id=match.player_one_object_id)
-            else:
-                player1 = Guest.objects.get(id=match.player_one_object_id)
-            game.update({
-                'player1': player1.username,
-                'player2': current_user.username,
-                'p1': player1.id,
-                'p2': current_user.id,
-            })
-        except User.DoesNotExist:
-            raise Exception('Game was abandoned by player 1')
-    else:
-        raise Exception('User is not a player in this game')
-    game.update({
-        'id': game_id,
-        'privacy': match.privacy,
-        'spaces': match.spaces,
-        'plays': match.plays,
-        'round': match.round,
-        'current': current_user.id,
-    })
-    return render(request, 'magic_fifteen_game.html', game)
-
-def game_leave(request, game_id):
-    if request.method == 'POST':
-        current_user = get_player(request)
-        match = Game.objects.get(game_id=game_id)
-        if (match and match.status == 'IN-GAME'):
-            if (match.player_one == current_user):
-                match.p1_status='ABANDONED'
-                match.p2_status='POST'
-                match.winner=match.player_two_id
-                match.loser=match.player_one_id
-            elif (match.player_two == current_user):
-                match.p2_status='ABANDONED'
-                match.p1_status='POST'
-                match.winner=match.player_one_id
-                match.loser=match.player_two_id
-            match.status='COMPLETED'
-            match.save()
-        return HttpResponseRedirect('/magic_fifteen')
     
 def game_archival(id):
     to_be_archived = Game.objects.get(game_id=id)
