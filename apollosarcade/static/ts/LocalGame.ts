@@ -87,6 +87,6 @@ export abstract class LocalGame {
     }
     
     protected abstract loop(timestamp: number): void;
-    protected abstract update(progress: number): void;
+    protected abstract handleMove(progress: number): void;
     protected abstract checkWin(): void;
 }

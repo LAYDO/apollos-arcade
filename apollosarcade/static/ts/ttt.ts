@@ -120,13 +120,13 @@ export class TicTacToe extends LocalGame {
 
     protected loop(timestamp: number): void {
         let progress = timestamp - this.lastRender;
-        this.update(progress);
+        this.handleMove(progress);
         this.checkWin();
         this.lastRender = timestamp;
         window.requestAnimationFrame(this.loop.bind(this));
     }
 
-    protected update(progress: number): void {
+    protected handleMove(progress: number): void {
         for (let s = 0; s < 9; s++) {
             let square = document.getElementById(`square${s}`);
             square?.addEventListener('click', () => {

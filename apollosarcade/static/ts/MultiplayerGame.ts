@@ -1,6 +1,8 @@
+import { GameSocket } from "./GameSocket";
 import { LocalGame } from "./LocalGame";
+import { apollosLocalMessage, apollosServerMessage, getCurrentUserId } from "./utils";
 
-export class MultiplayerGame extends LocalGame{
+export abstract class MultiplayerGame extends LocalGame{
     protected app: HTMLElement;
     protected contextData: HTMLElement;
     protected currentRound: HTMLElement;
@@ -11,6 +13,7 @@ export class MultiplayerGame extends LocalGame{
     protected playerOne: string;
     protected playerTwo: string;
 
+    protected socket: GameSocket;
 
     constructor(app: HTMLElement, board: HTMLElement, data: HTMLElement) {
         super(board);
@@ -53,8 +56,13 @@ export class MultiplayerGame extends LocalGame{
             this.playerOneElement.classList.remove('disabled');
             this.playerTwoElement.classList.add('disabled');
         }
+
+        this.socket = new GameSocket(this.gameId, this.handleMove.bind(this));
+        this.socket.connect();
     }
     protected loop(): void { }
-    protected update(): void { }
+    protected handleMove(data: any): void { }
     protected checkWin(): void { }
+
+    protected abstract makeMove(data: any): void;
 }

@@ -29,13 +29,22 @@ class MagicFifteenConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive_json(self, response):
         print(f"Received JSON: {response}")
+        if (isinstance(response, str)):
+            try:
+                response = json.loads(response)
+            except json.JSONDecodeError:
+                traceback.print_exc()
+                return
         try:
             if response['type'] == 'move':
                 message = response.get('message', {})
+                print(f"Received move: {message}")
                 game_id = message.get('game_id', None)
-                space = message.get('space', None)
-                play = message.get('play', None)
                 user_id = message.get('user_id', None)
+                data = message.get('data', None)
+                space = data.get('space', None)
+                play = data.get('play', None)
+                print(f'space: {space}, play: {play}')
 
                 game = await self.get_game_instance(game_id)
 

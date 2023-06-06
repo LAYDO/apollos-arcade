@@ -1,7 +1,7 @@
 import { MultiplayerGame } from "./MultiplayerGame";
 import { apollosLocalMessage, getCurrentUserId } from "./utils";
 
-export class MagicFifteenBoard extends MultiplayerGame{
+export class MagicFifteenBoard extends MultiplayerGame {
 
     private squares: Element;
 
@@ -85,9 +85,11 @@ export class MagicFifteenBoard extends MultiplayerGame{
         }
 
         this.board.prepend(this.squares);
+        this.setUpSquareEventListeners();
+        this.setUpNumberEventListeners();
     }
 
-    public setUpSquareEventListeners(callback: Function) {
+    public setUpSquareEventListeners() {
         // Construct and append squares to board
         for (let i = 0; i < 9; i++) {
             let square = document.getElementById(`square${i}`);
@@ -113,7 +115,11 @@ export class MagicFifteenBoard extends MultiplayerGame{
 
                         if (this.selectedSquare != -1 && this.selectedNumber != 0) {
                             console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
-                            callback(this.selectedSquare, this.selectedNumber);
+                            let data = {
+                                'space': this.selectedSquare,
+                                'play': this.selectedNumber,
+                            }
+                            this.makeMove(data);
                         }
                     } catch (e: any) {
                         apollosLocalMessage(e, 'error');
@@ -123,7 +129,7 @@ export class MagicFifteenBoard extends MultiplayerGame{
         }
     }
 
-    public setUpNumberEventListeners(callback: Function) {
+    public setUpNumberEventListeners() {
         for (let i = 1; i < 10; i++) {
             let number = document.getElementById(`number${i}`);
             if (number != null) {
@@ -146,14 +152,18 @@ export class MagicFifteenBoard extends MultiplayerGame{
                     // callback to makeMove
                     if (this.selectedSquare != -1 && this.selectedNumber != 0) {
                         console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
-                        callback(this.selectedSquare, this.selectedNumber);
+                        let data = {
+                            'space': this.selectedSquare,
+                            'play': this.selectedNumber
+                        }
+                        this.makeMove(data);
                     }
                 });
             }
         }
     }
 
-    public takeTurn(data: any, callback: Function) {
+    public handleMove(data: any) {
         // Update the current round
         this.round = data['round'];
         this.currentRound.textContent = `Round: ${this.round}`;
@@ -217,6 +227,18 @@ export class MagicFifteenBoard extends MultiplayerGame{
         // Set up the numbers' event listeners
         this.selectedSquare = -1;
         this.selectedNumber = 0;
-        this.setUpNumberEventListeners(callback);
+        this.setUpNumberEventListeners();
+    }
+
+    protected makeMove(data: any) {
+        let move = {
+            'type': 'move',
+            'message': {
+                'game_id': this.gameId,
+                'user_id': getCurrentUserId(),
+                data
+            }
+        };
+        this.socket.send(JSON.stringify(move));
     }
 }
