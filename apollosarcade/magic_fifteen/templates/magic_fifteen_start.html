@@ -1,27 +1,9 @@
-{% extends "app.html" %} {% load static %}
+{% extends "start.html" %} {% load static %}
 {% block page_head %}
 <title>Magic 15</title>
 <link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
 <link rel="stylesheet" href="{% static 'css/magic15_home.css' %}" />
 {% endblock %}
-{% block apollos_content_1 %}
-<div id="context-data-start" style="display: none;" data-guest="{{ guest }}"></div>
-<div class="apollos-container apollos-app">
-    <div id="start_container" class="apollos-flex-col">
-        <div class="mft-row mft-title">START MATCH</div>
-        {% csrf_token %}
-        <div class="mft-row">
-            <div id="createButton" class="mft-button">CREATE</div>
-        </div>
-        <div class="mft-row">
-            <div id="joinButton" class="mft-button">JOIN</div>
-        </div>
-    </div>
-</div>
-<div id="createModal" class="mft-modal"></div>
-<div id="joinModal" class="mft-modal"></div>
-{% endblock %}
 {% block page_scripts %}
-<script>let csrfToken = "{{ csrf_token }}";</script>
 <script type="text/javascript" src="{% static 'magic15_start.bundle.js' %}"></script>
 {% endblock %}

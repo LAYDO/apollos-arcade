@@ -115,11 +115,10 @@ export class MagicFifteenBoard extends MultiplayerGame {
 
                         if (this.selectedSquare != -1 && this.selectedNumber != 0) {
                             console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
-                            let data = {
+                            this.makeMove({
                                 'space': this.selectedSquare,
                                 'play': this.selectedNumber,
-                            }
-                            this.makeMove(data);
+                            });
                         }
                     } catch (e: any) {
                         apollosLocalMessage(e, 'error');
@@ -152,11 +151,10 @@ export class MagicFifteenBoard extends MultiplayerGame {
                     // callback to makeMove
                     if (this.selectedSquare != -1 && this.selectedNumber != 0) {
                         console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
-                        let data = {
+                        this.makeMove({
                             'space': this.selectedSquare,
-                            'play': this.selectedNumber
-                        }
-                        this.makeMove(data);
+                            'play': this.selectedNumber,
+                        });
                     }
                 });
             }
@@ -236,7 +234,8 @@ export class MagicFifteenBoard extends MultiplayerGame {
             'message': {
                 'game_id': this.gameId,
                 'user_id': getCurrentUserId(),
-                data
+                'space': data['space'],
+                'play': data['play'],
             }
         };
         this.socket.send(JSON.stringify(move));

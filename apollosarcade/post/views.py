@@ -1,19 +1,16 @@
-from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from .models import Game
-from .views import game_archival, get_games
-from apollosarcade.utils import get_player, get_player_by_content_type
+from apollosarcade.utils import get_player, get_player_by_content_type, game_archival, get_games, get_app_model
 
 def post(request):
-    current_user = get_player(request)
+
     post = {}
-    lobbies = get_games(current_user, ['LOBBY','REMATCH'], [])
+    lobbies = get_games(request, ['LOBBY','REMATCH'], [])
     if len(lobbies) > 0:
         return HttpResponseRedirect(f'/magic_fifteen/lobby')
-    games = get_games(current_user, ['COMPLETED'], [])
+    games = get_games(request, ['COMPLETED'], [])
+    Game = get_app_model(request, 'game')
     if (len(games) == 1):
         game = Game.objects.get(game_id=games[0].game_id)
         if (game):
@@ -47,6 +44,7 @@ def post(request):
 def post_rematch(request):
     if request.method == 'POST':
         current_user = get_player(request)
+        Game = get_app_model(request, 'game')
         p1 = Game.objects.filter(player_one_object_id=current_user.id, status='COMPLETED').first()
         p2 = Game.objects.filter(player_two_object_id=current_user.id, status='COMPLETED').first()
 
@@ -86,7 +84,7 @@ def create_rematch(game, is_player_one):
         new_player_content_type = game.player_one_content_type if is_player_one else game.player_two_content_type
 
     new_player = get_player_by_content_type(new_player_content_type, new_player_id)
-
+    Game = game.__class__
     rematch_game = Game(
         status='REMATCH',
         player_one=(new_player if is_player_one else None),
@@ -103,7 +101,8 @@ def create_rematch(game, is_player_one):
     )
     rematch_game.save()
 
-def create_new_lobby_game(cu, game = None):
+def create_new_lobby_game(request, cu, game = None):
+    Game = game.__class__
     new_game = Game(
         status='LOBBY',
         player_one=cu,
@@ -119,13 +118,14 @@ def create_new_lobby_game(cu, game = None):
     )
     new_game.save()
     if game and game != None:
-        game_archival(game.game_id)
+        game_archival(request, game.game_id)
 
-def handle_existing_rematch(game, is_player_one):
+def handle_existing_rematch(request, game, is_player_one):
+    Game = get_app_model(request, 'game')
     rematch = Game.objects.filter(player_one_object_id=(game.player_two_object_id if is_player_one else game.player_one_object_id), status='REMATCH').first()
     rematch = rematch or Game.objects.filter(player_two_object_id=(game.player_two_object_id if is_player_one else game.player_one_object_id), status='REMATCH').first()
     if rematch:
-        game_archival(game.game_id)
+        game_archival(request, game.game_id)
         if rematch.player_one is not None:
             rematch.player_two = game.player_one if is_player_one else game.player_two
             rematch.p2_status = 'REMATCH'
@@ -138,6 +138,7 @@ def handle_existing_rematch(game, is_player_one):
 def post_leave(request):
     if request.method == 'POST':
         current_user = get_player(request)
+        Game = get_app_model(request, 'game')
         player_one_game = Game.objects.filter(player_one_object_id=current_user.id, status='COMPLETED').first()
         player_two_game = Game.objects.filter(player_two_object_id=current_user.id, status='COMPLETED').first()
 
@@ -147,7 +148,7 @@ def post_leave(request):
             handle_leave(player_two_game, False)
         return HttpResponseRedirect('/magic_fifteen')
 
-def handle_leave(game, is_player_one):
+def handle_leave(request, game, is_player_one):
     if is_player_one:
         game.p1_status='LEFT'
     else:
@@ -155,9 +156,10 @@ def handle_leave(game, is_player_one):
     game.save()
 
     if is_player_one and game.p2_status == 'REMATCH' or not is_player_one and game.p1_status == 'REMATCH':
+        Game = game.__class__
         rematch = Game.objects.filter(player_one_object_id=(game.player_two_object_id if is_player_one else game.player_one_object_id), status='REMATCH').first()
         if rematch:
             rematch.status='LOBBY'
             rematch.save()
     # if game.p1_status in ['LEFT', 'REMATCH'] and game.p2_status in ['LEFT', 'REMATCH']:
-    game_archival(game.game_id)
+    game_archival(request, game.game_id)

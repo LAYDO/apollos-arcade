@@ -41,3 +41,11 @@ export function getCurrentUserId() {
         throw new Error('User id not found');
     }
 }
+
+export function addCsrfTokenToForm(form: HTMLFormElement, _csrfToken: string) {
+    const csrfToken = document.createElement('input');
+    csrfToken.setAttribute('type', 'hidden');
+    csrfToken.setAttribute('name', 'csrfmiddlewaretoken');
+    csrfToken.setAttribute('value', _csrfToken);
+    form.append(csrfToken);
+}

@@ -1,3 +1,4 @@
+import { addCsrfTokenToForm } from "./utils";
 export class MagicFifteenPost {
 
     private app: Element;
@@ -152,8 +153,8 @@ export class MagicFifteenPost {
         rematchForm.append(rematchButton);
         leaveForm.append(leaveButton);
 
-        this.addCsrfTokenToForm(rematchForm);
-        this.addCsrfTokenToForm(leaveForm);
+        addCsrfTokenToForm(rematchForm, this.csrfToken);
+        addCsrfTokenToForm(leaveForm, this.csrfToken);
 
         lobbyOptions.append(rematchForm);
         lobbyOptions.append(leaveForm);
@@ -216,11 +217,11 @@ export class MagicFifteenPost {
         }
     }
 
-    addCsrfTokenToForm(form: HTMLFormElement) {
-        const csrfToken = document.createElement('input');
-        csrfToken.setAttribute('type', 'hidden');
-        csrfToken.setAttribute('name', 'csrfmiddlewaretoken');
-        csrfToken.setAttribute('value', this.csrfToken);
-        form.append(csrfToken);
-    }
+    // addCsrfTokenToForm(form: HTMLFormElement) {
+    //     const csrfToken = document.createElement('input');
+    //     csrfToken.setAttribute('type', 'hidden');
+    //     csrfToken.setAttribute('name', 'csrfmiddlewaretoken');
+    //     csrfToken.setAttribute('value', this.csrfToken);
+    //     form.append(csrfToken);
+    // }
 }

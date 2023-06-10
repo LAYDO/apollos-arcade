@@ -1,13 +1,17 @@
-let lobbyOptions = document.getElementById('lobbyOptions');
-let isMobile = window.matchMedia("only screen and (max-width: 48rem)").matches;
-let lobbyRefeshButton = document.getElementById('lobbyRefresh');
+import { MagicFifteenLobby } from './MagicFifteenLobby';
 
-if (!isMobile) {
-    lobbyOptions?.classList.add('mft-row');
-} else {
-    lobbyOptions?.classList.add('apollos-flex-col');
+let magic_lobby: MagicFifteenLobby;
+
+declare var csrfToken: string;
+
+function magicFifteenLobby() {
+    let app = document.getElementById('aa_lobby');
+    let data = document.getElementById('context-data-lobby');
+    if (app && data) {
+        magic_lobby = new MagicFifteenLobby(app, data, csrfToken);
+    }
 }
 
-lobbyRefeshButton?.addEventListener('click', () => {
-    window.location.reload();
+document.addEventListener('DOMContentLoaded', () => {
+    magicFifteenLobby();
 });

@@ -1,10 +1,11 @@
 {% extends "app.html" %} {% load static %}
 {% block page_head %}
-<title>Magic 15</title>
-<link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
+<link rel="stylesheet" href="{% static 'css/lobby.css' %}" />
+{% endblock %}
+{% block context_data %}
 {% endblock %}
 {% block apollos_content_1 %}
-<div class="apollos-container apollos-app">
+<div id="aa_lobby" class="apollos-container apollos-app">
     <div class="apollos-flex-col">
         <div class="mft-row mft-title">{{ privacy }} Lobby #{{ id }}</div>
         <div class="apollos-flex-col">
@@ -42,5 +43,6 @@
 </div>
 {% endblock %}
 {% block page_scripts %}
-<script type="text/javascript" src="{% static 'magic15_lobby.bundle.js' %}"></script>
+<script>let csrfToken = "{{ csrf_token }}";</script>
+<script type="text/javascript" src="{% static 'aa_lobby.bundle.js' %}"></script>
 {% endblock %}

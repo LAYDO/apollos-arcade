@@ -3,42 +3,11 @@
 <title>Magic 15</title>
 <link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
 {% endblock %}
-{% block apollos_content_1 %}
-<div class="apollos-container apollos-app">
-    <div class="apollos-flex-col">
-        <div class="mft-row mft-title">{{ privacy }} Lobby #{{ id }}</div>
-        <div class="apollos-flex-col">
-            <div class="mft-row-b">
-                <div class="mft-margin-sb">
-                    Player 1: {{ p1 }}
-                </div>
-            </div>
-            <div class="mft-row-b">
-                <div class="mft-margin-sb">
-                    Player 2: {{ p2 }}
-                </div>
-            </div>
-        </div>
-        <div id="lobbyOptions" class="mft-row">
-                <form method="post" class="apollos-flex-col" action="start">
-                    {% csrf_token %}
-                    {% if status == 'READY'%}
-                    <input class="mft-button" type="submit" value="START"></input>
-                    {% elif status == 'IN-GAME' %}
-                    <input class="mft-button" type="submit" value="CONTINUE"></input>
-                    {% endif %}
-                </form>
-                <form method="post" class="apollos-flex-col" action="leave">
-                    {% csrf_token %}
-                    <input class="mft-button" type="submit" value="LEAVE"></input>
-                </form>
-        </div>
-        <div class="mft-refresh">
-            <div id="lobbyRefresh" class="mft-button">
-                <span class="fa-solid fa-rotate"></span>
-            </div>
-        </div>
-    </div>
+{% block context_data %}
+<div id="context-data-lobby" style="display:none;" data-game-id="{{ id }}" data-round="{{ round }}"
+    data-player1="{{ player1|default:'Player One' }}" data-player2="{{ player2|default:'Player Two' }}" 
+    data-p1="{{ p1 }}" data-p2="{{ p2 }}" data-privacy="{{ privacy }}" data-p1-ID="p1ID" data-p2-ID="p2ID"
+    data-p1-status="p1Status" data-p2-status="p2Status" data-current="current" data-status="status">
 </div>
 {% endblock %}
 {% block page_scripts %}

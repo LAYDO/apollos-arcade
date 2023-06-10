@@ -55,6 +55,10 @@ INSTALLED_APPS = [
     'guest',
     'local',
     'game',
+    'lobby',
+    'home',
+    'start',
+    'post',
 ]
 
 SOCIALACCOUNT_PROVIDERS = {

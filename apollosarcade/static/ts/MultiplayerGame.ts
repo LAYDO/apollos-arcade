@@ -1,7 +1,5 @@
 import { GameSocket } from "./GameSocket";
 import { LocalGame } from "./LocalGame";
-import { apollosLocalMessage, apollosServerMessage, getCurrentUserId } from "./utils";
-
 export abstract class MultiplayerGame extends LocalGame{
     protected app: HTMLElement;
     protected contextData: HTMLElement;
@@ -13,7 +11,7 @@ export abstract class MultiplayerGame extends LocalGame{
     protected playerOne: string;
     protected playerTwo: string;
 
-    protected socket: GameSocket;
+    public socket: GameSocket;
 
     constructor(app: HTMLElement, board: HTMLElement, data: HTMLElement) {
         super(board);

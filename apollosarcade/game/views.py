@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
 from guest.models import Guest
-from apollosarcade.utils import get_player
+from apollosarcade.utils import get_player, get_app_model
 from apollosarcade.error_handler import GameError
 
 
@@ -16,8 +16,7 @@ def game(request, game_id):
     model_name = 'game'
     game = {}
     try:
-        app_config = apps.get_app_config(app)
-        model = app_config.get_model(model_name)
+        model = get_app_model(request, model_name)
         match = model.objects.get(game_id=game_id)
         if (match.status == 'COMPLETED' or match.round == 10):
             return HttpResponseRedirect(f'/{app}/post')
@@ -69,8 +68,7 @@ def game_leave(request, game_id):
         app = request.path.split('/')[1]
         model_name = 'game'
         try:
-            app_config = apps.get_app_config(app)
-            model = app_config.get_model(model_name)
+            model = get_app_model(request, model_name)
             match = model.objects.get(game_id=game_id)
             if (match and match.status == 'IN-GAME'):
                 if (match.player_one == current_user):
