@@ -6,7 +6,6 @@
 <div class="apollos-container apollos-app">
     <div id="start_container" class="apollos-flex-col">
         <div class="mft-row mft-title">START MATCH</div>
-        {% csrf_token %}
         <div class="mft-row">
             <div id="createButton" class="mft-button">CREATE</div>
         </div>
@@ -19,6 +18,5 @@
 <div id="joinModal" class="mft-modal"></div>
 {% endblock %}
 {% block page_scripts %}
-<script>let csrfToken = "{{ csrf_token }}";</script>
 <script type="text/javascript" src="{% static 'aa_start.bundle.js' %}"></script>
 {% endblock %}

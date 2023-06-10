@@ -167,7 +167,7 @@ export class MagicFifteenBoard extends MultiplayerGame {
         this.currentRound.textContent = `Round: ${this.round}`;
 
         let currentPlayer: number = this.round % 2 == 0 ? data['p2'] : data['p1'];
-        if (currentPlayer == getCurrentUserId()) {
+        if (currentPlayer == getCurrentUserId(this.contextData.dataset)) {
             this.app.classList.remove('turn-disable');
         } else {
             this.app.classList.add('turn-disable');
@@ -233,7 +233,7 @@ export class MagicFifteenBoard extends MultiplayerGame {
             'type': 'move',
             'message': {
                 'game_id': this.gameId,
-                'user_id': getCurrentUserId(),
+                'user_id': getCurrentUserId(this.contextData.dataset),
                 'space': data['space'],
                 'play': data['play'],
             }

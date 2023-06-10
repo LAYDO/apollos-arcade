@@ -34,7 +34,7 @@ def create_lobby(request):
                     spaces=[0,0,0,0,0,0,0,0,0],
                 )
                 game.save()
-                return JsonResponse({'redirect': '/magic_fifteen/lobby/'})
+                return JsonResponse({'redirect': f'/magic_fifteen/lobby/{game.game_id}'})
             
 def join_lobby(request):
     if request.method == 'POST':
@@ -57,15 +57,13 @@ def join_lobby(request):
                                 game.player_one = current_user
                             elif game.player_two == None:
                                 game.player_two = current_user
-                            game.status = 'READY'
                             game.save()
                         elif(game.privacy == 'Private' and fClean['password'] == game.password):
                             if game.has_players():
-                                game.status = 'READY'
-                            if game.player_one== None:
-                                game.player_one = current_user
-                            elif game.player_two == None:
-                                game.player_two = current_user
+                                if game.player_one== None:
+                                    game.player_one = current_user
+                                elif game.player_two == None:
+                                    game.player_two = current_user
                             game.save()
                         elif (game.privacy == 'Private' and fClean['password'] == ''):
                             raise LobbyError("This lobby is private, please enter the password")
@@ -81,62 +79,63 @@ def join_lobby(request):
                             game.player_one=current_user
                         elif game.player_two == None:
                             game.player_two=current_user
-                        game.status = 'READY'
                         game.save()
-                    return JsonResponse({'redirect': '/magic_fifteen/lobby/'})
+                    return JsonResponse({'redirect': f'/magic_fifteen/lobby/{game.game_id}'})
             except LobbyError as e:
                 return JsonResponse({'error': str(e)}, status=400)
 
-def lobby(request):
+def lobby(request, lobby_id):
     current_user = get_player(request)
     # print(f'Current user id: {current_user.id}')
     lobby = {}
     try:
-        found = get_games(request, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
-        if (len(found) == 1 and found[0].player_one == current_user):
-            # print(f'p1: {found[0]}')
+        Game = get_app_model(request, 'game')
+        game = Game.objects.get(game_id=lobby_id)
+        # found = get_games(request, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
+        if (game.player_one == current_user):
+            # print(f'p1: {game}')
             player2 = None
-            if (found[0].player_two != None):
-                if (str(ContentType.objects.get_for_model(found[0].player_two)).lower() == 'auth | user'):
-                    player2 = User.objects.get(id=found[0].player_two_object_id).username
+            if (game.player_two != None):
+                if (str(ContentType.objects.get_for_model(game.player_two)).lower() == 'auth | user'):
+                    player2 = User.objects.get(id=game.player_two_object_id).username
                 else:
-                    player2 = Guest.objects.get(id=found[0].player_two_object_id).username            
+                    player2 = Guest.objects.get(id=game.player_two_object_id).username            
             lobby.update({
-                'id': found[0].game_id,
-                'status': found[0].status,
+                'id': game.game_id,
+                'status': game.status,
                 'p1': current_user.username,
                 'p2': 'Waiting for player...' if player2 == None else player2,
                 'p1ID': current_user.id,
-                'p2ID': found[0].player_two_object_id,
-                'p1Status': found[0].p1_status,
-                'p2Status': found[0].p2_status,
-                'privacy': found[0].privacy,
-                'pw': found[0].password,
+                'p2ID': game.player_two_object_id,
+                'p1Status': game.p1_status,
+                'p2Status': game.p2_status,
+                'privacy': game.privacy,
+                'pw': game.password,
                 'current': current_user.id,
-                'round': found[0].round,
+                'round': game.round,
             })
             return render(request, 'magic_fifteen_lobby.html', lobby)
-        elif (len(found) == 1 and found[0].player_two == current_user):
-            # print(f'p2: {found[0]}')
+        elif (game.player_two == current_user):
+            # print(f'p2: {game}')
             player1 = None
-            if (found[0].player_one != None):
-                if (str(ContentType.objects.get_for_model(found[0].player_one)).lower() == 'auth | user'):
-                    player1 = User.objects.get(id=found[0].player_one_object_id).username
+            if (game.player_one != None):
+                if (str(ContentType.objects.get_for_model(game.player_one)).lower() == 'auth | user'):
+                    player1 = User.objects.get(id=game.player_one_object_id).username
                 else:
-                    player1 = Guest.objects.get(id=found[0].player_one_object_id).username
+                    player1 = Guest.objects.get(id=game.player_one_object_id).username
             lobby.update({
-                'id': found[0].game_id,
-                'status': found[0].status,
+                'id': game.game_id,
+                'status': game.status,
                 'p1': 'Waiting for player...' if player1 == None else player1,
                 'p2': current_user.username,
-                'p1ID': found[0].player_one_object_id,
+                'p1ID': game.player_one_object_id,
                 'p2ID': current_user.id,
-                'p1Status': found[0].p1_status,
-                'p2Status': found[0].p2_status,
-                'privacy': found[0].privacy,
-                'pw': found[0].password,
+                'p1Status': game.p1_status,
+                'p2Status': game.p2_status,
+                'privacy': game.privacy,
+                'pw': game.password,
                 'current': current_user.id,
-                'round': found[0].round,
+                'round': game.round,
             })
             return render(request, 'magic_fifteen_lobby.html', lobby)
         else:
@@ -144,67 +143,67 @@ def lobby(request):
     except LobbyError as e:
         return JsonResponse({'error': str(e)}, status=400)
     
-def game_start_continue(request):
-    # See if the player is already in a lobby
-    try:
-        games = get_games(request, ['READY','LOBBY','REMATCH'])
-        if len(games) == 1:
-            # If so, update lobby status to IN-GAME and redirect them to the game
-            lobby = games[0]
-            print(('STARTING GAME #{}').format(lobby.game_id))
-            lobby.status='IN-GAME'
-            lobby.p1_status='IN-GAME'
-            lobby.p2_status='IN-GAME'
-            lobby.round=1
-            lobby.save()
-            return HttpResponseRedirect(f'/magic_fifteen/game/{lobby.game_id}')
+# def game_start_continue(request):
+#     # See if the player is already in a lobby
+#     try:
+#         games = get_games(request, ['READY','LOBBY','REMATCH'])
+#         if len(games) == 1:
+#             # If so, update lobby status to IN-GAME and redirect them to the game
+#             lobby = games[0]
+#             print(('STARTING GAME #{}').format(lobby.game_id))
+#             lobby.status='IN-GAME'
+#             lobby.p1_status='IN-GAME'
+#             lobby.p2_status='IN-GAME'
+#             lobby.round=1
+#             lobby.save()
+#             return HttpResponseRedirect(f'/magic_fifteen/game/{lobby.game_id}')
 
-        # See if the player is already in a game
-        games = get_games(request, ['IN-GAME'])
-        if len(games) == 1:
-            # If so, redirect them to the game
-            return HttpResponseRedirect(f'/magic_fifteen/game/{games[0].game_id}')
+#         # See if the player is already in a game
+#         games = get_games(request, ['IN-GAME'])
+#         if len(games) == 1:
+#             # If so, redirect them to the game
+#             return HttpResponseRedirect(f'/magic_fifteen/game/{games[0].game_id}')
     
-        # Otherwise, they are not in a game or a lobby
-        raise LobbyError('You are not in a game lobby or active game')
-    except LobbyError as e:
-        return JsonResponse({'error': str(e)}, status=400)
+#         # Otherwise, they are not in a game or a lobby
+#         raise LobbyError('You are not in a game lobby or active game')
+#     except LobbyError as e:
+#         return JsonResponse({'error': str(e)}, status=400)
         
 
-def lobby_leave(request):
-    if request.method == 'POST':
-        current_user = get_player(request)
-        try:
-            found = get_games(request, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
-            Game = get_app_model(request, 'game')
-            if (len(found) == 1 and found[0].player_one == current_user):
-                p = Game.objects.get(game_id=found[0].game_id)
-                if (p.status == 'IN-GAME'):
-                    p.winner=p.player_two_id
-                    p.loser=p.player_one_id
-                    p.status='COMPLETED'
-                    p.p1_status='ABANDONED'
-                    p.p2_status='POST'
-                else:
-                    p.player_one=None
-                    p.status='LOBBY'
-                p.save()
-            elif (len(found) == 1 and found[0].player_two == current_user):
-                p = Game.objects.get(game_id=found[0].game_id)
-                if (p.status == 'IN-GAME'):
-                    p.winner=p.player_one_id
-                    p.loser=p.player_two_id
-                    p.status='COMPLETED'
-                    p.p2_status='ABANDONED'
-                    p.p1_status='POST'
-                else:
-                    p.player_two=None
-                    p.status='LOBBY'
-            else:
-                raise LobbyError('Lobby not found!')
-            p.save()
-            if p.has_players() == False:
-                p.delete()
-        except LobbyError as e:
-            return JsonResponse({'error': str(e)}, status=400)
-        return HttpResponseRedirect('/magic_fifteen')
+# def lobby_leave(request):
+#     if request.method == 'POST':
+#         current_user = get_player(request)
+#         try:
+#             found = get_games(request, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
+#             Game = get_app_model(request, 'game')
+#             if (len(found) == 1 and game.player_one == current_user):
+#                 p = Game.objects.get(game_id=game.game_id)
+#                 if (p.status == 'IN-GAME'):
+#                     p.winner=p.player_two_id
+#                     p.loser=p.player_one_id
+#                     p.status='COMPLETED'
+#                     p.p1_status='ABANDONED'
+#                     p.p2_status='POST'
+#                 else:
+#                     p.player_one=None
+#                     p.status='LOBBY'
+#                 p.save()
+#             elif (len(found) == 1 and game.player_two == current_user):
+#                 p = Game.objects.get(game_id=game.game_id)
+#                 if (p.status == 'IN-GAME'):
+#                     p.winner=p.player_one_id
+#                     p.loser=p.player_two_id
+#                     p.status='COMPLETED'
+#                     p.p2_status='ABANDONED'
+#                     p.p1_status='POST'
+#                 else:
+#                     p.player_two=None
+#                     p.status='LOBBY'
+#             else:
+#                 raise LobbyError('Lobby not found!')
+#             p.save()
+#             if p.has_players() == False:
+#                 p.delete()
+#         except LobbyError as e:
+#             return JsonResponse({'error': str(e)}, status=400)
+#         return HttpResponseRedirect('/magic_fifteen')

@@ -16,7 +16,7 @@ export function apollosLocalMessage(message: string, type: string) {
     }
 }
 
-export function apollosServerMessage(message: string, type: string) {
+export function apollosServerMessage(message: string, type: string, data: any) {
     console.log(`${type}: ${message}`);
     let userIdRegex = /User:\s*(\d+)/;
     let matchedUserId = message.match(userIdRegex);
@@ -27,14 +27,14 @@ export function apollosServerMessage(message: string, type: string) {
     let errorMessage = matchedErrorMessage ? matchedErrorMessage[1] : null;
 
     // Want to only show alert to the user who made the error
-    if (userIdFromMessage === getCurrentUserId() && errorMessage) {
+    if (userIdFromMessage === getCurrentUserId(data) && errorMessage) {
         apollosLocalMessage(errorMessage, type);
     }
 }
 
-export function getCurrentUserId() {
-    let appElement = document.getElementById('mpApp');
-    let id = (appElement?.dataset.current)?.toString();
+export function getCurrentUserId(data: any) {
+    // let appElement = document.getElementById('mpApp');
+    let id = (data.current)?.toString();
     if (id) {
         return parseInt(id);
     } else {

@@ -2,8 +2,8 @@ import { MultiplayerLobby } from "./MultiplayerLobby";
 import { apollosLocalMessage, getCurrentUserId } from "./utils";
 
 export class MagicFifteenLobby extends MultiplayerLobby {
-    constructor(app: HTMLElement, data: HTMLElement, csrfToken: string) {
-        super(app, data, csrfToken);
+    constructor(app: HTMLElement, data: HTMLElement) {
+        super(app, data);
     }
 
     protected handleLobby(data: any): void {
@@ -29,7 +29,7 @@ export class MagicFifteenLobby extends MultiplayerLobby {
         this.privacy = data.status.privacy;
         // this.current = data.status.current;
         this.round = data.status.round;
-        this.handleOptions();
+        this.handleOptions(this.updateLobby.bind(this));
     }
 
     protected updateLobby(data: any): void {
@@ -38,7 +38,7 @@ export class MagicFifteenLobby extends MultiplayerLobby {
             'type': '',
             'message': {
                 'lobby_id': this.gameId,
-                'user_id': getCurrentUserId(),
+                'user_id': getCurrentUserId(this.contextData.dataset),
             },
         };
         if (data.type == 'ready') {

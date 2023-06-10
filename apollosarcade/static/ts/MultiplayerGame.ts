@@ -55,7 +55,7 @@ export abstract class MultiplayerGame extends LocalGame{
             this.playerTwoElement.classList.add('disabled');
         }
 
-        this.socket = new GameSocket(this.gameId, this.handleMove.bind(this));
+        this.socket = new GameSocket(this.gameId, this.handleMove.bind(this), this.contextData.dataset);
         this.socket.connect();
     }
     protected loop(): void { }

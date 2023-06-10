@@ -338,7 +338,16 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                         lobby.player_two = None
                         lobby.p2_status = 'UNREADY'
                     await self.save_game(lobby)
-                print(f"Sending message to group: {self.game_group_id}")
+                    await self.channel_layer.group_send(
+                        self.lobby_group_id, {
+                            'type': 'send_redirect',
+                            'message': {
+                                'url': f'/magic_fifteen/',
+                                'reason': 'You have left the lobby.'
+                            }
+                        }
+                    )
+                print(f"Sending message to group: {self.lobby_group_id}")
                 await self.channel_layer.group_send(
                     self.lobby_group_id, {
                         'type': 'send_message',
@@ -356,14 +365,23 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                             'round': lobby.round,
                         }
                     })
-                print(f"Sent message to group: {self.game_group_id}")
+                print(f"Sent message to group: {self.lobby_group_id}")
+            elif response['type'] == 'continue':
+                await self.channel_layer.group_send(
+                        self.lobby_group_id, {
+                            'type': 'send_redirect',
+                            'message': {
+                                'url': f'/magic_fifteen/game/{lobby.game_id}',
+                            }
+                        }
+                    )
         except Exception as e:
             tb_str = traceback.format_exception(type(e), e, e.__traceback__)
             tb_str = ''.join(tb_str)
 
             message = response.get('message', {})
             await self.channel_layer.group_send(
-                self.game_group_id, {
+                self.lobby_group_id, {
                     'type': 'error_message',
                     'message': f"User: {user_id}\nError: {str(e)}\nTraceback:\n{tb_str}",
                 })
@@ -403,11 +421,11 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
 
 
         # Print the game_id received
-        print(f"Looking for game with ID: {self.game_id}")
+        print(f"Looking for game with ID: {self.lobby_id}")
 
         # Retrieve the model instance from the database
         try:
-            game = Game.objects.get(game_id=self.game_id)
+            game = Game.objects.get(game_id=self.lobby_id)
             # Print the game instance found
             print(f"Found game: {game}")
 

@@ -5,7 +5,7 @@ export class GameSocket extends ApollosSocket {
 
     private callback: Function;
 
-    constructor(gameId: string, callback: Function) {
+    constructor(gameId: string, callback: Function, data: any = {}) {
         super(gameId);
         this.callback = callback;
     }
@@ -21,7 +21,7 @@ export class GameSocket extends ApollosSocket {
                 window.location.href = data.url;
             });
         } else if (data.type == 'error') {
-            apollosServerMessage(data.error, 'error');
+            apollosServerMessage(data.error, 'error', data);
         }
     }
 }

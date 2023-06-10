@@ -21,11 +21,6 @@ export abstract class MultiplayerLobby {
     protected players: HTMLElement;
     protected options: HTMLElement;
 
-    public readyForm: HTMLFormElement;
-    public unreadyForm: HTMLFormElement;
-    public continueForm: HTMLFormElement;
-    public leaveForm: HTMLFormElement;
-
     protected readyButton: HTMLElement;
     protected unreadyButton: HTMLElement;
     protected continueButton: HTMLElement;
@@ -33,15 +28,12 @@ export abstract class MultiplayerLobby {
 
     protected isMobile: boolean;
 
-    private csrfToken: string;
-
     protected socket: LobbySocket;
 
-    constructor(app: HTMLElement, data: HTMLElement, csrfToken: string) {
+    constructor(app: HTMLElement, data: HTMLElement) {
         // House-keeping
         this.app = app;
         this.contextData = data;
-        this.csrfToken = csrfToken;
         this.isMobile = window.matchMedia("only screen and (max-width: 48rem)").matches;
         if (!this.isMobile) {
             this.app.classList.add('apollos-flex-row');
@@ -54,8 +46,8 @@ export abstract class MultiplayerLobby {
         this.privacy = this.contextData.dataset.privacy || 'Public';
         this.playerOne = this.contextData.dataset.p1 || 'Player 1';
         this.playerTwo = this.contextData.dataset.p2 || 'Player 2';
-        this.playerOneID = this.contextData.dataset.p1ID || '0';
-        this.playerTwoID = this.contextData.dataset.p2ID || '0';
+        this.playerOneID = this.contextData.dataset.p1Id || '0';
+        this.playerTwoID = this.contextData.dataset.p2Id || '0';
         this.playerOneStatus = this.contextData.dataset.p1Status || 'UNREADY';
         this.playerTwoStatus = this.contextData.dataset.p2Status || 'UNREADY';
         this.gameStatus = this.contextData.dataset.status || 'LOBBY';
@@ -96,96 +88,100 @@ export abstract class MultiplayerLobby {
         this.options.classList.add('apollos-flex-row');
         this.options.id = 'lobbyOptions';
 
-        this.readyForm = document.createElement('form');
-        this.readyForm.classList.add('apollos-flex-col');
-        this.readyForm.id = 'startForm';
-        this.readyForm.setAttribute('action', `start`);
-        this.readyForm.setAttribute('method', 'post');
+        this.readyButton = document.createElement('div');
+        this.readyButton.classList.add('mft-button');
+        this.readyButton.setAttribute('value', 'ready');
+        this.readyButton.textContent = 'READY';
 
-        this.readyButton = document.createElement('input');
-        this.readyButton.classList.add('apollos-button');
-        this.readyButton.setAttribute('type', 'submit');
-        this.readyButton.setAttribute('value', 'START');
+        this.unreadyButton = document.createElement('div');
+        this.unreadyButton.classList.add('mft-button');
+        this.unreadyButton.setAttribute('value', 'unready');
+        this.unreadyButton.textContent = 'UNREADY';
 
-        this.unreadyForm = document.createElement('form');
-        this.unreadyForm.classList.add('apollos-flex-col');
-        this.unreadyForm.id = 'startForm';
-        this.unreadyForm.setAttribute('action', `start`);
-        this.unreadyForm.setAttribute('method', 'post');
-
-        this.unreadyButton = document.createElement('input');
-        this.unreadyButton.classList.add('apollos-button');
-        this.unreadyButton.setAttribute('type', 'submit');
-        this.unreadyButton.setAttribute('value', 'START');
-
-        this.continueForm = document.createElement('form');
-        this.continueForm.classList.add('apollos-flex-col');
-        this.continueForm.id = 'startForm';
-        this.continueForm.setAttribute('action', `start`);
-        this.continueForm.setAttribute('method', 'post');
-
-        this.continueButton = document.createElement('input');
-        this.continueButton.classList.add('apollos-button');
-        this.continueButton.setAttribute('type', 'submit');
+        this.continueButton = document.createElement('div');
+        this.continueButton.classList.add('mft-button');
         this.continueButton.setAttribute('value', 'CONTINUE');
+        this.continueButton.textContent = 'CONTINUE';
 
-        this.leaveForm = document.createElement('form');
-        this.leaveForm.classList.add('apollos-flex-col');
-        this.leaveForm.id = 'leaveForm';
-        this.leaveForm.setAttribute('action', 'leave');
-
-        this.leaveButton = document.createElement('input');
-        this.leaveButton.classList.add('apollos-button');
-        this.leaveButton.setAttribute('type', 'submit');
+        this.leaveButton = document.createElement('div');
+        this.leaveButton.classList.add('mft-button');
         this.leaveButton.setAttribute('value', 'LEAVE');
-
-        this.readyForm.appendChild(this.readyButton);
-        this.unreadyForm.appendChild(this.unreadyButton);
-        this.continueForm.appendChild(this.continueButton);
-        this.leaveForm.appendChild(this.leaveButton);
-
-        addCsrfTokenToForm(this.readyForm, this.csrfToken);
-        addCsrfTokenToForm(this.unreadyForm, this.csrfToken);
-        addCsrfTokenToForm(this.continueForm, this.csrfToken);
-        addCsrfTokenToForm(this.leaveForm, this.csrfToken);
+        this.leaveButton.textContent = 'LEAVE';
 
         
-        this.handleOptions();
+        this.handleOptions(this.updateLobby.bind(this));
 
         this.card.appendChild(this.lobbyTitle);
         this.card.appendChild(this.players);
         this.card.appendChild(this.options);
 
-        this.socket = new LobbySocket(this.gameId, this.handleLobby.bind(this));
+        this.app.appendChild(this.card);
+
+        this.socket = new LobbySocket(this.gameId, this.handleLobby.bind(this), this.contextData.dataset);
         this.socket.connect();
     }
 
-    public handleOptions(): void {
+    public handleOptions(callback: Function): void {
         this.options.innerHTML = '';
         switch (this.gameStatus) {
             case 'LOBBY':
             case 'REMATCH':
                 if (this.current === this.playerOneID && this.playerOneStatus == 'UNREADY') {
-                    this.options.appendChild(this.readyForm);
+                    this.readyButton.addEventListener('click', () => {
+                        callback({
+                            'type': 'ready',
+                        })
+                    });
+                    this.options.appendChild(this.readyButton);
                 } else if (this.current === this.playerOneID && this.playerOneStatus == 'READY') {
-                    this.options.appendChild(this.unreadyForm);
+                    this.unreadyButton.addEventListener('click', () => {
+                        callback({
+                            'type': 'unready',
+                        })
+                    });
+                    this.options.appendChild(this.unreadyButton);
                 } else if (this.current === this.playerTwoID && this.playerTwoStatus == 'UNREADY') {
-                    this.options.appendChild(this.readyForm);
+                    this.readyButton.addEventListener('click', () => {
+                        callback({
+                            'type': 'ready',
+                        })
+                    });
+                    this.options.appendChild(this.readyButton);
                 } else if (this.current === this.playerTwoID && this.playerTwoStatus == 'READY') {
-                    this.options.appendChild(this.unreadyForm);
+                    this.unreadyButton.addEventListener('click', () => {
+                        callback({
+                            'type': 'unready',
+                        })
+                    });
+                    this.options.appendChild(this.unreadyButton);
                 }
                 break;
             case 'IN-GAME':
                 if (this.current === this.playerOneID && this.playerOneStatus == 'IN-GAME') {
-                    this.options.appendChild(this.continueForm);
+                    this.continueButton.addEventListener('click', () => {
+                        callback({
+                            'type': 'continue',
+                        })
+                    });
+                    this.options.appendChild(this.continueButton);
                 } else if (this.current === this.playerTwoID && this.playerTwoStatus == 'IN-GAME') {
-                    this.options.appendChild(this.continueForm);
+                    this.continueButton.addEventListener('click', () => {
+                        callback({
+                            'type': 'continue',
+                        })
+                    });
+                    this.options.appendChild(this.continueButton);
                 }
                 break;
             default:
                 break;
         }
-        this.options.appendChild(this.leaveForm);
+        this.leaveButton.addEventListener('click', () => {
+            callback({
+                'type': 'leave',
+            })
+        });
+        this.options.appendChild(this.leaveButton);
     }
 
     protected abstract handleLobby(data: any): void;

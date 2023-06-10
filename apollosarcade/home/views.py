@@ -20,11 +20,12 @@ def check_for_lobbies(request):
 
 def check_for_match(request):
     url = 'magic_fifteen/'
+    games = get_games(request,['LOBBY','READY','IN-GAME','COMPLETED'],exclude_status=['ARCHIVE'])
     match (check_for_lobbies(request)):
         case 2:
-            url += 'post'
+            url += f'post/{games[0].game_id}'
         case 1:
-            url += 'lobby'
+            url += f'lobby/{games[0].game_id}'
         case 0:
             url += 'start'
     match = {}
