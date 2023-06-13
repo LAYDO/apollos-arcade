@@ -6,7 +6,7 @@ module.exports = {
         app: ['./static/ts/app.ts', './static/ts/utils.ts'],
         home: './static/ts/home.ts',
         aa_local: ['./static/ts/LocalGame.ts'],
-        aa_start: ['./static/ts/GameStart.ts'],
+        aa_start: ['./static/ts/GameStart.ts', './static/ts/StartCard.ts'],
         aa_game: ['./static/ts/MultiplayerGame.ts', './static/ts/LocalGame.ts', './static/ts/GameSocket.ts', './static/ts/ApollosSocket.ts'],
         aa_lobby: ['./static/ts/MultiplayerLobby.ts', './static/ts/LobbySocket.ts', './static/ts/ApollosSocket.ts'],
         // aa_post: ['./static/ts/PostGame.ts', './static/ts/PostGameSocket.ts', './static/ts/ApollosSocket.ts'],

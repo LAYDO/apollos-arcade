@@ -202,12 +202,17 @@ body {
 }
 
 .apollos-button {
-    background-color: var(--color-secondary);
+    width: 10rem;
+    height: 2rem;
+    border: 0.125rem solid var(--font-color);
+    display: inherit;
     color: var(--font-color);
-    padding: 0.5rem 2rem;
-    margin: 1rem auto;
-    width: 90%;
+    margin: 2rem;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
     cursor: pointer;
+    background-color: transparent;
 }
 
 .apollos-button a {
@@ -415,4 +420,8 @@ body {
 
 .apollos-round {
     font-size: 1rem;
+}
+
+.apollos-modal {
+    display: none;
 }

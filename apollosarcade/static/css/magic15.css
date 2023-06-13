@@ -28,21 +28,7 @@
     pointer-events: none;
 }
 
-.mft-button {
-    width: 10rem;
-    height: 2rem;
-    border: 0.125rem solid var(--font-color);
-    display: inherit;
-    color: var(--font-color);
-    margin: 2rem;
-    justify-content: center;
-    align-items: center;
-    opacity: 1;
-    cursor: pointer;
-    background-color: transparent;
-}
-
-.mft-button:hover {
+.apollos-button:hover {
     opacity: 0.5;
 }
 
@@ -84,9 +70,7 @@
     justify-content: center;
     align-items: center;
 }
-.mft-modal {
-    display: none;
-}
+
 .ttt-number-selected {
     border: 0.25rem solid var(--color-accent);
     border-radius: 0.75rem;

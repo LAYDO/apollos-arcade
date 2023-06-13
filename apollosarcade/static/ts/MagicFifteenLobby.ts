@@ -7,19 +7,6 @@ export class MagicFifteenLobby extends MultiplayerLobby {
     }
 
     protected handleLobby(data: any): void {
-        // "payload": {
-        //     "id": event['message']['id'],
-        //     "status": event['message']['status'],
-        //     "p1": event['message']['p1'],
-        //     "p2": event['message']['p2'],
-        //     "p1ID": event['message']['p1ID'],
-        //     "p2ID": event['message']['p2ID'],
-        //     "p1Status": event['message']['p1Status'],
-        //     "p2Status": event['message']['p2Status'],
-        //     "privacy": event['message']['privacy'],
-        //     "current": event['message']['current'],
-        //     "round": event['message']['round'],
-        // }
         this.playerOneStatus = data.status.p1Status;
         this.playerTwoStatus = data.status.p2Status;
         this.playerOne = data.status.p1;

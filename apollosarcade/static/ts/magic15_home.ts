@@ -39,7 +39,7 @@ function buildCard() {
             row.classList.add('mft-row');
 
             let button = document.createElement('div');
-            button.classList.add('mft-button');
+            button.classList.add('apollos-button');
             switch (i) {
                 case 0:
                     button.textContent = 'LOCAL';

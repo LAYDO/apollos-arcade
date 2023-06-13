@@ -123,12 +123,12 @@ export class StartCard {
         buttRow.classList.add('mft-row-b');
 
         this.button = document.createElement('input');
-        this.button.classList.add('mft-button');
+        this.button.classList.add('apollos-button');
         this.button.setAttribute('type', 'submit');
         this.button.setAttribute('value', button);
 
         let cancel = document.createElement('div');
-        cancel.classList.add('mft-button');
+        cancel.classList.add('apollos-button');
         cancel.textContent = 'CANCEL';
         cancel.addEventListener('click', () => {
             callback();
@@ -157,29 +157,29 @@ export class StartCard {
         this.parentElement.append(this.cardContainer);
     }
 
-    show() {
+    public show() {
         this.parentElement.setAttribute('style', 'display:block;');
     }
 
-    hide() {
+    public hide() {
         this.parentElement.setAttribute('style', 'display:none;');
     }
 
-    showText() {
+    public showText() {
         this.textLabel.setAttribute('style', 'display: inherit;');
         this.textOption.setAttribute('style', 'display: inherit;');
         this.passwordLabel.setAttribute('style', 'display: inherit;');
         this.password.setAttribute('style', 'display: inherit;');
     }
 
-    hideText() {
+    public hideText() {
         this.textLabel.setAttribute('style', 'display: none;');
         this.textOption.setAttribute('style', 'display: none;');
         this.passwordLabel.setAttribute('style', 'display: none;');
         this.password.setAttribute('style', 'display: none;');
     }
 
-    addCsrfTokenToForm(formElement: Element) {
+    private addCsrfTokenToForm(formElement: Element) {
         const csrfInput = document.createElement("input");
         csrfInput.type = "hidden";
         csrfInput.name = "csrfmiddlewaretoken";
@@ -188,7 +188,7 @@ export class StartCard {
         formElement.appendChild(csrfInput);
     }
 
-    submitForm() {
+    private submitForm() {
         const formData = new FormData(this.cardForm as HTMLFormElement);
         fetch(this.cardForm.getAttribute('action')!, {
             method: 'POST',

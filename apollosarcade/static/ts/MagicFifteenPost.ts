@@ -135,7 +135,7 @@ export class MagicFifteenPost {
         rematchForm.setAttribute('method', 'post');
 
         let rematchButton = document.createElement('input');
-        rematchButton.classList.add('mft-button');
+        rematchButton.classList.add('apollos-button');
         rematchButton.setAttribute('type', 'submit');
         rematchButton.setAttribute('value', 'REMATCH');
 
@@ -146,7 +146,7 @@ export class MagicFifteenPost {
         leaveForm.setAttribute('method', 'post');
 
         let leaveButton = document.createElement('input');
-        leaveButton.classList.add('mft-button');
+        leaveButton.classList.add('apollos-button');
         leaveButton.setAttribute('type', 'submit');
         leaveButton.setAttribute('value', 'LEAVE');
 
@@ -163,7 +163,7 @@ export class MagicFifteenPost {
         refreshContainer.classList.add('mft-refresh');
 
         let refreshButton = document.createElement('div');
-        refreshButton.classList.add('mft-button');
+        refreshButton.classList.add('apollos-button');
         refreshButton.addEventListener('click', () => {
             window.location.reload();
         });

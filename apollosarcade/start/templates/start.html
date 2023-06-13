@@ -3,19 +3,7 @@
 {% endblock %}
 {% block apollos_content_1 %}
 <div id="context-data-start" style="display: none;" data-guest="{{ guest }}"></div>
-<div class="apollos-container apollos-app">
-    <div id="start_container" class="apollos-flex-col">
-        <div class="mft-row mft-title">START MATCH</div>
-        <div class="mft-row">
-            <div id="createButton" class="mft-button">CREATE</div>
-        </div>
-        <div class="mft-row">
-            <div id="joinButton" class="mft-button">JOIN</div>
-        </div>
-    </div>
-</div>
-<div id="createModal" class="mft-modal"></div>
-<div id="joinModal" class="mft-modal"></div>
+<div id="aa_start" class="apollos-container apollos-app"></div>
 {% endblock %}
 {% block page_scripts %}
 <script type="text/javascript" src="{% static 'aa_start.bundle.js' %}"></script>

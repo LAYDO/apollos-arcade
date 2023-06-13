@@ -16,7 +16,7 @@
     justify-content: space-between;
 }
 
-.mft-button {
+.apollos-button {
     width: 10rem;
     height: 2rem;
     border: 0.125rem solid var(--font-color);
@@ -30,7 +30,7 @@
     background-color: transparent;
 }
 
-.mft-button:hover {
+.apollos-button:hover {
     opacity: 0.5;
 }
 

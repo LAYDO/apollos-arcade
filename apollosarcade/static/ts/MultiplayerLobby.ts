@@ -89,22 +89,22 @@ export abstract class MultiplayerLobby {
         this.options.id = 'lobbyOptions';
 
         this.readyButton = document.createElement('div');
-        this.readyButton.classList.add('mft-button');
+        this.readyButton.classList.add('apollos-button');
         this.readyButton.setAttribute('value', 'ready');
         this.readyButton.textContent = 'READY';
 
         this.unreadyButton = document.createElement('div');
-        this.unreadyButton.classList.add('mft-button');
+        this.unreadyButton.classList.add('apollos-button');
         this.unreadyButton.setAttribute('value', 'unready');
         this.unreadyButton.textContent = 'UNREADY';
 
         this.continueButton = document.createElement('div');
-        this.continueButton.classList.add('mft-button');
+        this.continueButton.classList.add('apollos-button');
         this.continueButton.setAttribute('value', 'CONTINUE');
         this.continueButton.textContent = 'CONTINUE';
 
         this.leaveButton = document.createElement('div');
-        this.leaveButton.classList.add('mft-button');
+        this.leaveButton.classList.add('apollos-button');
         this.leaveButton.setAttribute('value', 'LEAVE');
         this.leaveButton.textContent = 'LEAVE';
 
