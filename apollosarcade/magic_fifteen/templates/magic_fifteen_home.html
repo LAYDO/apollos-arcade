@@ -1,11 +1,7 @@
-{% extends "app.html" %} {% load static %}
+{% extends "game_home.html" %} {% load static %}
 {% block page_head %}
 <title>Magic Fifteen</title>
 <link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
-<link rel="stylesheet" href="{% static 'css/magic15_home.css' %}" />
-{% endblock %}
-{% block apollos_content_1 %}
-<div id="mft_container" class="apollos-container apollos-app"></div>
 {% endblock %}
 {% block page_scripts %}
 <script type="text/javascript" src="{% static 'magic15_home.bundle.js' %}"></script>

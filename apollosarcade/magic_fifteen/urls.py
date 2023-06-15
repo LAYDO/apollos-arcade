@@ -11,11 +11,11 @@ from post import views as post_views
 urlpatterns = [
     path('', views.magic_fifteen, name='magic_fifteen'),
     path('local/', local_views.local, name='local'),
-    path('check/', home_views.check_for_match, name='check_for_match'),
+    path('multiplayer/', home_views.check_for_match, name='check_for_match'),
     path('start/', start_views.start, name='start'),
     path('start/create', lobby_views.create_lobby, name='create_lobby'),
     path('start/join', lobby_views.join_lobby, name='join_lobby'),
-    path('lobby/<lobby_id>', lobby_views.lobby, name='lobby'),
+    path('lobby/<game_id>', lobby_views.lobby, name='lobby'),
     # path('lobby/leave', lobby_views.lobby_leave, name='lobby_leave'),
     # path('lobby/start', lobby_views.game_start_continue, name='game_start_continue'),
     path('game/<game_id>', game_views.game, name='game'),

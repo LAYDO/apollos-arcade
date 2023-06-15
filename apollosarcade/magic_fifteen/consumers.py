@@ -1,5 +1,5 @@
 import json, traceback
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -36,7 +36,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         try:
             if response['type'] == 'move':
                 message = response.get('message', {})
-                print(f"Received move: {message}")
+                # print(f"Received move: {message}")
                 game_id = message.get('game_id', None)
                 user_id = message.get('user_id', None)
                 space = message.get('space', None)
@@ -114,8 +114,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 p1 = await self.get_player_one(game)
                 p2 = await self.get_player_two(game)
 
-                print(f"game.round: {game.round}, spaces: {game.spaces}, plays: {game.plays}, ended: {game.ended}, status: {game.status}")
-                print(f"Sending message to group: {self.game_group_id}")
+                # print(f"game.round: {game.round}, spaces: {game.spaces}, plays: {game.plays}, ended: {game.ended}, status: {game.status}")
+                # print(f"Sending message to group: {self.game_group_id}")
                 await self.channel_layer.group_send(
                     self.game_group_id, {
                         'type': 'send_message',
@@ -125,9 +125,10 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                             'plays': game.plays,
                             'p1': p1.id,
                             'p2': p2.id,
+                            'current': user_id,
                         }
                     })
-                print(f"Sent message to group: {self.game_group_id}") 
+                # print(f"Sent message to group: {self.game_group_id}") 
             elif response['type'] == 'heartbeat':
                 await self.send(text_data=json.dumps({
                     'type': 'heartbeat'
@@ -170,21 +171,21 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
         Game = apps.get_model(app, 'Game')
 
         # Print the game_id received
-        print(f"Looking for game with ID: {self.game_id}")
+        # print(f"Looking for game with ID: {self.game_id}")
 
         # Retrieve the model instance from the database
         try:
             game = Game.objects.get(game_id=self.game_id)
             # Print the game instance found
-            print(f"Found game: {game}")
+            # print(f"Found game: {game}")
 
             return game
         except Game.DoesNotExist:
-            print(f"Game with ID: {self.game_id} does not exist")
+            # print(f"Game with ID: {self.game_id} does not exist")
             return None
     
     def check_win(self, game):
-        print(f"Checking win for game: {game}")
+        # print(f"Checking win for game: {game}")
         win = False
         if game.round <= 9:
             winning_arrays = game.winningArrays
@@ -232,7 +233,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
 
 class LobbyConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
-        self.lobby_id = self.scope['url_route']['kwargs']['lobby_id']
+        self.lobby_id = self.scope['url_route']['kwargs']['game_id']
         self.lobby_group_id = 'lobby_%s' % self.lobby_id
 
         await self.channel_layer.group_add(
@@ -240,6 +241,28 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+        lobby = await self.get_game_instance()
+        user = await self.get_player_by_username(self.scope["user"], lobby)
+        if lobby:
+            p1 = await self.get_player_one(lobby)
+            p2 = await self.get_player_two(lobby)
+            await self.channel_layer.group_send(
+                self.lobby_group_id, {
+                    'type': 'send_message',
+                    'message': {
+                        'id': lobby.game_id,
+                        'status': lobby.status,
+                        'p1': p1,
+                        'p2': p2,
+                        'p1ID': lobby.player_one_object_id,
+                        'p2ID': lobby.player_two_object_id,
+                        'p1Status': lobby.p1_status,
+                        'p2Status': lobby.p2_status,
+                        'privacy': lobby.privacy,
+                        'current': user.id,
+                        'round': lobby.round,
+                    }
+                })
 
     async def disconnect(self, close_code):
         print('Disconnected')
@@ -249,7 +272,7 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def receive_json(self, response):
-        print(f"Received JSON: {response}")
+        # print(f"Received JSON: {response}")
         if (isinstance(response, str)):
             try:
                 response = json.loads(response)
@@ -261,120 +284,148 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
             lobby_id = message.get('lobby_id', None)
             user_id = message.get('user_id', None)
             lobby = await self.get_game_instance()
-            if response['type'] == 'ready':
-                if (lobby.player_one_object_id == user_id):
-                    lobby.p1_status = 'READY'
-                elif (lobby.player_two_object_id == user_id):
-                    lobby.p2_status = 'READY'
-
-                await self.save_game(lobby)
-                if ((lobby.status == 'LOBBY' or lobby.status == 'REMATCH') and (lobby.p1_status == 'READY' and lobby.p2_status == 'READY')):
-                    lobby.status = 'IN-GAME'
-                    lobby.p1_status = 'IN-GAME'
-                    lobby.p2_status = 'IN-GAME'
-                    lobby.round = 1
-                    await self.save_game(lobby)
-                    await self.channel_layer.group_send(
-                        self.lobby_group_id, {
-                            'type': 'send_redirect',
-                            'message': {
-                                'url': f'/magic_fifteen/game/{lobby.game_id}',
-                            }
-                        }
-                    )
-            elif response['type'] == 'unready':
-                if (lobby.player_one_object_id == user_id):
-                    lobby.p1_status = 'READY'
-                elif (lobby.player_two_object_id == user_id):
-                    lobby.p2_status = 'READY'
-                await self.save_game(lobby)
-                print(f"Sending message to group: {self.game_group_id}")
-                await self.channel_layer.group_send(
-                    self.lobby_group_id, {
-                        'type': 'send_message',
-                        'message': {
-                            'id': lobby.game_id,
-                            'status': lobby.status,
-                            'p1': 'Waiting for player...' if lobby.player_one == None else lobby.player_one,
-                            'p2': lobby.player_two,
-                            'p1ID': lobby.player_one_object_id,
-                            'p2ID': lobby.player_two_object_id,
-                            'p1Status': lobby.p1_status,
-                            'p2Status': lobby.p2_status,
-                            'privacy': lobby.privacy,
-                            'current': user_id,
-                            'round': lobby.round,
-                        }
-                    })
-                print(f"Sent message to group: {self.game_group_id}")
-            elif response['type'] == 'leave':
-                if (lobby.status == 'IN-GAME'):
-                    # Logic for abandoning game
+            # print(f"Lobby: {lobby}")
+            if lobby:
+                # print(f"Message: {message}")
+                # print(f"Type: {response['type']}")
+                p1 = await self.get_player_one(lobby)
+                p2 = await self.get_player_two(lobby)
+                if response['type'] == 'ready':
                     if (lobby.player_one_object_id == user_id):
-                        lobby.winner = lobby.player_two_object_id
-                        lobby.loser = lobby.player_one_object_id
-                        lobby.p1_status = 'ABANDONED'
-                        lobby.p2_status = 'POST'
+                        lobby.p1_status = 'READY'
                     elif (lobby.player_two_object_id == user_id):
-                        lobby.winner = lobby.player_one_object_id
-                        lobby.loser = lobby.player_two_object_id
-                        lobby.p2_status = 'ABANDONED'
-                        lobby.p1_status = 'POST'
-                    lobby.status = 'COMPLETED'
+                        lobby.p2_status = 'READY'
+
                     await self.save_game(lobby)
+                    if ((lobby.status == 'LOBBY' or lobby.status == 'REMATCH') and (lobby.p1_status == 'READY' and lobby.p2_status == 'READY')):
+                        lobby.status = 'IN-GAME'
+                        lobby.p1_status = 'IN-GAME'
+                        lobby.p2_status = 'IN-GAME'
+                        lobby.round = 1
+                        await self.save_game(lobby)
+                        await self.channel_layer.group_send(
+                            self.lobby_group_id, {
+                                'type': 'send_redirect',
+                                'message': {
+                                    'url': f'/magic_fifteen/game/{lobby.game_id}',
+                                    'reason': 'Game is starting...'
+                                }
+                            }
+                        )
                     await self.channel_layer.group_send(
                         self.lobby_group_id, {
-                            'type': 'send_redirect',
+                            'type': 'send_message',
                             'message': {
-                                'url': f'/magic_fifteen/post/{lobby.game_id}',
+                                'id': lobby.game_id,
+                                'status': lobby.status,
+                                'p1': p1, #'Waiting for player...' if lobby.player_one == None else lobby.player_one,
+                                'p2': p2, #lobby.player_two,
+                                'p1ID': lobby.player_one_object_id,
+                                'p2ID': lobby.player_two_object_id,
+                                'p1Status': lobby.p1_status,
+                                'p2Status': lobby.p2_status,
+                                'privacy': lobby.privacy,
+                                'current': user_id,
+                                'round': lobby.round,
                             }
-                        }
-                    )
-                elif (lobby.status == 'LOBBY'):
+                        })
+                elif response['type'] == 'unready':
+                    # print(f'UNREADY: {lobby}')
                     if (lobby.player_one_object_id == user_id):
-                        lobby.player_one = None
                         lobby.p1_status = 'UNREADY'
                     elif (lobby.player_two_object_id == user_id):
-                        lobby.player_two = None
                         lobby.p2_status = 'UNREADY'
                     await self.save_game(lobby)
+                    # print(f"Sending message to group: {self.lobby_group_id}")
                     await self.channel_layer.group_send(
                         self.lobby_group_id, {
-                            'type': 'send_redirect',
+                            'type': 'send_message',
                             'message': {
-                                'url': f'/magic_fifteen/',
-                                'reason': 'You have left the lobby.'
+                                'id': lobby.game_id,
+                                'status': lobby.status,
+                                'p1': p1, #'Waiting for player...' if lobby.player_one == None else lobby.player_one,
+                                'p2': p2, #lobby.player_two,
+                                'p1ID': lobby.player_one_object_id,
+                                'p2ID': lobby.player_two_object_id,
+                                'p1Status': lobby.p1_status,
+                                'p2Status': lobby.p2_status,
+                                'privacy': lobby.privacy,
+                                'current': user_id,
+                                'round': lobby.round,
                             }
-                        }
-                    )
-                print(f"Sending message to group: {self.lobby_group_id}")
-                await self.channel_layer.group_send(
-                    self.lobby_group_id, {
-                        'type': 'send_message',
-                        'message': {
-                            'id': lobby.game_id,
-                            'status': lobby.status,
-                            'p1': 'Waiting for player...' if lobby.player_one == None else lobby.player_one,
-                            'p2': lobby.player_two,
-                            'p1ID': lobby.player_one_object_id,
-                            'p2ID': lobby.player_two_object_id,
-                            'p1Status': lobby.p1_status,
-                            'p2Status': lobby.p2_status,
-                            'privacy': lobby.privacy,
-                            'current': user_id,
-                            'round': lobby.round,
-                        }
-                    })
-                print(f"Sent message to group: {self.lobby_group_id}")
-            elif response['type'] == 'continue':
-                await self.channel_layer.group_send(
+                        })
+                    # print(f"Sent message to group: {self.lobby_group_id}")
+                elif response['type'] == 'leave':
+                    if (lobby.status == 'IN-GAME'):
+                        # Logic for abandoning game
+                        if (lobby.player_one_object_id == user_id):
+                            lobby.winner = lobby.player_two_object_id
+                            lobby.loser = lobby.player_one_object_id
+                            lobby.p1_status = 'ABANDONED'
+                            lobby.p2_status = 'POST'
+                        elif (lobby.player_two_object_id == user_id):
+                            lobby.winner = lobby.player_one_object_id
+                            lobby.loser = lobby.player_two_object_id
+                            lobby.p2_status = 'ABANDONED'
+                            lobby.p1_status = 'POST'
+                        lobby.status = 'COMPLETED'
+                        await self.save_game(lobby)
+                        await self.channel_layer.group_send(
+                            self.lobby_group_id, {
+                                'type': 'send_redirect',
+                                'message': {
+                                    'url': f'/magic_fifteen/post/{lobby.game_id}',
+                                }
+                            }
+                        )
+                    elif (lobby.status == 'LOBBY'):
+                        if (lobby.player_one_object_id == user_id):
+                            lobby.player_one = None
+                            lobby.p1_status = 'UNREADY'
+                        elif (lobby.player_two_object_id == user_id):
+                            lobby.player_two = None
+                            lobby.p2_status = 'UNREADY'
+                        await self.save_game(lobby)
+                        await self.channel_layer.group_send(
+                            self.lobby_group_id, {
+                                'type': 'send_leave',
+                                'message': {
+                                    'current': user_id,
+                                    'url': f'/magic_fifteen/',
+                                    'reason': 'You have left the lobby.'
+                                }
+                            }
+                        )
+                    # print(f"Sending message to group: {self.lobby_group_id}")
+                    await self.channel_layer.group_send(
                         self.lobby_group_id, {
-                            'type': 'send_redirect',
+                            'type': 'send_message',
                             'message': {
-                                'url': f'/magic_fifteen/game/{lobby.game_id}',
+                                'id': lobby.game_id,
+                                'status': lobby.status,
+                                'p1': p1, #'Waiting for player...' if lobby.player_one == None else lobby.player_one,
+                                'p2': p2, #lobby.player_two,
+                                'p1ID': lobby.player_one_object_id,
+                                'p2ID': lobby.player_two_object_id,
+                                'p1Status': lobby.p1_status,
+                                'p2Status': lobby.p2_status,
+                                'privacy': lobby.privacy,
+                                'current': user_id,
+                                'round': lobby.round,
                             }
-                        }
-                    )
+                        })
+                    # print(f"Sent message to group: {self.lobby_group_id}")
+                elif response['type'] == 'continue':
+                    await self.channel_layer.group_send(
+                            self.lobby_group_id, {
+                                'type': 'send_continue',
+                                'message': {
+                                    'current': user_id,
+                                    'url': f'/magic_fifteen/game/{lobby.game_id}',
+                                    'reason': 'Continuing to game.',
+                                }
+                            }
+                        )
         except Exception as e:
             tb_str = traceback.format_exception(type(e), e, e.__traceback__)
             tb_str = ''.join(tb_str)
@@ -387,7 +438,7 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                 })
 
     async def send_message(self, event):
-        print(f'Received event: {event}')
+        # print(f'Received event: {event}')
         await self.send(text_data=json.dumps({
             "payload": {
                 'type': 'update',
@@ -411,6 +462,27 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                 'type': 'redirect',
                 'url': event['message']['url'],
                 'reason': event['message']['reason'],
+                'current': event['message']['current'],
+            }
+        }))
+
+    async def send_leave(self, event):
+        await self.send(text_data=json.dumps({
+            'payload': {
+                'type': 'leave',
+                'url': event['message']['url'],
+                'reason': event['message']['reason'],
+                'current': event['message']['current'],
+            }
+        }))
+
+    async def send_continue(self, event):
+        await self.send(text_data=json.dumps({
+            'payload': {
+                'type': 'continue',
+                'url': event['message']['url'],
+                'reason': event['message']['reason'],
+                'current': event['message']['current'],
             }
         }))
 
@@ -421,13 +493,13 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
 
 
         # Print the game_id received
-        print(f"Looking for game with ID: {self.lobby_id}")
+        # print(f"Looking for game with ID: {self.lobby_id}")
 
         # Retrieve the model instance from the database
         try:
             game = Game.objects.get(game_id=self.lobby_id)
             # Print the game instance found
-            print(f"Found game: {game}")
+            # print(f"Found game: {game}")
 
             return game
         except Game.DoesNotExist:
@@ -442,9 +514,51 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def save_game(self, game):
-        game.save()
-        print(f"Game saved: {game}")
+    def save_game(self, lobby):
+        lobby.save()
+        # print(f"Lobby saved: {lobby}")
+
+    @database_sync_to_async
+    def get_player_one(self, lobby):
+        player1 = None
+        if (lobby.player_one != None):
+                if (str(ContentType.objects.get_for_model(lobby.player_one)).lower() == 'auth | user'):
+                    player1 = User.objects.get(id=lobby.player_one_object_id).username
+                else:
+                    player1 = Guest.objects.get(id=lobby.player_one_object_id).username
+        return player1
+    
+    @database_sync_to_async
+    def get_player_two(self, lobby):
+        player2 = None
+        if (lobby.player_two != None):
+                if (str(ContentType.objects.get_for_model(lobby.player_two)).lower() == 'auth | user'):
+                    player2 = User.objects.get(id=lobby.player_two_object_id).username
+                else:
+                    player2 = Guest.objects.get(id=lobby.player_two_object_id).username
+        return player2
+    
+    @database_sync_to_async
+    def get_player_by_username(self, user, lobby):
+        try:
+            if user.is_authenticated:
+                # This is an authenticated user.
+                return User.objects.get(username=user.username)
+            elif isinstance(user, AnonymousUser):
+                # This is a guest.
+                game = lobby #self.async_get_game_instance()
+                if (ContentType.objects.get_for_model(game.player_one) == ContentType.objects.get_for_model(Guest)):
+                    return Guest.objects.get(id=game.player_one_object_id)
+                elif (ContentType.objects.get_for_model(game.player_two) == ContentType.objects.get_for_model(Guest)):
+                    return Guest.objects.get(id=game.player_two_object_id)
+            else:
+                # This is an unexpected situation, handle accordingly.
+                pass
+            
+        except User.DoesNotExist:
+            raise Exception('Player not found')
+        except Guest.DoesNotExist:
+                raise Exception('Player not found')
         
 class PostConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):

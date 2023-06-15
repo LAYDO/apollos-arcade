@@ -201,7 +201,6 @@ export class StartCard {
             }
             return response.json();
         }).then(data => {
-            console.log(data);
             if (data.redirect) {
                 window.location.href = data.redirect;
             }

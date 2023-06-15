@@ -1,8 +1,9 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
 from guest.models import Guest
 from django.db.models import Q
+from channels.db import database_sync_to_async
 
 def get_player(request):
     try:

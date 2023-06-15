@@ -6,7 +6,7 @@ export class GameSocket extends ApollosSocket {
     private callback: Function;
 
     constructor(gameId: string, callback: Function, data: any = {}) {
-        super(gameId);
+        super(gameId, data);
         this.callback = callback;
     }
 

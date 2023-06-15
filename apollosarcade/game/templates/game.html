@@ -5,7 +5,7 @@
 <div id="context-data" style="display:none;" data-spaces="{{ spaces|safe }}" data-game-id="{{ id }}"
     data-round="{{ round }}" data-player1="{{ player1|default:'Player One' }}"
     data-player2="{{ player2|default:'Player Two' }}" data-plays="{{ plays|safe }}" data-p1="{{ p1 }}"
-    data-p2="{{ p2 }}" data-privacy="{{ privacy }}">
+    data-p2="{{ p2 }}" data-privacy="{{ privacy }}" data-current="{{ current }}">
 </div>
 {% if round|divisibleby:2 and current == p2 %}
 <div id="mpApp" class="apollos-container apollos-app" data-current="{{ current }}">

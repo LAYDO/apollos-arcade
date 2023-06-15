@@ -425,3 +425,47 @@ body {
 .apollos-modal {
     display: none;
 }
+
+.apollos-card {
+    background-color: transparent;
+    height: 39rem;
+}
+
+.apollos-card-inner {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.apollos-card.clicked .apollos-card-inner {
+    transform: rotateY(180deg);
+}
+
+.apollos-card-front,
+.apollos-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+.apollos-card-back {
+    text-align: start;
+    transform: rotateY(180deg);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff8ed;
+    border-radius: 1rem;
+    overflow-y: auto;
+}
+
+.apollos-title,
+.close-button {
+    font-size: 2rem;
+    margin: 0 1rem;
+}
+
+.apollos-text {
+    margin: 1rem;
+}

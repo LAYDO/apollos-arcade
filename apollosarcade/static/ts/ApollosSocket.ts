@@ -5,8 +5,9 @@ export abstract class ApollosSocket extends WebSocket {
     protected heartbeatInterval: number;
     protected heartbeatTimeout: any;
     protected gameId: string;
+    public data: any;
 
-    constructor(gameId: string) {
+    constructor(gameId: string, data: any = {}) {
         let path = window.location.pathname.split('/')[2];
         let app = window.location.pathname.split('/')[1];
         let connectionString = (window.location.protocol === 'https:') ? `wss://${window.location.host}/${app}/ws/${path}/${gameId}/` : `ws://${window.location.host}/${app}/ws/${path}/${gameId}/`;
@@ -15,6 +16,7 @@ export abstract class ApollosSocket extends WebSocket {
         this.retryInterval = 1000;
         this.heartbeatInterval = 30000; // 30 seconds
         this.heartbeatTimeout = null;
+        this.data = data;
     }
 
     public connect() {
@@ -33,7 +35,7 @@ export abstract class ApollosSocket extends WebSocket {
         }
 
         this.onmessage = (e) => {
-            console.log('Received message from websocket', e.data);
+            // console.log('Received message from websocket', e.data);
             let data = JSON.parse(e.data);
             if ('payload' in data) {
                 data = data.payload;

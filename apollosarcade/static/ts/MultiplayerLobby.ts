@@ -12,6 +12,8 @@ export abstract class MultiplayerLobby {
     protected playerTwoID: string;
     protected playerOneStatus: string;
     protected playerTwoStatus: string;
+    public p1Check: HTMLElement;
+    public p2Check: HTMLElement;
     protected gameStatus: string;
     public round: string;
     public current: string;
@@ -70,6 +72,7 @@ export abstract class MultiplayerLobby {
 
         let p1 = document.createElement('div');
         p1.classList.add('apollos-margin-sb');
+        p1.id = 'playerOne';
         p1.textContent = `Player 1: ${this.playerOne}`;
 
         let playerTwoContainer = document.createElement('div');
@@ -77,10 +80,25 @@ export abstract class MultiplayerLobby {
 
         let p2 = document.createElement('div');
         p2.classList.add('apollos-margin-sb');
+        p2.id = 'playerTwo';
         p2.textContent = `Player 2: ${this.playerTwo}`;
 
+        this.p1Check = document.createElement('span');
+        this.p1Check.classList.add('fa-solid');
+        this.p1Check.classList.add('fa-check');
+        this.p1Check.style.color = 'limegreen';
+        this.p1Check.style.visibility = 'hidden';
+
+        this.p2Check = document.createElement('span');
+        this.p2Check.classList.add('fa-solid');
+        this.p2Check.classList.add('fa-check');
+        this.p2Check.style.color = 'limegreen';
+        this.p2Check.style.visibility = 'hidden';
+
         playerOneContainer.appendChild(p1);
+        playerOneContainer.appendChild(this.p1Check);
         playerTwoContainer.appendChild(p2);
+        playerTwoContainer.appendChild(this.p2Check);
         this.players.appendChild(playerOneContainer);
         this.players.appendChild(playerTwoContainer);
 
@@ -108,17 +126,16 @@ export abstract class MultiplayerLobby {
         this.leaveButton.setAttribute('value', 'LEAVE');
         this.leaveButton.textContent = 'LEAVE';
 
-        
-        this.handleOptions(this.updateLobby.bind(this));
-
         this.card.appendChild(this.lobbyTitle);
         this.card.appendChild(this.players);
         this.card.appendChild(this.options);
-
+        
         this.app.appendChild(this.card);
-
+        
         this.socket = new LobbySocket(this.gameId, this.handleLobby.bind(this), this.contextData.dataset);
         this.socket.connect();
+
+        // this.handleOptions(this.updateLobby.bind(this));
     }
 
     public handleOptions(callback: Function): void {
@@ -126,51 +143,69 @@ export abstract class MultiplayerLobby {
         switch (this.gameStatus) {
             case 'LOBBY':
             case 'REMATCH':
-                if (this.current === this.playerOneID && this.playerOneStatus == 'UNREADY') {
-                    this.readyButton.addEventListener('click', () => {
-                        callback({
-                            'type': 'ready',
-                        })
-                    });
-                    this.options.appendChild(this.readyButton);
-                } else if (this.current === this.playerOneID && this.playerOneStatus == 'READY') {
-                    this.unreadyButton.addEventListener('click', () => {
-                        callback({
-                            'type': 'unready',
-                        })
-                    });
-                    this.options.appendChild(this.unreadyButton);
-                } else if (this.current === this.playerTwoID && this.playerTwoStatus == 'UNREADY') {
-                    this.readyButton.addEventListener('click', () => {
-                        callback({
-                            'type': 'ready',
-                        })
-                    });
-                    this.options.appendChild(this.readyButton);
-                } else if (this.current === this.playerTwoID && this.playerTwoStatus == 'READY') {
-                    this.unreadyButton.addEventListener('click', () => {
-                        callback({
-                            'type': 'unready',
-                        })
-                    });
-                    this.options.appendChild(this.unreadyButton);
+                if (this.current == this.playerOneID) {
+                    if (this.playerOneStatus == 'UNREADY') {
+                        this.readyButton.addEventListener('click', () => {
+                            callback({
+                                'type': 'ready',
+                            })
+                        });
+                        this.options.appendChild(this.readyButton);
+                    } else if (this.playerOneStatus == 'READY') {
+                        this.unreadyButton.addEventListener('click', () => {
+                            callback({
+                                'type': 'unready',
+                            })
+                        });
+                        this.options.appendChild(this.unreadyButton);
+                    }
+                } else if (this.current == this.playerTwoID) {
+                    if (this.playerTwoStatus == 'UNREADY') {
+                        this.readyButton.addEventListener('click', () => {
+                            callback({
+                                'type': 'ready',
+                            })
+                        });
+                        this.options.appendChild(this.readyButton);
+                    } else if (this.playerTwoStatus == 'READY') {
+                        this.unreadyButton.addEventListener('click', () => {
+                            callback({
+                                'type': 'unready',
+                            })
+                        });
+                        this.options.appendChild(this.unreadyButton);
+                    }
+                }
+                if (this.playerOneStatus == 'READY') {
+                    this.p1Check.style.visibility = 'visible';
+                } else if (this.playerOneStatus == 'UNREADY') {
+                    this.p1Check.style.visibility = 'hidden';
+                }
+                if (this.playerTwoStatus == 'READY') {
+                    this.p2Check.style.visibility = 'visible';
+                } else if (this.playerTwoStatus == 'UNREADY') {
+                    this.p2Check.style.visibility = 'hidden';
                 }
                 break;
             case 'IN-GAME':
-                if (this.current === this.playerOneID && this.playerOneStatus == 'IN-GAME') {
-                    this.continueButton.addEventListener('click', () => {
-                        callback({
-                            'type': 'continue',
-                        })
-                    });
-                    this.options.appendChild(this.continueButton);
-                } else if (this.current === this.playerTwoID && this.playerTwoStatus == 'IN-GAME') {
-                    this.continueButton.addEventListener('click', () => {
-                        callback({
-                            'type': 'continue',
-                        })
-                    });
-                    this.options.appendChild(this.continueButton);
+                if (this.current == this.playerOneID) {
+                    if (this.playerOneStatus == 'IN-GAME') {
+                        this.continueButton.addEventListener('click', () => {
+                            callback({
+                                'type': 'continue',
+                            })
+                        });
+                        this.options.appendChild(this.continueButton);
+                    }
+                } else if (this.current == this.playerTwoID) {
+                    if (this.playerTwoStatus == 'IN-GAME') {
+                        this.continueButton.addEventListener('click', () => {
+                            callback({
+                                'type': 'continue',
+                            })
+                        });
+                        this.options.appendChild(this.continueButton);
+                    }
                 }
                 break;
             default:
