@@ -1,4 +1,3 @@
-import { addCsrfTokenToForm } from "./utils";
 import { LobbySocket } from "./LobbySocket";
 
 export abstract class MultiplayerLobby {

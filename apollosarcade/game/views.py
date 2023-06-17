@@ -61,28 +61,3 @@ def game(request, game_id):
         return render(request, f'{app}_game.html', game)
     except GameError as e:
         return JsonResponse({'error': e.message}, status=e.status)
-    
-def game_leave(request, game_id):
-    if request.method == 'POST':
-        current_user = get_player(request)
-        app = request.path.split('/')[1]
-        model_name = 'game'
-        try:
-            model = get_app_model(request, model_name)
-            match = model.objects.get(game_id=game_id)
-            if (match and match.status == 'IN-GAME'):
-                if (match.player_one == current_user):
-                    match.p1_status='ABANDONED'
-                    match.p2_status='POST'
-                    match.winner=match.player_two_id
-                    match.loser=match.player_one_id
-                elif (match.player_two == current_user):
-                    match.p2_status='ABANDONED'
-                    match.p1_status='POST'
-                    match.winner=match.player_one_id
-                    match.loser=match.player_two_id
-                match.status='COMPLETED'
-                match.save()
-            return HttpResponseRedirect(f'/{app}')
-        except GameError as e:
-            return JsonResponse({'error': e.message}, status=e.status)

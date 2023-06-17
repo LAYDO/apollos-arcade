@@ -1,11 +1,10 @@
 import { MagicFifteenPost } from "./MagicFifteenPost";
 
-declare var csrfToken: string;
-
 function magicFifteenPost() {
-    let app = document.getElementById('magicFifteenPost');
-    if (app) {
-        let magicFifteenPost = new MagicFifteenPost(app, csrfToken);
+    let app = document.getElementById('aa_post');
+    let data = document.getElementById('context-data-post');
+    if (app && data) {
+        let magicFifteenPost = new MagicFifteenPost(app, data);
         magicFifteenPost.drawLine();
     }
 }

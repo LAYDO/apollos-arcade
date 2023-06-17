@@ -3,41 +3,40 @@ from django.shortcuts import render
 
 from apollosarcade.utils import get_player, get_player_by_content_type, game_archival, get_games, get_app_model
 
-def post(request):
-
+def post(request, game_id):
+    current_user = get_player(request)
     post = {}
     lobbies = get_games(request, ['LOBBY','REMATCH'], [])
     if len(lobbies) > 0:
         return HttpResponseRedirect(f'/magic_fifteen/lobby')
-    games = get_games(request, ['COMPLETED'], [])
     Game = get_app_model(request, 'game')
-    if (len(games) == 1):
-        game = Game.objects.get(game_id=games[0].game_id)
-        if (game):
-            if (game.round == 10 and game.winner == 0 and game.loser == 0):
-                winner = get_player_by_content_type(game.player_one_content_type, game.player_one_object_id)
-                loser = get_player_by_content_type(game.player_two_content_type, game.player_two_object_id)
+    game = Game.objects.get(game_id=game_id)
+    if (game and game.status == 'COMPLETED'):
+        if (game.round == 10 and game.winner == 0 and game.loser == 0):
+            winner = get_player_by_content_type(game.player_one_content_type, game.player_one_object_id)
+            loser = get_player_by_content_type(game.player_two_content_type, game.player_two_object_id)
+        else:
+            if (game.winner == game.player_one_object_id):
+                winner = get_player_by_content_type(game.player_one_content_type, game.winner)
+                loser = get_player_by_content_type(game.player_two_content_type, game.loser)
             else:
-                if (game.winner == game.player_one_object_id):
-                    winner = get_player_by_content_type(game.player_one_content_type, game.winner)
-                    loser = get_player_by_content_type(game.player_two_content_type, game.loser)
-                else:
-                    winner = get_player_by_content_type(game.player_two_content_type, game.winner)
-                    loser = get_player_by_content_type(game.player_one_content_type, game.loser)
-            post.update({
-                'id': game.game_id,
-                'privacy': game.privacy,
-                'player_one': game.player_one_object_id,
-                'player_two': game.player_two_object_id,
-                'winner_id': winner.id,
-                'loser_id': loser.id,
-                'winner': winner.username,
-                'loser': loser.username,
-                'spaces': game.spaces,
-                'pw': game.password,
-                'round': game.round,
-            })
-            return render(request, 'magic_fifteen_post.html', post)
+                winner = get_player_by_content_type(game.player_two_content_type, game.winner)
+                loser = get_player_by_content_type(game.player_one_content_type, game.loser)
+        post.update({
+            'id': game.game_id,
+            'privacy': game.privacy,
+            'player_one': game.player_one_object_id,
+            'player_two': game.player_two_object_id,
+            'winner_id': winner.id,
+            'loser_id': loser.id,
+            'winner': winner.username,
+            'loser': loser.username,
+            'spaces': game.spaces,
+            'pw': game.password,
+            'round': game.round,
+            'current': current_user.id,
+        })
+        return render(request, 'magic_fifteen_post.html', post)
     else:
         return HttpResponseRedirect(f'/magic_fifteen/')
 
@@ -161,5 +160,4 @@ def handle_leave(request, game, is_player_one):
         if rematch:
             rematch.status='LOBBY'
             rematch.save()
-    # if game.p1_status in ['LEFT', 'REMATCH'] and game.p2_status in ['LEFT', 'REMATCH']:
     game_archival(request, game.game_id)

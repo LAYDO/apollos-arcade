@@ -1,16 +1,7 @@
-import { addCsrfTokenToForm } from "./utils";
-export class MagicFifteenPost {
+import { MultiplayerPost } from "./MultiplayerPost";
+export class MagicFifteenPost extends MultiplayerPost {
 
-    private app: Element;
-    private gameTitle: Element;
-    private winnerElement: Element;
-    private loserElement: Element;
     private squares: Element;
-    private csrfToken: string;
-
-    public winner: string;
-    public loser: string;
-    public round: number;
     public spaces: number[];
     private winningArrays: number[][] = [
         [0, 1, 2],
@@ -23,69 +14,19 @@ export class MagicFifteenPost {
         [2, 4, 6],
     ]
 
-    private isMobile: boolean;
 
-    constructor(app: HTMLElement, csrfToken: string) {
-        this.app = app;
-        this.csrfToken = csrfToken;
+    constructor(app: HTMLElement, data: HTMLElement) {
+        super(app, data);
         this.spaces = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        this.isMobile = window.matchMedia("only screen and (max-width: 48rem)").matches;
-
-        const contextData = document.getElementById('context-data-post');
      
-        if (contextData?.dataset.spaces) {
-            this.spaces = JSON.parse(contextData?.dataset.spaces);
-        }
-        const gameId = contextData?.dataset.gameId;
-        this.round = contextData?.dataset.round ? parseInt(contextData?.dataset.round) : 0;
-        const privacy = contextData?.dataset.privacy;
-
-        this.winner = contextData?.dataset.winner !== undefined ? contextData?.dataset.winner : '';
-        this.loser = contextData?.dataset.loser !== undefined ? contextData?.dataset.loser : '';
-
-        if (!this.isMobile) {
-            this.app.classList.add('mft-row');
-        } else {
-            this.app.classList.add('apollos-flex-col');
-        }
-
-        let boardContainer = document.createElement('div');
-        boardContainer.classList.add('apollos-flex-col');
-
-        let buttonContainer = document.createElement('div');
-        buttonContainer.classList.add('apollos-flex-col');
-
-        this.gameTitle = document.createElement('div');
-        this.gameTitle.classList.add('mft-row');
-        this.gameTitle.classList.add('mft-title');
-        this.gameTitle.id = 'game_title';
-        this.gameTitle.textContent = `${privacy} Post Game #${gameId}`;
-
-        let outcomeContainer = document.createElement('div');
-        outcomeContainer.classList.add('apollos-flex-col');
-
-        this.winnerElement = document.createElement('div');
-        this.winnerElement.classList.add('mft-row-b');
-        this.winnerElement.classList.add('mft-margin-sb');
-        this.winnerElement.id = 'winner';
-
-        this.loserElement = document.createElement('div');
-        this.loserElement.classList.add('mft-row-b');
-        this.loserElement.classList.add('mft-margin-sb');
-        this.loserElement.id = 'loser';
-
-        if (this.round == 10 && this.winner != null) {
-            this.winnerElement.textContent = `Draw: ${this.winner}`;
-            this.loserElement.textContent = `Draw: ${this.loser}`;
-        } else {
-            this.winnerElement.textContent = `Winner: ${this.winner}`;
-            this.loserElement.textContent = `Try again: ${this.loser}`;
+        if (this.contextData.dataset.spaces) {
+            this.spaces = JSON.parse(this.contextData.dataset.spaces);
         }
 
         this.squares = document.createElement('div');
         this.squares.classList.add('pt-col');
         this.squares.id = 'mftSquares';
-        this.squares.setAttribute('game_id', gameId || '');
+        this.squares.setAttribute('game_id', this.gameId || '');
         let localCount = 0;
         for (let i = 0; i < 3; i++) {
             let squareRow = document.createElement('div');
@@ -123,68 +64,8 @@ export class MagicFifteenPost {
             }
             this.squares.append(squareRow);
         }
-
-        let lobbyOptions = document.createElement('div');
-        lobbyOptions.classList.add('mft-row');
-        lobbyOptions.id = 'lobbyOptions';
-
-        let rematchForm = document.createElement('form');
-        rematchForm.classList.add('apollos-flex-col');
-        rematchForm.id = 'rematchForm';
-        rematchForm.setAttribute('action', 'rematch');
-        rematchForm.setAttribute('method', 'post');
-
-        let rematchButton = document.createElement('input');
-        rematchButton.classList.add('apollos-button');
-        rematchButton.setAttribute('type', 'submit');
-        rematchButton.setAttribute('value', 'REMATCH');
-
-        let leaveForm = document.createElement('form');
-        leaveForm.classList.add('apollos-flex-col');
-        leaveForm.id = 'leaveForm';
-        leaveForm.setAttribute('action', 'leave');
-        leaveForm.setAttribute('method', 'post');
-
-        let leaveButton = document.createElement('input');
-        leaveButton.classList.add('apollos-button');
-        leaveButton.setAttribute('type', 'submit');
-        leaveButton.setAttribute('value', 'LEAVE');
-
-        rematchForm.append(rematchButton);
-        leaveForm.append(leaveButton);
-
-        addCsrfTokenToForm(rematchForm, this.csrfToken);
-        addCsrfTokenToForm(leaveForm, this.csrfToken);
-
-        lobbyOptions.append(rematchForm);
-        lobbyOptions.append(leaveForm);
-
-        let refreshContainer = document.createElement('div');
-        refreshContainer.classList.add('mft-refresh');
-
-        let refreshButton = document.createElement('div');
-        refreshButton.classList.add('apollos-button');
-        refreshButton.addEventListener('click', () => {
-            window.location.reload();
-        });
-        let refreshIcon = document.createElement('span');
-        refreshIcon.classList.add('fa-solid');
-        refreshIcon.classList.add('fa-rotate');
-
-        refreshButton.append(refreshIcon);
-        refreshContainer.append(refreshButton);
-
-        buttonContainer.append(lobbyOptions);
-        buttonContainer.append(refreshContainer);
-
-        outcomeContainer.append(this.gameTitle);
-        outcomeContainer.append(this.winnerElement);
-        outcomeContainer.append(this.loserElement);
-        outcomeContainer.append(this.squares);
-
-        boardContainer.append(outcomeContainer);
-        boardContainer.append(buttonContainer);
-        this.app.append(boardContainer);
+        this.resultsContainer.append(this.squares);
+        this.drawLine();
     }
 
     public drawLine() {
@@ -216,12 +97,4 @@ export class MagicFifteenPost {
             }
         }
     }
-
-    // addCsrfTokenToForm(form: HTMLFormElement) {
-    //     const csrfToken = document.createElement('input');
-    //     csrfToken.setAttribute('type', 'hidden');
-    //     csrfToken.setAttribute('name', 'csrfmiddlewaretoken');
-    //     csrfToken.setAttribute('value', this.csrfToken);
-    //     form.append(csrfToken);
-    // }
 }

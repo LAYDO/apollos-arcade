@@ -17,7 +17,7 @@ export class LobbySocket extends ApollosSocket {
         } else if (data.type == 'leave') {
             if (data.current == getCurrentUserId(this.data)) {
                 // console.log("Redirect message received");
-                apollosLocalMessage(data.reason, 'info')
+                apollosLocalMessage(data.reason, 'info');
                 document.getElementById('message_close')?.addEventListener('click', () => {
                     window.location.href = data.url;
                 });
@@ -29,7 +29,7 @@ export class LobbySocket extends ApollosSocket {
             }
         } else if (data.type == 'redirect') {
             // console.log("Redirect message received");
-            apollosLocalMessage(data.reason, 'info')
+            apollosLocalMessage(data.reason, 'info');
             document.getElementById('message_close')?.addEventListener('click', () => {
                 window.location.href = data.url;
             });
