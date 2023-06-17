@@ -43,11 +43,17 @@ export abstract class ApollosSocket extends WebSocket {
             } else {
                 console.warn('Received message from websocket without payload', data);
                 apollosLocalMessage('Received message from websocket without payload. See console for details.', 'warning');
+                document.getElementById('message_close')?.addEventListener('click', () => {
+                    window.location.reload();
+                });
             }
         }
         this.onerror = (e) => {
             console.error('Error connecting to websocket', e);
             apollosLocalMessage('Error connecting to websocket. See console for details.', 'error');
+            document.getElementById('message_close')?.addEventListener('click', () => {
+                window.location.reload();
+            });
         }
     }
 

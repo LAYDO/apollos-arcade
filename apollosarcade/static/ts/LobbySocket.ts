@@ -35,6 +35,9 @@ export class LobbySocket extends ApollosSocket {
             });
         } else if (data.type == 'error') {
             apollosServerMessage(data.error, 'error', data);
+            document.getElementById('message_close')?.addEventListener('click', () => {
+                window.location.reload();
+            });
         }
     }
 }

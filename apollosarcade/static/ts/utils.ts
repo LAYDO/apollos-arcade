@@ -1,14 +1,15 @@
 export function apollosLocalMessage(message: string, type: string) {
     console.log(`${type}: ${message}`);
     let modal = document.getElementById("messageModal");
+    let container = document.getElementById("modalContainer");
     let content = document.getElementById("messageContent");
     let closeButton = document.getElementById("message_close");
-    if (modal && content && closeButton != null) {
+    if (modal && content && container && closeButton != null) {
         content.textContent = message;
-        content.classList.add(`alert-${type}`);
+        container.classList.add(`alert-${type}`);
         modal.style.display = 'block';
         closeButton.replaceWith(closeButton.cloneNode(true));
-        if (type === 'error') {
+        if (type == 'error') {
             closeButton.addEventListener('click', () => {
                 window.location.reload();
             });

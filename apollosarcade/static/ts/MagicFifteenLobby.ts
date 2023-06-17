@@ -1,5 +1,5 @@
 import { MultiplayerLobby } from "./MultiplayerLobby";
-import { apollosLocalMessage, getCurrentUserId } from "./utils";
+import { getCurrentUserId } from "./utils";
 
 export class MagicFifteenLobby extends MultiplayerLobby {
     constructor(app: HTMLElement, data: HTMLElement) {
@@ -29,7 +29,6 @@ export class MagicFifteenLobby extends MultiplayerLobby {
     }
 
     protected updateLobby(data: any): void {
-        // TODO: Test lobby update
         let lobby = {
             'type': '',
             'message': {

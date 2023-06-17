@@ -141,11 +141,6 @@ export abstract class GameHome {
                     this.howToPlay();
                 });
                 inner.append(closeButton);
-
-                // Change inner event listener
-                // inner.addEventListener('click', () => {
-                //     this.howToPlay();
-                // });
             }
         }).catch(error => {
             console.error('There has been a problem with your fetch operation:', error);

@@ -133,8 +133,6 @@ export abstract class MultiplayerLobby {
         
         this.socket = new LobbySocket(this.gameId, this.handleLobby.bind(this), this.contextData.dataset);
         this.socket.connect();
-
-        // this.handleOptions(this.updateLobby.bind(this));
     }
 
     public handleOptions(callback: Function): void {

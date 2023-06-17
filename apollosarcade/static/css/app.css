@@ -373,6 +373,10 @@ body {
 }
 
 .modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     margin: 15% auto;
     border: 1px solid #888;
     width: 67%;
@@ -380,12 +384,13 @@ body {
 }
 
 .close {
-    color: #000;
-    float: right;
-    top: 0;
-    font-size: 3rem;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
+    padding: 0.5rem;
+    border: 0.124rem solid #31708f;
+    margin: 1rem;
+    width: 33%;
 }
 
 .close:hover,
@@ -396,6 +401,7 @@ body {
 }
 
 .alert {
+    font-size: 1.5rem;
     padding: 1rem;
     border: 1px solid transparent;
     border-radius: 4px;

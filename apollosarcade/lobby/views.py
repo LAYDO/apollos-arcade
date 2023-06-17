@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
 
-from apollosarcade.utils import get_player, get_games, get_app_model
+from apollosarcade.utils import get_player, get_app_model
 from apollosarcade.error_handler import LobbyError
 from guest.models import Guest
 
