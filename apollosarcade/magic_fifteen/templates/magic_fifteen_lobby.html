@@ -1,45 +1,7 @@
-{% extends "app.html" %} {% load static %}
+{% extends "lobby.html" %} {% load static %}
 {% block page_head %}
 <title>Magic 15</title>
 <link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
-{% endblock %}
-{% block apollos_content_1 %}
-<div class="apollos-container apollos-app">
-    <div class="mft-col">
-        <div class="mft-row mft-title">{{ privacy }} Lobby #{{ id }}</div>
-        <div class="mft-col">
-            <div class="mft-row-b">
-                <div class="mft-margin-sb">
-                    Player 1: {{ p1 }}
-                </div>
-            </div>
-            <div class="mft-row-b">
-                <div class="mft-margin-sb">
-                    Player 2: {{ p2 }}
-                </div>
-            </div>
-        </div>
-        <div id="lobbyOptions" class="mft-row">
-                <form method="post" class="mft-col" action="start">
-                    {% csrf_token %}
-                    {% if status == 'READY'%}
-                    <input class="mft-button" type="submit" value="START"></input>
-                    {% elif status == 'IN-GAME' %}
-                    <input class="mft-button" type="submit" value="CONTINUE"></input>
-                    {% endif %}
-                </form>
-                <form method="post" class="mft-col" action="leave">
-                    {% csrf_token %}
-                    <input class="mft-button" type="submit" value="LEAVE"></input>
-                </form>
-        </div>
-        <div class="mft-refresh">
-            <div id="lobbyRefresh" class="mft-button">
-                <span class="fa-solid fa-rotate"></span>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 {% block page_scripts %}
 <script type="text/javascript" src="{% static 'magic15_lobby.bundle.js' %}"></script>

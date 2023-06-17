@@ -1,10 +1,12 @@
 from django.urls import re_path
-from magic_fifteen.consumers import MagicFifteenConsumer
+from magic_fifteen.consumers import GameConsumer, LobbyConsumer, PostConsumer
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 
 websocket_urlpatterns = [
-    re_path(r'^ws/game/(?P<game_id>\w+)/$', MagicFifteenConsumer.as_asgi()),
+    re_path(r'^magic_fifteen/ws/game/(?P<game_id>\w+)/$', GameConsumer.as_asgi()),
+    re_path(r'^magic_fifteen/ws/lobby/(?P<game_id>\w+)/$', LobbyConsumer.as_asgi()),
+    re_path(r'^magic_fifteen/ws/post/(?P<game_id>\w+)/$', PostConsumer.as_asgi()),
 ]
 
 application = ProtocolTypeRouter({

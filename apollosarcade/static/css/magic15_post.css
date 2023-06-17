@@ -10,26 +10,13 @@
     justify-content: space-between;
 }
 
-.mft-col {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.mft-col-top {
-    display: flex;
-    flex-direction: column;
-    justify-content: top;
-}
-
 .mft-col-b {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.mft-button {
+.apollos-button {
     width: 10rem;
     height: 2rem;
     border: 0.125rem solid var(--font-color);
@@ -43,7 +30,7 @@
     background-color: transparent;
 }
 
-.mft-button:hover {
+.apollos-button:hover {
     opacity: 0.5;
 }
 

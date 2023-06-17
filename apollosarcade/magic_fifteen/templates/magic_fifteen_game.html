@@ -1,25 +1,9 @@
-{% extends "app.html" %} {% load static %}
+{% extends "game.html" %} {% load static %}
 {% block page_head %}
 <title>Magic 15</title>
 <link rel="stylesheet" href="{% static 'css/magic15.css' %}" />
 <link rel="stylesheet" href="{% static 'css/ttt.css' %}" />
 <link rel="stylesheet" href="{% static 'css/home.css' %}" />
-{% endblock %}
-{% block apollos_content_1 %}{% csrf_token %}
-<div id="context-data" style="display:none;" data-spaces="{{ spaces|safe }}" data-game-id="{{ id }}"
-    data-round="{{ round }}" data-player1="{{ player1|default:'Player One' }}"
-    data-player2="{{ player2|default:'Player Two' }}" data-plays="{{ plays|safe }}" data-p1="{{ p1 }}"
-    data-p2="{{ p2 }}" data-privacy="{{ privacy }}">
-</div>
-{% if round|divisibleby:2 and current == p2 %}
-<div id="magic15_app" class="apollos-container apollos-app" data-current="{{ current }}">
-{% elif not round|divisibleby:2 and current == p1 %}
-<div id="magic15_app" class="apollos-container apollos-app" data-current="{{ current }}">
-{% else %}
-<div id="magic15_app" class="apollos-container apollos-app turn-disable" data-current="{{ current }}">
-{% endif %}
-    <div id="magic15_board" class="ttt-board"></div>
-</div>
 {% endblock %}
 {% block page_scripts %}
 <script type="text/javascript" src="{% static 'magic15_game.bundle.js' %}"></script>

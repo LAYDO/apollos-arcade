@@ -1,0 +1,9 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+{% endblock %}
+{% block apollos_content_1 %}
+<div id="aa_home" class="apollos-container apollos-app"></div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'aa_home.bundle.js' %}"></script>
+{% endblock %}

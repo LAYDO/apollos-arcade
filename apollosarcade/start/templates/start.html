@@ -1,0 +1,10 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+{% endblock %}
+{% block apollos_content_1 %}
+<div id="context-data-start" style="display: none;" data-guest="{{ guest }}"></div>
+<div id="aa_start" class="apollos-container apollos-app"></div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'aa_start.bundle.js' %}"></script>
+{% endblock %}

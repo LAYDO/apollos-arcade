@@ -1,0 +1,13 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+{% endblock %}
+{% block apollos_content_1 %}
+<div id="context-data-post" style="display:none;" data-spaces="{{ spaces|safe }}" data-game-id="{{ id }}"
+    data-round="{{ round }}" data-winner="{{ winner }}" data-loser="{{ loser }}" data-privacy="{{ privacy }}"
+    data-current="{{ current }}">
+</div>
+<div id="aa_post" class="apollos-container apollos-app"></div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'aa_post.bundle.js' %}"></script>
+{% endblock %}

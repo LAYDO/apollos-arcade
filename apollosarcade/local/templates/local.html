@@ -1,0 +1,13 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+<link rel="stylesheet" href="{% static 'css/local.css' %}" />
+{% endblock %}
+{% block apollos_content_1 %}
+<div class="apollos-container apollos-app">
+    <div class="container-title">{% block game_title %}{% endblock %}</div>
+    <div class="local-board" id="localBoard"></div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'aa_local.bundle.js' %}"></script>
+{% endblock %}

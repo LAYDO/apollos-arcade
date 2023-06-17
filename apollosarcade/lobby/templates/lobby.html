@@ -1,0 +1,15 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+<link rel="stylesheet" href="{% static 'css/lobby.css' %}" />
+{% endblock %}
+{% block apollos_content_1 %}
+<div id="context-data-lobby" style="display:none;" data-game-id="{{ id }}" data-round="{{ round }}"
+    data-player1="{{ player1|default:'Player One' }}" data-player2="{{ player2|default:'Player Two' }}"
+    data-p1="{{ p1 }}" data-p2="{{ p2 }}" data-privacy="{{ privacy }}" data-p1-ID="{{ p1ID }}" data-p2-ID="{{ p2ID }}"
+    data-p1-status="{{ p1Status }}" data-p2-status="{{ p2Status }}" data-current="{{ current }}" data-status="{{ status }}">
+</div>
+<div id="aa_lobby" class="apollos-container apollos-app"></div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'aa_lobby.bundle.js' %}"></script>
+{% endblock %}

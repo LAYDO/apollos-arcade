@@ -3,14 +3,19 @@ const BundleTracker = require('webpack-bundle-tracker');
 
 module.exports = {
     entry: {
-        app: ['./static/js/app.ts', './static/js/utils.ts'],
-        home: './static/js/home.ts',
-        magic15_home: './static/js/magic15_home.ts',
-        magic15_start: ['./static/js/FifteenCard.ts','./static/js/magic15_start.ts'],
-        magic15_lobby: './static/js/magic15_lobby.ts',
-        magic15_game: ['./static/js/MagicFifteenBoard.ts', './static/js/magic15_game.ts'],
-        magic15_post: ['./static/js/MagicFifteenPost.ts','./static/js/magic15_post.ts'],
-        magic15_local: ['./static/js/ttt.ts', './static/js/ttt_game.ts'],
+        app: ['./static/ts/app.ts', './static/ts/utils.ts'],
+        home: './static/ts/home.ts',
+        aa_local: ['./static/ts/LocalGame.ts'],
+        aa_start: ['./static/ts/GameStart.ts', './static/ts/StartCard.ts'],
+        aa_game: ['./static/ts/MultiplayerGame.ts', './static/ts/LocalGame.ts', './static/ts/GameSocket.ts', './static/ts/ApollosSocket.ts'],
+        aa_lobby: ['./static/ts/MultiplayerLobby.ts', './static/ts/LobbySocket.ts', './static/ts/ApollosSocket.ts'],
+        aa_post: ['./static/ts/MultiplayerPost.ts', './static/ts/PostSocket.ts', './static/ts/ApollosSocket.ts'],
+        magic15_home: './static/ts/magic15_home.ts',
+        magic15_start: ['./static/ts/StartCard.ts','./static/ts/magic15_start.ts'],
+        magic15_lobby: ['./static/ts/magic15_lobby.ts', './static/ts/MagicFifteenLobby.ts'],
+        magic15_game: ['./static/ts/MagicFifteenBoard.ts', './static/ts/magic15_game.ts'],
+        magic15_post: ['./static/ts/MagicFifteenPost.ts','./static/ts/magic15_post.ts'],
+        magic15_local: ['./static/ts/ttt.ts', './static/ts/ttt_game.ts'],
     },
     mode: 'development',
     module: {
