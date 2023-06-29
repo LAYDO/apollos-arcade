@@ -34,8 +34,9 @@ CSRF_TRUSTED_ORIGINS = ['https://*.apollosarcade.com','https://apollos-arcade-u3
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne', 
-    'whitenoise.runserver_nostatic',
+    'daphne',
+    'storages',
+    # 'whitenoise.runserver_nostatic',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -228,13 +229,40 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-    BASE_DIR / "static/dist",
-]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+if DEVELOPMENT_MODE:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",
+        # BASE_DIR / "static/dist",
+    ]
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+else:
+
+    AWS_ACCESS_KEY_ID = os.getenv('DO_SPACES_KEY')
+    AWS_SECRET_ACCESS_KEY = os.getenv('DO_SPACES_SECRET')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('DO_SPACES_BUCKET_NAME')
+    AWS_S3_ENDPOINT_URL = os.getenv('DO_SPACES_ENDPOINT_URL')
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_LOCATION = 'static'
+    AWS_QUERYSTRING_AUTH = False
+    AWS_DEFAULT_ACL = 'public-read'
+
+    STATIC_URL = '{}/{}/'.format(AWS_S3_ENDPOINT_URL, AWS_LOCATION)
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = '{}/media/'.format(AWS_S3_ENDPOINT_URL)
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",
+    ]
+
+
+# STATIC_URL = "static/"
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

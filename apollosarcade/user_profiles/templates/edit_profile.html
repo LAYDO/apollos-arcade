@@ -1,0 +1,18 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+<link rel="stylesheet" href="{% static 'profile.css' %}" />
+{% endblock %}
+{% block apollos_content_1 %}
+<div id="aa_profile" class="apollos-container apollos-app">
+    <h1>Edit Profile</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Update</button>
+    </form>
+
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'dist/aa_profile.bundle.js' %}"></script>
+{% endblock %}

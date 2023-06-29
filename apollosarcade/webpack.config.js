@@ -10,6 +10,7 @@ module.exports = {
         aa_game: ['./static/ts/MultiplayerGame.ts', './static/ts/LocalGame.ts', './static/ts/GameSocket.ts', './static/ts/ApollosSocket.ts'],
         aa_lobby: ['./static/ts/MultiplayerLobby.ts', './static/ts/LobbySocket.ts', './static/ts/ApollosSocket.ts'],
         aa_post: ['./static/ts/MultiplayerPost.ts', './static/ts/PostSocket.ts', './static/ts/ApollosSocket.ts'],
+        aa_profile: ['./static/ts/Profile.ts', './static/ts/aa_profile.ts'],
         magic15_home: './static/ts/magic15_home.ts',
         magic15_start: ['./static/ts/StartCard.ts','./static/ts/magic15_start.ts'],
         magic15_lobby: ['./static/ts/magic15_lobby.ts', './static/ts/MagicFifteenLobby.ts'],
