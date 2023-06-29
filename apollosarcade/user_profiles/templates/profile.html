@@ -1,0 +1,14 @@
+{% extends "app.html" %} {% load static %}
+{% block page_head %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}" />
+{% endblock %}
+{% block apollos_content_1 %}
+<div style="display: none;" id="context-data-profile" data-avatar="{{ userprofile.avatar }}" data-banner="{{ userprofile.banner }}"
+data-username="{{ userprofile.user.username }}" data-first-name="{{ userprofile.first_name }}" data-last-name="{{ userprofile.last_name }}" 
+data-bio="{{ userprofile.bio }}" data-location="{{ userprofile.location }}" 
+data-m15-stats="{{ userprofile.magic_15_stats}}"></div>
+<div id="aa_profile" class="apollos-container apollos-app"></div>
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'dist/aa_profile.bundle.js' %}"></script>
+{% endblock %}

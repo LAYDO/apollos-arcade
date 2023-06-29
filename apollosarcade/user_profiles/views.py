@@ -1,6 +1,8 @@
 from rest_framework import generics
+from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from .models import UserProfile
+from django.contrib.auth.decorators import login_required
+from .forms import UserProfileForm
 from .serializers import UserSerializer
 
 class UserProfileList(generics.ListCreateAPIView):
@@ -10,3 +12,18 @@ class UserProfileList(generics.ListCreateAPIView):
 class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+@login_required
+def profile(request):
+    return render(request, 'profile.html', {'userprofile': request.user.userprofile})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        if form.is_valid():
+            form.save()
+            return redirect('player')
+    else:
+        form = UserProfileForm(instance=request.user.userprofile)
+    return render(request, 'edit_profile.html', {'form': form})
