@@ -27,8 +27,8 @@
         this.data = data.dataset;
         this.url = `${window.location.protocol}//${window.location.host}/static/images/`;
         let root = document.documentElement;
-        root.style.setProperty('--banner-url', `url('${this.url}${this.data.banner}')`);
-        root.style.setProperty('--avatar-url', `url('${this.url}${this.data.avatar}')`);
+        // root.style.setProperty('--banner-url', `url('${this.url}${this.data.banner}')`);
+        // root.style.setProperty('--avatar-url', `url('${this.url}${this.data.avatar}')`);
 
         this.profile = document.createElement('div');
         this.profile.classList.add('profile');
@@ -36,7 +36,7 @@
 
         this.banner = document.createElement('div');
         this.banner.classList.add('banner');
-        // this.banner.style.backgroundImage = `url('${this.url}${this.data.banner}')`;
+        this.banner.style.backgroundImage = `url('${this.url}${this.data.banner}')`;
 
         this.profileWrapper = document.createElement('div');
         this.profileWrapper.classList.add('profile-wrapper');
@@ -47,7 +47,7 @@
 
         this.avatar = document.createElement('div');
         this.avatar.classList.add('avatar');
-        // this.avatar.style.backgroundImage = `url('${this.url}${this.data.avatar}')`;
+        this.avatar.style.backgroundImage = `url('${this.url}${this.data.avatar}')`;
 
         this.detailsWrapper = document.createElement('div');
         this.detailsWrapper.classList.add('details-wrapper');
