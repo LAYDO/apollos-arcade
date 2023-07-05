@@ -25,8 +25,8 @@
     constructor(app: Element, data: HTMLElement) {
         this.app = app;
         this.data = data.dataset;
-        this.url = `${window.location.protocol}//${window.location.host}/static/images/`;
-        let root = document.documentElement;
+        this.url = `${this.data.mediaUrl}`;  // Local instance `${window.location.protocol}//${window.location.host}/static/images/`;
+        // let root = document.documentElement;
         // root.style.setProperty('--banner-url', `url('${this.url}${this.data.banner}')`);
         // root.style.setProperty('--avatar-url', `url('${this.url}${this.data.avatar}')`);
 
