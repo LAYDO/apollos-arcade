@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from rest_framework import generics
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
@@ -15,7 +17,10 @@ class UserProfileDetail(generics.RetrieveUpdateDestroyAPIView):
 
 @login_required
 def profile(request):
-    return render(request, 'profile.html', {'userprofile': request.user.userprofile})
+    return render(request, 'profile.html', {
+        'userprofile': request.user.userprofile,
+        'media_url': settings.MEDIA_ROOT #os.getenv('MEDIA_ROOT') # f'{os.getenv("DO_SPACES_ENDPOINT_URL")}/apollosarcade/static/images/' 
+    })
 
 @login_required
 def edit_profile(request):

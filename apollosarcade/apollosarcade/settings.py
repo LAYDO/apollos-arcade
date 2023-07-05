@@ -237,7 +237,7 @@ if DEVELOPMENT_MODE:
         # BASE_DIR / "static/dist",
     ]
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
+    MEDIA_ROOT = STATIC_URL + 'images/'
 else:
 
     AWS_ACCESS_KEY_ID = os.getenv('DO_SPACES_KEY')
@@ -254,7 +254,7 @@ else:
     STATIC_URL = '{}/{}/'.format(AWS_S3_ENDPOINT_URL, AWS_LOCATION)
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    MEDIA_URL = '{}/media/'.format(AWS_S3_ENDPOINT_URL)
+    MEDIA_ROOT = '{}/apollosarcade/static/images/'.format(AWS_S3_ENDPOINT_URL)
     STATICFILES_DIRS = [
         BASE_DIR / "static",
     ]
