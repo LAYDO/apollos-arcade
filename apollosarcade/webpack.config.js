@@ -17,6 +17,7 @@ module.exports = {
         magic15_game: ['./static/ts/MagicFifteenBoard.ts', './static/ts/magic15_game.ts'],
         magic15_post: ['./static/ts/MagicFifteenPost.ts','./static/ts/magic15_post.ts'],
         magic15_local: ['./static/ts/ttt.ts', './static/ts/ttt_game.ts'],
+        capture_home: './static/ts/capture_home.ts',
     },
     mode: 'development',
     module: {

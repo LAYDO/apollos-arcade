@@ -1,4 +1,5 @@
 let mft = document.getElementById('magic_fifteen');
+let capture = document.getElementById('capture');
 if (mft) {
     drawLogo(mft);
     mft.addEventListener('click', () => {
@@ -6,6 +7,12 @@ if (mft) {
     });
 }
 
+if (capture) {
+    drawLogo(capture);
+    capture.addEventListener('click', () => {
+        window.location.href = '/capture';
+    });
+}
 
 function drawLogo(_element: HTMLElement) {
     if (_element != null) {
