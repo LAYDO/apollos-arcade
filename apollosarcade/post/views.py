@@ -4,11 +4,12 @@ from django.shortcuts import render
 from apollosarcade.utils import get_player, get_player_by_content_type, game_archival, get_games, get_app_model
 
 def post(request, game_id):
+    app = request.path.split('/')[1]
     current_user = get_player(request)
     post = {}
     lobbies = get_games(request, ['LOBBY','REMATCH'], [])
     if len(lobbies) > 0:
-        return HttpResponseRedirect(f'/magic_fifteen/lobby')
+        return HttpResponseRedirect(f'/{app}/lobby')
     Game = get_app_model(request, 'game')
     game = Game.objects.get(game_id=game_id)
     if (game and game.status == 'COMPLETED'):
@@ -36,6 +37,6 @@ def post(request, game_id):
             'round': game.round,
             'current': current_user.id,
         })
-        return render(request, 'magic_fifteen_post.html', post)
+        return render(request, f'{app}_post.html', post)
     else:
-        return HttpResponseRedirect(f'/magic_fifteen/')
+        return HttpResponseRedirect(f'/{app}/')

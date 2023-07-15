@@ -18,6 +18,11 @@ module.exports = {
         magic15_post: ['./static/ts/MagicFifteenPost.ts','./static/ts/magic15_post.ts'],
         magic15_local: ['./static/ts/ttt.ts', './static/ts/ttt_game.ts'],
         capture_home: './static/ts/capture_home.ts',
+        capture_start: ['./static/ts/StartCard.ts', './static/ts/capture_start.ts'],
+        capture_lobby: ['./static/ts/capture_lobby.ts', './static/ts/CaptureLobby.ts'],
+        capture_game: ['./static/ts/CaptureBoard.ts', './static/ts/capture_game.ts'],
+        capture_post: ['./static/ts/CapturePost.ts', './static/ts/capture_post.ts'],
+        capture_local: ['./static/ts/capture.ts', './static/ts/capture_game.ts'],
     },
     mode: 'development',
     module: {

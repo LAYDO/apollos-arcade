@@ -8,7 +8,7 @@ if (mft) {
 }
 
 if (capture) {
-    drawLogo(capture);
+    // drawLogo(capture);
     capture.addEventListener('click', () => {
         window.location.href = '/capture';
     });

@@ -19,7 +19,8 @@ def check_for_lobbies(request):
         return 0
 
 def check_for_match(request):
-    url = 'magic_fifteen/'
+    app = request.path.split('/')[1]
+    url = f'{app}/'
     games = get_games(request,['LOBBY','READY','IN-GAME','COMPLETED'],exclude_status=['ARCHIVE'])
     match (check_for_lobbies(request)):
         case 2:

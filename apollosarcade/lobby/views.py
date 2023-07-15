@@ -15,6 +15,7 @@ def create_lobby(request):
         if (check_for_lobbies(request)):
             return
         else:
+            app = request.path.split('/')[1]
             form = CreateLobbyForm(request.POST)
             current_user = get_player(request)
             Game = get_app_model(request, 'game')
@@ -34,7 +35,7 @@ def create_lobby(request):
                     spaces=[0,0,0,0,0,0,0,0,0],
                 )
                 game.save()
-                return JsonResponse({'redirect': f'/magic_fifteen/lobby/{game.game_id}'})
+                return JsonResponse({'redirect': f'/{app}/lobby/{game.game_id}'})
             
 def join_lobby(request):
     if request.method == 'POST':
@@ -42,6 +43,7 @@ def join_lobby(request):
             return
         else:
             try:
+                app = request.path.split('/')[1]
                 form = JoinLobbyForm(request.POST)
                 current_user = get_player(request)
                 Game = get_app_model(request, 'game')
@@ -80,7 +82,7 @@ def join_lobby(request):
                         elif game.player_two == None:
                             game.player_two=current_user
                         game.save()
-                    return JsonResponse({'redirect': f'/magic_fifteen/lobby/{game.game_id}'})
+                    return JsonResponse({'redirect': f'/{app}/lobby/{game.game_id}'})
             except LobbyError as e:
                 return JsonResponse({'error': str(e)}, status=400)
 
@@ -89,6 +91,7 @@ def lobby(request, game_id):
     # print(f'Current user id: {current_user.id}')
     lobby = {}
     try:
+        app = request.path.split('/')[1]
         Game = get_app_model(request, 'game')
         game = Game.objects.get(game_id=game_id)
         # found = get_games(request, ['LOBBY', 'REMATCH', 'READY', 'IN-GAME'], [])
@@ -114,7 +117,7 @@ def lobby(request, game_id):
                 'current': current_user.id,
                 'round': game.round,
             })
-            return render(request, 'magic_fifteen_lobby.html', lobby)
+            return render(request, f'{app}_lobby.html', lobby)
         elif (game.player_two == current_user):
             # print(f'p2: {game}')
             player1 = None
@@ -137,7 +140,7 @@ def lobby(request, game_id):
                 'current': current_user.id,
                 'round': game.round,
             })
-            return render(request, 'magic_fifteen_lobby.html', lobby)
+            return render(request, f'{app}_lobby.html', lobby)
         else:
             raise LobbyError('Lobby not found!')
     except LobbyError as e:
