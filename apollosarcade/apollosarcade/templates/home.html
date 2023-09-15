@@ -2,16 +2,7 @@
 <link rel="stylesheet" href="{% static 'css/home.css' %}" />
 {% endblock %}
 {% block apollos_content_1 %}
-<div class="apps-space">
-    <div class="app-claim">
-        <button class="app-button" id="magic_fifteen"></button>
-        <h3 class="app-title">Magic 15</h3>
-    </div>
-    <div class="app-claim">
-        <button class="app-button" id="capture"></button>
-        <h3 class="app-title">Capture<br>(Coming Soon!)</h3>
-    </div>
-</div>
+<div class="apps-space" id="arcadeSpace"></div>
 {% endblock %} {% block page_scripts %}
 <script type="text/javascript" src="{% static 'dist/home.bundle.js' %}"></script>
 {% endblock %}

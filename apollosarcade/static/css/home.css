@@ -5,28 +5,269 @@
     flex-wrap: wrap;
 }
 
-.app-claim {
-    margin: 1rem;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-height: 16.5rem;
+.arcade-cabinet {
+    margin: 2.25rem auto;
+    position: relative;
+    width: 25rem;
+    height: 25rem;
+    perspective: 35em;
 }
 
-.app-button {
-    min-height: 6rem;
-    min-width: 6rem;
-    max-height: 6rem;
-    max-width: 6rem;
-    background-color: transparent;
-    box-shadow: rgba(0, 0, 0, 0.25) 0 0.0625rem 0.25rem;
-    border-radius: 25%;
-    cursor: pointer;
-    background-position: inherit;
-    background-size: cover;
-    background-repeat: no-repeat;
-    padding: 0;
+.arcade-cabinet > .shadow {
+    height: 85%;
+    width: 65%;
+    position: absolute;
+    top: 2%;
+    left: 19%;
+    background: var(--glass-backdrop);
+    box-shadow: 0 0 60px var(--font-faded);
+    z-index: -1;
+}
+
+.arcade-cabinet .top-band {
+    height: 15%;
+    width: 70%;
+    position: absolute;
+    top: 0%;
+    left: 15%;
+    background: #fff8ed;
+    border: 5px solid #000020;
+    z-index: 3;
+    color: #000020;
+    font-size: 1.5rem;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.arcade-cabinet .top-band::before,
+.arcade-cabinet .top-band::after {
+    height: 100%;
+    width: 4%;
+    position: absolute;
+    top: -9%;
+    background: #fff8ed;
+    border: 5px solid #000020;
+    content: " ";
+}
+
+.arcade-cabinet .top-band::before {
+    left: -6%;
+}
+.arcade-cabinet .top-band::after {
+    right: -6%;
+}
+
+.arcade-cabinet .screen-container {
+    height: 60%;
+    width: 62%;
+    position: absolute;
+    top: 15%;
+    left: 19%;
+    background: var(--glass-backdrop);
+    border: 5px solid #000020;
+    z-index: 1;
+}
+
+.arcade-cabinet .screen-container::before,
+.arcade-cabinet .screen-container::after {
+    height: 100%;
+    width: 4%;
+    position: absolute;
+    top: -2%;
+    background: #fff8ed;
+    content: " ";
+    border: 5px solid #000020;
+    z-index: 2;
+}
+
+.arcade-cabinet .screen-container::before {
+    left: -6%;
+}
+
+.arcade-cabinet .screen-container::after {
+    right: -6%;
+}
+
+.arcade-cabinet .screen-container .screen {
+    height: 70%;
+    width: 75%;
+    position: absolute;
+    top: 15%;
+    left: 11%;
+    background: #fff8ed;
+    border: 5px solid #000020;
+    border-radius: 90px 93px 93px 93px/15px 15px 15px 15px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.arcade-cabinet .screen-container .shadow {
+    height: 8%;
+    width: 110%;
+    position: absolute;
+    top: 0%;
+    left: -5%;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 4;
+}
+
+.arcade-cabinet .control-band {
+    height: 20%;
+    width: 66%;
+    position: absolute;
+    top: 73%;
+    left: 18.2%;
+    background: var(--glass-backdrop);
+    transform: rotateX(70deg);
+}
+
+.arcade-cabinet .control-band::before,
+.arcade-cabinet .control-band::after {
+    height: 92%;
+    width: 4%;
+    position: absolute;
+    top: -2%;
+    background: #fff8ed;
+    content: " ";
+    border: 5px solid #000020;
+    z-index: 2;
+}
+
+.arcade-cabinet .control-band::before {
+    left: -6%;
+}
+
+.arcade-cabinet .control-band::after {
+    right: -6%;
+}
+
+.arcade-cabinet .control-band .button {
+    height: 15%;
+    width: 6%;
+    position: absolute;
+    top: 40%;
+    left: 30%;
+    border-radius: 50%;
+    border: 5px solid #000020;
+}
+
+.arcade-cabinet .control-band .button-a {
+    background: #BFD3C1;
+    left: 40%;
+}
+
+.arcade-cabinet .control-band .button-b {
+    background: #68A691;
+    left: 55%;
+}
+
+.arcade-cabinet .control-band .button-c {
+    background: #07BEB8;
+    left: 70%;
+}
+
+.arcade-cabinet .bottom {
+    height: 10%;
+    width: 71%;
+    position: absolute;
+    top: 89%;
+    left: 14.5%;
+    background: #fff8ed;
+    border: 5px solid #000020;
+}
+
+.arcade-cabinet .bottom::before,
+.arcade-cabinet .bottom::after {
+    height: 98%;
+    width: 4%;
+    position: absolute;
+    top: -9%;
+    background: #fff8ed;
+    content: " ";
+    border: 5px solid #000020;
+    z-index: 2;
+}
+
+.arcade-cabinet .bottom::before {
+    left: -5.8%;
+}
+
+.arcade-cabinet .bottom::after {
+    right: -5.8%;
+}
+
+.arcade-cabinet .stripes {
+    height: 100%;
+    width: 10%;
+    position: absolute;
+    top: 0%;
+    left: 45%;
+    background: #68A691;
+}
+
+
+.arcade-cabinet .stripes::before,
+.arcade-cabinet .stripes::after {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0%;
+    content: " ";
+}
+
+.arcade-cabinet .stripes::before {
+    background: #BFD3C1;
+    left: -100%;
+}
+
+.arcade-cabinet .stripes::after {
+    background: #07BEB8;
+    right: -100%;
+}
+
+.arcade-cabinet .screen-container .joystick {
+    height: 6%;
+    width: 5%;
+    background: #0F90C9;
+    position: absolute;
+    top: 91%;
+    left: 17%;
+    border-radius: 50%;
+    border: 5px solid #000020;
+    z-index: 3;
+}
+
+.arcade-cabinet .screen-container .joystick::before {
+    height: 90%;
+    width: 65%;
+    position: absolute;
+    top: 7%;
+    left: 32%;
+    background: #0d78a8;
+    content: "";
+    border-radius: 50%;
+}
+
+.arcade-cabinet .screen-container .joystick .stick {
+    height: 200%;
+    width: 40%;
+    position: absolute;
+    top: 100%;
+    left: 30%;
+    background: #000020;
+    content: "";
+}
+
+.arcade-cabinet .screen-container .joystick .stick::before {
+    height: 100%;
+    width: 150%;
+    transform: rotate(90deg);
+    position: absolute;
+    top: 50%;
+    left: -20%;
+    background: #000020;
+    content: "";
 }
 
 @keyframes appOpen {
@@ -52,7 +293,7 @@
 
 
 @media only screen and (min-width: 37.5rem) {
-    .app-button {
+    .screen {
         min-height: 10rem;
         min-width: 10rem;
     }
