@@ -153,17 +153,17 @@
 }
 
 .arcade-cabinet .control-band .button-a {
-    background: #BFD3C1;
+    background: var(--color-a);
     left: 40%;
 }
 
 .arcade-cabinet .control-band .button-b {
-    background: #68A691;
+    background: var(--color-b);
     left: 55%;
 }
 
 .arcade-cabinet .control-band .button-c {
-    background: #07BEB8;
+    background: var(--color-c);
     left: 70%;
 }
 
@@ -203,7 +203,7 @@
     position: absolute;
     top: 0%;
     left: 45%;
-    background: #68A691;
+    background: var(--during-background);
 }
 
 
@@ -217,19 +217,19 @@
 }
 
 .arcade-cabinet .stripes::before {
-    background: #BFD3C1;
+    background: var(--before-background);
     left: -100%;
 }
 
 .arcade-cabinet .stripes::after {
-    background: #07BEB8;
+    background: var(--after-background);
     right: -100%;
 }
 
 .arcade-cabinet .screen-container .joystick {
     height: 6%;
     width: 5%;
-    background: #0F90C9;
+    background: var(--joystick-background);
     position: absolute;
     top: 91%;
     left: 17%;
@@ -244,7 +244,7 @@
     position: absolute;
     top: 7%;
     left: 32%;
-    background: #0d78a8;
+    background: var(--joystick-before-background);
     content: "";
     border-radius: 50%;
 }

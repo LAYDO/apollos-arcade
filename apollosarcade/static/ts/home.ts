@@ -4,12 +4,16 @@ class ColorTheme {
     public colorOne: string;
     public colorTwo: string;
     public colorThree: string;
+    public colorFour: string;
+    public colorFive: string;
 
-    constructor(name: string, colorOne: string, colorTwo: string, colorThree: string) {
+    constructor(name: string, colorOne: string, colorTwo: string, colorThree: string, colorFour: string, colorFive: string) {
         this.name = name;
         this.colorOne = colorOne;
         this.colorTwo = colorTwo;
         this.colorThree = colorThree;
+        this.colorFour = colorFour;
+        this.colorFive = colorFive;
     }
 }
 
@@ -22,7 +26,7 @@ class ArcadeCabinet {
     private _screen: HTMLElement;
     private _controlBand: HTMLElement;
 
-    constructor(title: string, container: HTMLElement) {
+    constructor(title: string, container: HTMLElement, colors: ColorTheme = new ColorTheme('default', '#BFD3C1', '#68A691', '#07BEB8', '#0F90C9','#0d78a8')) {
         this.title = title;
 
         this._cabinet = document.createElement('div');
@@ -54,6 +58,8 @@ class ArcadeCabinet {
 
         let joystick = document.createElement('div');
         joystick.classList.add('joystick');
+        joystick.style.setProperty('--joystick-background', colors.colorFour);
+        joystick.style.setProperty('--joystick-before-background', colors.colorFive);
 
         let stick = document.createElement('div');
         stick.classList.add('stick');
@@ -64,10 +70,13 @@ class ArcadeCabinet {
 
         let buttonA = document.createElement('div');
         buttonA.classList.add('button', 'button-a');
+        buttonA.style.setProperty('--color-a', colors.colorOne);
         let buttonB = document.createElement('div');
         buttonB.classList.add('button', 'button-b');
+        buttonB.style.setProperty('--color-b', colors.colorTwo);
         let buttonC = document.createElement('div');
         buttonC.classList.add('button', 'button-c');
+        buttonC.style.setProperty('--color-c', colors.colorThree);
 
         this._controlBand.append(buttonA);
         this._controlBand.append(buttonB);
@@ -78,6 +87,10 @@ class ArcadeCabinet {
 
         let stripes = document.createElement('div');
         stripes.classList.add('stripes');
+        stripes.style.setProperty('--before-background', colors.colorOne);
+        stripes.style.setProperty('--during-background', colors.colorTwo);
+        stripes.style.setProperty('--after-background', colors.colorThree);
+
         bottom.append(stripes);
 
         this._cabinet.append(this._topBand);
@@ -132,6 +145,23 @@ class ArcadeCabinet {
                     }
                     break;
                 case 'Capture':
+                    let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', '50%');
+                    text.setAttribute('y', '50%');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('dominant-baseline', 'middle');
+                    text.setAttribute('font-size', '1em');
+                    text.setAttribute('font-family', 'sans-serif');
+                    text.setAttribute('fill', '#000020');
+                    text.setAttribute('stroke', '#000020');
+                    text.setAttribute('stroke-width', '0.5');
+                    text.setAttribute('stroke-linejoin', 'round');
+                    text.setAttribute('stroke-linecap', 'round');
+                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('letter-spacing', '0.1em');
+                    text.setAttribute('transform', 'translate(0,0)');
+                    text.textContent = 'COMING SOON';
+                    svg.append(text);
                     break;
                 default:
                     break;
@@ -143,8 +173,9 @@ class ArcadeCabinet {
 
 let arcade = document.getElementById('arcadeSpace');
 if (arcade) {
+    let captureColors = new ColorTheme('Capture', '#004777', '#A30000', '#FF7700', '#EBC670', '#D69F1F');
     let magicFifteen = new ArcadeCabinet('Magic Fifteen', arcade);
-    let capture = new ArcadeCabinet('Capture', arcade);
+    let capture = new ArcadeCabinet('Capture', arcade, captureColors);
 
     // Draw logos
     magicFifteen.drawLogo();
