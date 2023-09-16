@@ -32,8 +32,23 @@ class ArcadeCabinet {
         this._cabinet = document.createElement('div');
         this._cabinet.classList.add('arcade-cabinet');
         this._cabinet.addEventListener('click', () => {
-            window.location.href = `/${this.title.toLowerCase().replace(' ', '_')}`;
+            if (this.title == 'Capture') {
+                fetch('/capture').then((response) => {
+                    if (response.status == 200) {
+                        console.log(response);
+                        return response.text();
+                    }
+                }).then((text) => {
+                    if (text) {
+                        let t = JSON.parse(text);
+                        alert(t.capture);
+                    }
+                });
+            } else {
+                window.location.href = `/${this.title.toLowerCase().replace(' ', '_')}`;
+            }
         });
+                
 
         let cabinetShadow = document.createElement('div');
         cabinetShadow.classList.add('shadow');
