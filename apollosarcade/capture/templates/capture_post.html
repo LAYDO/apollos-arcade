@@ -1,0 +1,9 @@
+{% extends "post.html" %} {% load static %}
+{% block page_head %}
+<title>Capture</title>
+<link rel="stylesheet" href="{% static 'css/capture.css' %}" />
+<link rel="stylesheet" href="{% static 'css/capture_post.css' %}" />
+{% endblock %}
+{% block page_scripts %}
+<script type="text/javascript" src="{% static 'dist/capture_post.bundle.js' %}"></script>
+{% endblock %}

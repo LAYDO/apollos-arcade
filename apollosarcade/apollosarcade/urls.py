@@ -30,4 +30,5 @@ urlpatterns = [
     path('magic_fifteen/', include('magic_fifteen.urls')),
     path('verify/<uuid:verification_code>', verify_email, name='verify_email'),
     path('request-new-verification-link/', request_new_verification_link, name='request_new_verification_link'),
+    path('capture/', include('capture.urls')),
 ]

@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'home',
     'start',
     'post',
+    'capture',
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
