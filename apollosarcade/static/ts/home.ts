@@ -1,4 +1,4 @@
-
+// Color theme class
 class ColorTheme {
     public name: string;
     public colorOne: string;
@@ -16,7 +16,7 @@ class ColorTheme {
         this.colorFive = colorFive;
     }
 }
-
+// Arcade cabinet class
 class ArcadeCabinet {
     public title: string;
     private _cabinet: HTMLElement;
