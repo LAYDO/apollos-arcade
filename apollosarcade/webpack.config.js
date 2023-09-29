@@ -24,7 +24,8 @@ module.exports = {
         capture_post: ['./static/ts/CapturePost.ts', './static/ts/capture_post.ts'],
         capture_local: ['./static/ts/capture.ts', './static/ts/capture_game.ts'],
     },
-    mode: 'development',
+    mode: 'production',
+    cache: false,
     module: {
         rules: [
             {
