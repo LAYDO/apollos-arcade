@@ -257,7 +257,7 @@ else:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     MEDIA_ROOT = '{}/apollosarcade/static/images/'.format(AWS_S3_ENDPOINT_URL)
     STATICFILES_DIRS = [
-        BASE_DIR / "static",
+        BASE_DIR / "static/dist",
     ]
 
 
