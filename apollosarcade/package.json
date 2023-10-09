@@ -6,10 +6,10 @@
     "@types/node": "^18.16.3",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
-    "webpack": "^5.82.1",
-    "webpack-cli": "^5.1.1"
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "webpack-bundle-tracker": "^1.8.1"
+    "webpack-bundle-tracker": "^2.0.1"
   }
 }
