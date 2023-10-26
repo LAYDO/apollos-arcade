@@ -12,6 +12,7 @@ body {
     --font-color: #000020;
     --font-faded: #00002090;
     --font-faded50: #00002050;
+    --font-faded75: #00002075;
     --glass-backdrop: rgba(0, 0, 0, 0.15);
 }
 
@@ -22,6 +23,7 @@ body {
     --font-color: #fff8ed;
     --font-faded: #fff8ed90;
     --font-faded50: #fff8ed50;
+    --font-faded75: #fff8ed75;
     --glass-backdrop: rgba(255, 255, 255, 0.15);
 }
 
