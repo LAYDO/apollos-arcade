@@ -1,0 +1,51 @@
+.local-board {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.board-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 50%;
+    height: 100%;
+}
+
+.capture-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+}
+
+.capture-dot {
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 50%;
+    background-color: var(--font-color);
+}
+
+.capture-space {
+    margin-left: -0.125rem;
+    margin-right: -0.125rem;
+    margin-bottom: -0.125rem;
+    box-sizing: border-box;
+}
+
+.capture-border-top {
+    border-top: 0.125rem solid var(--font-color);
+}
+
+.capture-border-bottom {
+    border-bottom: 0.125rem solid var(--font-color);
+}
+
+.capture-border-left {
+    border-left: 0.125rem solid var(--font-color);
+}
+
+.capture-border-right {
+    border-right: 0.125rem solid var(--font-color);
+}

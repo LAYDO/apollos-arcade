@@ -34,6 +34,7 @@ export abstract class LocalGame {
 
         this.boardArea = document.createElement('div');
         this.boardArea.classList.add('ttt-col');
+        this.boardArea.classList.add('board-area');
 
         this.playerArea = document.createElement('div');
         this.playerArea.classList.add('ttt-col-b');
