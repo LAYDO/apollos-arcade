@@ -85,9 +85,18 @@ export abstract class LocalGame {
 
         this.board.append(this.boardArea);
         this.board.append(this.playerArea);
+
+        window.requestAnimationFrame(this.loop.bind(this));
     }
     
-    protected abstract loop(timestamp: number): void;
+    protected loop(timestamp: number): void {
+        let progress = timestamp - this.lastRender;
+        this.handleMove(progress);
+        this.checkWin();
+        this.lastRender = timestamp;
+        window.requestAnimationFrame((timestamp) => this.loop.bind(this));
+    }
+
     protected abstract handleMove(progress: number): void;
     protected abstract checkWin(): void;
 }

@@ -114,16 +114,6 @@ export class TicTacToe extends LocalGame {
             [0, 4, 8],
             [2, 4, 6]
         ];
-
-        window.requestAnimationFrame(this.loop.bind(this));
-    }
-
-    protected loop(timestamp: number): void {
-        let progress = timestamp - this.lastRender;
-        this.handleMove(progress);
-        this.checkWin();
-        this.lastRender = timestamp;
-        window.requestAnimationFrame(this.loop.bind(this));
     }
 
     protected handleMove(progress: number): void {
