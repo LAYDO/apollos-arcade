@@ -19,6 +19,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    font: bold 3rem serif;
 }
 
 .ttt-player {
@@ -107,4 +108,8 @@
 
 .ttt-restart:hover {
     opacity: 1;
+}
+
+.ttt-win-highlight {
+    background-color: var(--glass-backdrop);
 }
