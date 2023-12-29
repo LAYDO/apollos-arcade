@@ -33,21 +33,21 @@ class ArcadeCabinet {
         this._cabinet = document.createElement('div');
         this._cabinet.classList.add('arcade-cabinet');
         this._cabinet.addEventListener('click', () => {
-            if (this.title == 'Capture' && this.captureFeature) {
-                fetch('/capture').then((response) => {
-                    if (response.status == 200) {
-                        console.log(response);
+            fetch(`/${this.title.toLowerCase().replace(' ', '_')}`).then((response) => {
+                if (response.status == 200) {
+                    // console.log(response);
+                    if (response.headers.get('content-type') == 'text/html; charset=utf-8') {
+                        window.location.href = response.url;
+                    } else {
                         return response.text();
                     }
-                }).then((text) => {
-                    if (text) {
-                        let t = JSON.parse(text);
-                        alert(t.capture);
-                    }
-                });
-            } else {
-                window.location.href = `/${this.title.toLowerCase().replace(' ', '_')}`;
-            }
+                }
+            }).then((text) => {
+                if (text) {
+                    let t = JSON.parse(text);
+                    alert(t.body);
+                }
+            });
         });
                 
 
