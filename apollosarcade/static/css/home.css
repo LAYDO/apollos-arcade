@@ -6,11 +6,12 @@
 }
 
 .arcade-cabinet {
-    margin: 2.25rem auto;
+    margin: 5rem auto;
     position: relative;
     width: 25rem;
     height: 25rem;
     perspective: 35em;
+    cursor: pointer;
 }
 
 .arcade-cabinet > .shadow {
@@ -20,8 +21,13 @@
     top: 2%;
     left: 19%;
     background: var(--glass-backdrop);
-    box-shadow: 0 0 60px var(--font-faded);
+    box-shadow: 0 0 60px var(--font-faded75);
+    transition: box-shadow 0.3s ease-in-out;
     z-index: -1;
+}
+
+.arcade-cabinet:hover > .shadow {
+    box-shadow: 0 0 80px var(--font-color);
 }
 
 .arcade-cabinet .top-band {

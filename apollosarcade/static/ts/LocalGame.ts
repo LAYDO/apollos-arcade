@@ -34,6 +34,7 @@ export abstract class LocalGame {
 
         this.boardArea = document.createElement('div');
         this.boardArea.classList.add('ttt-col');
+        this.boardArea.classList.add('board-area');
 
         this.playerArea = document.createElement('div');
         this.playerArea.classList.add('ttt-col-b');
@@ -84,9 +85,18 @@ export abstract class LocalGame {
 
         this.board.append(this.boardArea);
         this.board.append(this.playerArea);
+
+        window.requestAnimationFrame(this.loop.bind(this));
     }
     
-    protected abstract loop(timestamp: number): void;
+    protected loop(timestamp: number): void {
+        let progress = timestamp - this.lastRender;
+        this.handleMove(progress);
+        this.checkWin();
+        this.lastRender = timestamp;
+        window.requestAnimationFrame((timestamp) => this.loop.bind(this));
+    }
+
     protected abstract handleMove(progress: number): void;
     protected abstract checkWin(): void;
 }

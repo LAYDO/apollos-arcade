@@ -25,6 +25,7 @@ class ArcadeCabinet {
     private _screenBackground: HTMLElement;
     private _screen: HTMLElement;
     private _controlBand: HTMLElement;
+    private captureFeature: boolean = false;
 
     constructor(title: string, container: HTMLElement, colors: ColorTheme = new ColorTheme('default', '#BFD3C1', '#68A691', '#07BEB8', '#0F90C9','#0d78a8')) {
         this.title = title;
@@ -32,21 +33,21 @@ class ArcadeCabinet {
         this._cabinet = document.createElement('div');
         this._cabinet.classList.add('arcade-cabinet');
         this._cabinet.addEventListener('click', () => {
-            if (this.title == 'Capture') {
-                fetch('/capture').then((response) => {
-                    if (response.status == 200) {
-                        console.log(response);
+            fetch(`/${this.title.toLowerCase().replace(' ', '_')}`).then((response) => {
+                if (response.status == 200) {
+                    // console.log(response);
+                    if (response.headers.get('content-type') == 'text/html; charset=utf-8') {
+                        window.location.href = response.url;
+                    } else {
                         return response.text();
                     }
-                }).then((text) => {
-                    if (text) {
-                        let t = JSON.parse(text);
-                        alert(t.capture);
-                    }
-                });
-            } else {
-                window.location.href = `/${this.title.toLowerCase().replace(' ', '_')}`;
-            }
+                }
+            }).then((text) => {
+                if (text) {
+                    let t = JSON.parse(text);
+                    alert(t.body);
+                }
+            });
         });
                 
 
@@ -160,23 +161,28 @@ class ArcadeCabinet {
                     }
                     break;
                 case 'Capture':
-                    let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    text.setAttribute('x', '50%');
-                    text.setAttribute('y', '50%');
-                    text.setAttribute('text-anchor', 'middle');
-                    text.setAttribute('dominant-baseline', 'middle');
-                    text.setAttribute('font-size', '1em');
-                    text.setAttribute('font-family', 'sans-serif');
-                    text.setAttribute('fill', '#000020');
-                    text.setAttribute('stroke', '#000020');
-                    text.setAttribute('stroke-width', '0.5');
-                    text.setAttribute('stroke-linejoin', 'round');
-                    text.setAttribute('stroke-linecap', 'round');
-                    text.setAttribute('font-weight', 'bold');
-                    text.setAttribute('letter-spacing', '0.1em');
-                    text.setAttribute('transform', 'translate(0,0)');
-                    text.textContent = 'COMING SOON';
-                    svg.append(text);
+                    const sideLength = width / 2;
+                    const gap = 6;
+                    const strokeWidth = 3;
+
+                    for (let i = 0; i < 4; i++) {
+                        const angle = i * Math.PI / 2;
+                        const cosAngle = Math.cos(angle);
+                        const sinAngle = Math.sin(angle);
+                        const x1 = sideLength + ((sideLength / 2) * cosAngle) - ((sideLength / 2 - gap) * sinAngle);
+                        const y1 = sideLength + ((sideLength / 2) * sinAngle) + ((sideLength / 2 - gap) * cosAngle);
+                        const x2 = x1 + ((sideLength - 2 * gap) * sinAngle);
+                        const y2 = y1 - ((sideLength - 2 * gap) * cosAngle);
+
+                        let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('stroke', '#000020');
+                        line.setAttribute('stroke-width', strokeWidth.toFixed(0));
+                        line.setAttribute('x1', x1.toFixed(0));
+                        line.setAttribute('y1', y1.toFixed(0));
+                        line.setAttribute('x2', x2.toFixed(0));
+                        line.setAttribute('y2', y2.toFixed(0));
+                        svg.append(line);
+                    }
                     break;
                 default:
                     break;

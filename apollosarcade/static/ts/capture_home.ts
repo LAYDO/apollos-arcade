@@ -6,35 +6,29 @@ class CaptureHome extends GameHome {
     }
 
     public drawLogo(logo: SVGElement): void {
-        throw new Error("Method not implemented.");
-        // let width = logo.clientWidth;,
-        // let sWidth = width / 3;
-        // let start = sWidth / 7;
-        // for (let i = 0; i < 3; i++) {
-        //     let g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        //     for (let j = 0; j < 5; j++) {
-        //         let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        //         line.setAttribute('stroke', 'var(--font-color)');
-        //         line.setAttribute('stroke-width', '2.5');
-        //         if (j != 4) {
-        //             line.setAttribute('x1', ((j * (sWidth / 4)) + start).toFixed(0));
-        //             line.setAttribute('x2', ((j * (sWidth / 4)) + start).toFixed(0));
-        //             line.setAttribute('y1', '3');
-        //             line.setAttribute('y2', `${sWidth - 3}`);
-        //         } else {
-        //             line.setAttribute('x1', (((j - 1) * (sWidth / 4)) + start).toFixed(0));
-        //             line.setAttribute('x2' (start).toFixed(0));
-        //             line.setAttribute('y1', '3');
-        //             line.setAttribute('y2', `${sWidth - 3}`);
-        //         }
-        //         g.append(line);
-        //     }
-        //     if (i == 1) {
-        //         g.setAttribute('transform', `translate(0,${sWidth})`);
-        //     }
-        //     logo.append(g);
-        //     start += sWidth;
-        // }
+        let width = logo.clientWidth;
+        const sideLength = width / 3;
+        const gap = 10;
+        const strokeWidth = 3;
+
+        for (let i = 0; i < 4; i++) {
+            const angle = i * Math.PI / 2;
+            const cosAngle = Math.cos(angle);
+            const sinAngle = Math.sin(angle);
+            const x1 = (sideLength * 1.5) + ((sideLength / 2) * cosAngle) - ((sideLength / 2 - gap) * sinAngle);
+            const y1 = (sideLength) + ((sideLength / 2) * sinAngle) + ((sideLength / 2 - gap) * cosAngle);
+            const x2 = x1 + ((sideLength - 2 * gap) * sinAngle);
+            const y2 = y1 - ((sideLength - 2 * gap) * cosAngle);
+
+            let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('stroke', 'var(--font-color)');
+            line.setAttribute('stroke-width', strokeWidth.toFixed(0));
+            line.setAttribute('x1', x1.toFixed(0));
+            line.setAttribute('y1', y1.toFixed(0));
+            line.setAttribute('x2', x2.toFixed(0));
+            line.setAttribute('y2', y2.toFixed(0));
+            logo.append(line);
+        }
     }
 }
 
