@@ -26,16 +26,22 @@ SECRET_KEY = os.environ.get("APOLLO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS",'127.0.0.1,localhost,*.apollosarcade.com,https://apollos-arcade-u3itp.ondigitalocean.app').split(',')
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "127.0.0.1,localhost,*.apollosarcade.com,https://apollos-arcade-u3itp.ondigitalocean.app",
+).split(",")
 
-CSRF_TRUSTED_ORIGINS = ['https://*.apollosarcade.com','https://apollos-arcade-u3itp.ondigitalocean.app']
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.apollosarcade.com",
+    "https://apollos-arcade-u3itp.ondigitalocean.app",
+]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'storages',
+    "daphne",
+    "storages",
     # 'whitenoise.runserver_nostatic',
     "django.contrib.admin",
     "django.contrib.auth",
@@ -45,22 +51,22 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_quill",
     "channels",
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-    'rest_framework',
-    'webpack_loader',
-    'user_profiles',
-    'magic_fifteen',
-    'guest',
-    'local',
-    'game',
-    'lobby',
-    'home',
-    'start',
-    'post',
-    'capture',
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "rest_framework",
+    "webpack_loader",
+    "user_profiles",
+    "magic_fifteen",
+    "guest",
+    "local",
+    "game",
+    "lobby",
+    "home",
+    "start",
+    "post",
+    "capture",
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -68,7 +74,7 @@ SOCIALACCOUNT_PROVIDERS = {
         "APP": {
             "client_id": os.environ.get("GMAIL_API_CLIENT_ID", None),
             "secret": os.environ.get("GMAIL_API_SECRET", None),
-            "key": ""
+            "key": "",
         },
         "SCOPE": ["https://www.googleapis.com/auth/gmail.send"],
         "AUTH_EXTRA_ARGUMENTS": {"access_type": "offline", "prompt": "consent"},
@@ -76,23 +82,24 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 WEBPACK_LOADER = {
-    'DEFAULT': {
-        'CACHE': not DEBUG,
-        'BUNDLE_DIR_NAME': 'dist/', # must end with slash
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
-        'POLL_INTERVAL': 0.1,
-        'TIMEOUT': None, # 0.1
-        'IGNORE': [r'.+\.hot-update.js', r'.+\.map']
+    "DEFAULT": {
+        "CACHE": not DEBUG,
+        "BUNDLE_DIR_NAME": "dist/",  # must end with slash
+        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
+        "POLL_INTERVAL": 0.1,
+        "TIMEOUT": None,  # 0.1
+        "IGNORE": [r".+\.hot-update.js", r".+\.map"],
     }
 }
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apollosarcade.middleware.GuestMiddleware",
@@ -103,10 +110,7 @@ ROOT_URLCONF = "apollosarcade.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            'apollosarcade/templates',
-            'apollosarcade/static'
-        ],
+        "DIRS": ["apollosarcade/templates", "apollosarcade/static"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -120,12 +124,12 @@ TEMPLATES = [
 ]
 
 # Get the Redis URL from the environment variable
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
             "hosts": [REDIS_URL],
         },
     },
@@ -139,30 +143,31 @@ DEVELOPMENT_MODE = os.environ.get("DEVELOPMENT_MODE", "False") == "True"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 from urllib.parse import urlsplit
+
 if DEVELOPMENT_MODE is True:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'apollosarcadelocal',
-            'USER': 'laydo',
-            'PASSWORD': os.environ.get("LOCAL_DB_PW"),
-            'HOST': 'localhost',
-            'PORT': '5432'
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": "apollosarcadelocal",
+            "USER": "laydo",
+            "PASSWORD": os.environ.get("LOCAL_DB_PW"),
+            "HOST": "localhost",
+            "PORT": "5432",
         }
     }
-elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
-    database_url = os.getenv('DATABASE_URL', None)
+elif len(sys.argv) > 0 and sys.argv[1] != "collectstatic":
+    database_url = os.getenv("DATABASE_URL", None)
     if database_url is None:
         raise Exception("DATABASE_URL environment variable not defined")
 
     parsed_url = urlsplit(database_url)
 
-    if parsed_url.scheme in ['postgres', 'postgresql']:
-        database_engine = 'django.db.backends.postgresql'
-    elif parsed_url.scheme == 'mysql':
-        database_engine = 'django.db.backends.mysql'
-    elif parsed_url.scheme == 'sqlite':
-        database_engine = 'django.db.backends.sqlite3'
+    if parsed_url.scheme in ["postgres", "postgresql"]:
+        database_engine = "django.db.backends.postgresql"
+    elif parsed_url.scheme == "mysql":
+        database_engine = "django.db.backends.mysql"
+    elif parsed_url.scheme == "sqlite":
+        database_engine = "django.db.backends.sqlite3"
     else:
         raise ValueError(f"Unsupported database scheme: {parsed_url.scheme}")
 
@@ -178,18 +183,18 @@ elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
     }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 )
 
 SITE_ID = 1
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_EMAIL_REQUIRED = True
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = "/"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", None)
@@ -231,31 +236,30 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 if DEVELOPMENT_MODE:
-    STATIC_URL = '/static/'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATIC_URL = "/static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
     STATICFILES_DIRS = [
         BASE_DIR / "static",
         # BASE_DIR / "static/dist",
     ]
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    MEDIA_ROOT = STATIC_URL + 'images/'
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    MEDIA_ROOT = STATIC_URL + "images/"
 else:
-
-    AWS_ACCESS_KEY_ID = os.getenv('DO_SPACES_KEY')
-    AWS_SECRET_ACCESS_KEY = os.getenv('DO_SPACES_SECRET')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('DO_SPACES_BUCKET_NAME')
-    AWS_S3_ENDPOINT_URL = os.getenv('DO_SPACES_ENDPOINT_URL')
+    AWS_ACCESS_KEY_ID = os.getenv("DO_SPACES_KEY")
+    AWS_SECRET_ACCESS_KEY = os.getenv("DO_SPACES_SECRET")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("DO_SPACES_BUCKET_NAME")
+    AWS_S3_ENDPOINT_URL = os.getenv("DO_SPACES_ENDPOINT_URL")
     AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
+        "CacheControl": "max-age=86400",
     }
-    AWS_LOCATION = 'static'
+    AWS_LOCATION = "static"
     AWS_QUERYSTRING_AUTH = False
-    AWS_DEFAULT_ACL = 'public-read'
+    AWS_DEFAULT_ACL = "public-read"
 
-    STATIC_URL = '{}/{}/'.format(AWS_S3_ENDPOINT_URL, AWS_LOCATION)
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    MEDIA_ROOT = '{}/apollosarcade/static/images/'.format(AWS_S3_ENDPOINT_URL)
+    STATIC_URL = "{}/{}/".format(AWS_S3_ENDPOINT_URL, AWS_LOCATION)
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    MEDIA_ROOT = "{}/apollosarcade/static/images/".format(AWS_S3_ENDPOINT_URL)
     STATICFILES_DIRS = [
         BASE_DIR / "static",
     ]
