@@ -30,7 +30,7 @@ google-auth-oauthlib==1.2.0
 googleapis-common-protos==1.62.0
 httplib2==0.22.0
 hyperlink==21.0.0
-idna==3.6
+idna>=3.7
 incremental==22.10.0
 jmespath==1.0.1
 msgpack==1.0.7
