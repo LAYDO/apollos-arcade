@@ -59,3 +59,36 @@
 .ttt-col-b {
     width: 100%;
 }
+
+.capture-owned-player1 {
+    background-color: rgb(173, 216, 230);
+    /* Light blue */
+}
+
+.capture-owned-player2 {
+    background-color: rgb(144, 238, 144);
+    /* Light green */
+}
+.capture-score-player1 {
+    color: rgb(173, 216, 230);
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.capture-score-player2 {
+    color: rgb(144, 238, 144);
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.winners-glow {
+    box-shadow: 0 0 1rem 0.25rem rgba(255, 255, 255, 0.9);
+}
+
+.capture-faded-player1 {
+    background-color: rgba(173, 216, 230, 0.5);
+}
+
+.capture-faded-player2 {
+    background-color: rgba(144, 238, 144, 0.5);
+}
