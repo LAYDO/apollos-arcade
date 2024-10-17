@@ -1,21 +1,22 @@
 import { LocalGame } from "./LocalGame";
 
+const SIDE_INDEXES = {
+    top: 0,
+    bottom: 1,
+    left: 2,
+    right: 3
+}
+
 export class Capture extends LocalGame {
 
     public plays: Array<number>;
-    protected rows: number = 11;
-    protected cols: number = 9;
-    private horizontalLines: number = 0;
-    private verticalLines: number = 0;
-    private horizontalArray: Array<number>;
-    private verticalArray: Array<number>;
-
+    protected rows: number = 5;
+    protected cols: number = 5;
+    private squareArrays: Array<Array<number>>;
+    private gameOver: boolean = false;
     constructor(board: HTMLElement) {
         super(board);
-        this.horizontalLines = this.rows * (this.cols - 1);
-        this.horizontalArray = new Array(this.horizontalLines).fill(0);
-        this.verticalLines = (this.rows - 1) * this.cols;
-        this.verticalArray = new Array(this.verticalLines).fill(0);
+        this.squareArrays = new Array(this.rows * this.cols).fill(null).map(() => Array(5).fill(0));
         this.plays = [];
 
         // this.boardArea.style.width = '50%';
@@ -37,7 +38,7 @@ export class Capture extends LocalGame {
                     space.style.width = `${spacing}px`;
                     space.style.height = `${spacing}px`;
                     space.id = `space${spaceCount}`;
-                    space.textContent = spaceCount.toFixed(0);
+                    // space.textContent = spaceCount.toFixed(0);
                     
                     dotRow.append(space);
                 }
@@ -50,66 +51,166 @@ export class Capture extends LocalGame {
         });
     }
 
+    private getCurrentPlayerNumber(): number {
+        return this.player1Turn ? 1 : 2;
+    }
+
     protected handleMove(progress: number): void {
-        for (let r = 0; r < this.rows; r++) {
+        for (let r = 0; r <= this.rows; r++) {
             for (let c = 0; c < this.cols; c++) {
                 let localCount = r * this.cols + c;
                 let space = document.getElementById(`space${localCount}`);
                 space?.addEventListener('click', (event: MouseEvent) => {
-                    let nearestSide = this.determineNearestSide(event);
+                    if (this.gameOver) {
+                        return;
+                    }
+                    const currentPlayerNumber = this.getCurrentPlayerNumber();
+                    const nearestSide = this.determineNearestSide(event);
+                    const affectedSquares: number[] = [];
+
+                    if (localCount < this.squareArrays.length && this.squareArrays[localCount][nearestSide] !== 0) {
+                        alert('This side is already captured');
+                        return;
+                    }
+
                     switch (nearestSide) {
-                        case 'top':
-                            let top = localCount;
-                            if (this.horizontalArray[top] == 0) {
-                                if (this.player1Turn) {
-                                    this.updateLineArray(top, 0, 1);
-                                } else {
-                                    this.updateLineArray(top, 0, 2);
-                                }
+                        case SIDE_INDEXES.top:
+                            if (localCount < this.squareArrays.length) {
+                                this.squareArrays[localCount][0] = currentPlayerNumber;
+                                affectedSquares.push(localCount);
+                            }
+                            if (localCount >= this.cols || localCount >= this.squareArrays.length) {
+                                this.squareArrays[localCount - this.cols][1] = currentPlayerNumber;
+                                affectedSquares.push(localCount - this.cols);
                             }
                             break;
-                        case 'bottom':
-                            let bottom = localCount + this.cols;
-                            if (this.horizontalArray[bottom] == 0) {
-                                if (this.player1Turn) {
-                                    this.updateLineArray(bottom, 0, 1);
-                                } else {
-                                    this.updateLineArray(bottom, 0, 2);
-                                }
+                        case SIDE_INDEXES.bottom:
+                            if (localCount < this.squareArrays.length) {
+                                this.squareArrays[localCount][1] = currentPlayerNumber;
+                                affectedSquares.push(localCount);
+                            }
+                            if (localCount < (this.rows * this.cols) - this.cols) {
+                                this.squareArrays[localCount + this.cols][0] = currentPlayerNumber;
+                                affectedSquares.push(localCount + this.cols);
                             }
                             break;
-                        case 'left':
-                            let left = localCount;
-                            if (this.verticalArray[left] == 0) {
-                                if (this.player1Turn) {
-                                    this.updateLineArray(left, 1, 1);
-                                } else {
-                                    this.updateLineArray(left, 1, 2);
-                                }
+                        case SIDE_INDEXES.left:
+                            if (localCount < this.squareArrays.length) {
+                                this.squareArrays[localCount][2] = currentPlayerNumber;
+                                affectedSquares.push(localCount);
+                            }
+                            if (localCount < this.squareArrays.length && localCount % this.cols != 0) {
+                                this.squareArrays[localCount - 1][3] = currentPlayerNumber;
+                                affectedSquares.push(localCount - 1);
                             }
                             break;
-                        case 'right':
-                            let right = localCount + 1;
-                            if (this.verticalArray[right] == 0) {
-                                if (this.player1Turn) {
-                                    this.updateLineArray(right, 1, 1);
-                                } else {
-                                    this.updateLineArray(right, 1, 2);
-                                }
+                        case SIDE_INDEXES.right:
+                            if (localCount < this.squareArrays.length) {
+                                this.squareArrays[localCount][3] = currentPlayerNumber;
+                                affectedSquares.push(localCount);
+                            }
+                            if (localCount < this.squareArrays.length && localCount % this.cols != this.cols - 1) {
+                                this.squareArrays[localCount + 1][2] = currentPlayerNumber;
+                                affectedSquares.push(localCount + 1);
                             }
                             break;
                     }
+                    
+
                     this.drawLines();
+                    const completedSquare = this.checkForCompletedSquare(currentPlayerNumber, affectedSquares);
+
+                    if (!completedSquare) {
+                        this.player1Turn = !this.player1Turn;
+                        this.player2Turn = !this.player2Turn;
+                        this.updateTurnIndicator();
+                    }
+
+                    this.checkWin();
                 });
             }
         }
     }
 
-    protected checkWin(): void {
-
+    private checkForCompletedSquare(currentPlayerNumber: number, affectedSquares: number[]): boolean {
+        let squareCompleted = false;
+        for (let index of affectedSquares) {
+            const square = this.squareArrays[index];
+            // Check if all sides are captured and the square is not owned
+            if (square?.slice(0, 4).every(side => side !== 0) && square[4] === 0) {
+                square[4] = currentPlayerNumber;
+                squareCompleted = true;
+                // Update the UI to indicate ownership
+                const space = document.getElementById(`space${index}`);
+                if (space) {
+                    space.classList.add(`capture-owned-player${currentPlayerNumber}`);
+                }
+            }
+        }
+        return squareCompleted;
     }
 
-    private determineNearestSide(event: MouseEvent): string {
+    protected checkWin(): void {
+        const totalSquares = this.rows * this.cols;
+        let player1Score = 0;
+        let player2Score = 0;
+
+        for (const square of this.squareArrays) {
+            if (square[4] === 1) player1Score++;
+            if (square[4] === 2) player2Score++;
+        }
+
+        this.playerOneContent.textContent = `${player1Score}`;
+        this.playerOneContent.classList.add(`capture-score-player1`);
+        this.playerTwoContent.textContent = `${player2Score}`;
+        this.playerTwoContent.classList.add(`capture-score-player2`);
+
+        if (player1Score + player2Score === totalSquares) {
+            this.gameOver = true;
+            // let message: string;
+
+            if (player1Score > player2Score) {
+                // message = 'Player 1 wins!';
+                // this.playerOneElement.classList.add('winners-glow');
+                for (let i = 0; i < this.squareArrays.length; i++) {
+                    const square = this.squareArrays[i];
+                    if (square[4] === 1) {
+                        const space = document.getElementById(`space${i}`);
+                        if (space) {
+                            space.classList.add('winners-glow');
+                        }
+                    } else {
+                        const space = document.getElementById(`space${i}`);
+                        if (space) {
+                            space.classList.add('capture-faded-player2');
+                        }
+                    }
+                }
+            } else if (player2Score > player1Score) {
+                // message = 'Player 2 wins!';
+                for (let i = 0; i < this.squareArrays.length; i++) {
+                    const square = this.squareArrays[i];
+                    if (square[4] === 2) {
+                        const space = document.getElementById(`space${i}`);
+                        if (space) {
+                            space.classList.add('winners-glow');
+                        }
+                    } else {
+                        const space = document.getElementById(`space${i}`);
+                        if (space) {
+                            space.classList.add('capture-faded-player1');
+                        }
+                    }
+                }
+            } else {
+                // message = "It's a tie!";
+            }
+
+            // alert(message);
+        }
+    }
+
+    private determineNearestSide(event: MouseEvent): number {
         let rect = (event.target as HTMLElement).getBoundingClientRect();
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
@@ -128,89 +229,30 @@ export class Capture extends LocalGame {
             return distances[a] < distances[b] ? a : b
         });
 
-        return nearestSide;
-    }
-
-    private updateLineArray(index: number, which: number, player: number): void {
-        if (which == 0) {
-            this.horizontalArray[index] = player;
-        } else {
-            this.verticalArray[index] = player;
-        }
-        console.log(`Horizontal: ${this.horizontalArray}\nVertical: ${this.verticalArray}`);
+        return SIDE_INDEXES[nearestSide];
     }
 
     private drawLines(): void {
-        for (let i = 0; i < this.horizontalArray.length; i++) {
-            let space = document.getElementById(`space${i}`);
-            space?.classList.remove('capture-border-top');
-            space?.classList.remove('capture-border-bottom');
-            if (i < this.cols) {
-                if (this.horizontalArray[i] == 1) {
-                    space?.classList.add('capture-border-top');
-                } else if (this.horizontalArray[i] == 2) {
-                    space?.classList.add('capture-border-top');
-                }
-            } else if (i > this.horizontalArray.length - this.cols) {
-                if (this.horizontalArray[i] == 1) {
-                    space?.classList.add('capture-border-bottom');
-                } else if (this.horizontalArray[i] == 2) {
-                    space?.classList.add('capture-border-bottom');
-                }
-            } else {
-                let spaceBelowId = document.getElementById(`space${i - this.cols}`);
-                if (this.horizontalArray[i] == 1) {
-                    space?.classList.add('capture-border-top-shared');
-                    spaceBelowId?.classList.add('capture-border-bottom-shared');
-                } else if (this.horizontalArray[i] == 2) {
-                    space?.classList.add('capture-border-top-shared');
-                    spaceBelowId?.classList.add('capture-border-bottom-shared');
-                }
+        for (let index = 0; index < this.squareArrays.length; index++) {
+            const square = this.squareArrays[index];
+            const space = document.getElementById(`space${index}`);
+
+            if (space) {
+                if (square[0] !== 0) space.classList.add('capture-border-top');
+                if (square[1] !== 0) space.classList.add('capture-border-bottom');
+                if (square[2] !== 0) space.classList.add('capture-border-left');
+                if (square[3] !== 0) space.classList.add('capture-border-right');
             }
         }
+    }
 
-        let leftCount = 0;
-        let rightCount = 1;
-        for (let i = 0; i < this.verticalArray.length; i++) {
-            if (i % this.cols + 1 == 0) {
-                let space = document.getElementById(`space${i - leftCount}`);
-                space?.classList.remove('capture-border-left');
-                space?.classList.remove('capture-border-right');
-
-                if (this.verticalArray[i] == 1) {
-                    space?.classList.add('capture-border-left');
-                } else if (this.verticalArray[i] == 2) {
-                    space?.classList.add('capture-border-left');
-                }
-                leftCount++;
-            } else if (i + 1 % this.cols + 1 == 0) {
-                let space = document.getElementById(`space${i - rightCount}`);
-                space?.classList.remove('capture-border-left');
-                space?.classList.remove('capture-border-right');
-
-                if (this.verticalArray[i] == 1) {
-                    space?.classList.add('capture-border-right');
-                } else if (this.verticalArray[i] == 2) {
-                    space?.classList.add('capture-border-right');
-                }
-                rightCount++;
-            } else {
-                let spaceLeft = document.getElementById(`space${i - rightCount}`);
-                spaceLeft?.classList.remove('capture-border-left');
-                spaceLeft?.classList.remove('capture-border-right');
-
-                let spaceRight = document.getElementById(`space${i - leftCount}`);
-                spaceRight?.classList.remove('capture-border-left');
-                spaceRight?.classList.remove('capture-border-right');
-
-                if (this.verticalArray[i] == 1) {
-                    spaceRight?.classList.add('capture-border-left-shared');
-                    spaceLeft?.classList.add('capture-border-right-shared');
-                } else if (this.verticalArray[i] == 2) {
-                    spaceRight?.classList.add('capture-border-left-shared');
-                    spaceLeft?.classList.add('capture-border-right-shared');
-                }
-            }
+    private updateTurnIndicator(): void {
+        if (this.player1Turn) {
+            this.playerOneElement.classList.remove('disabled');
+            this.playerTwoElement.classList.add('disabled');
+        } else {
+            this.playerOneElement.classList.add('disabled');
+            this.playerTwoElement.classList.remove('disabled');
         }
-     }
+    }
 }
