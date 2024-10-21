@@ -123,8 +123,10 @@ TEMPLATES = [
     },
 ]
 
+DEVELOPMENT_MODE = os.environ.get("DEVELOPMENT_MODE", "False") == "True"
+
 # Get the Redis URL from the environment variable
-REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379") if not DEVELOPMENT_MODE else "redis://localhost:6379"
 
 CHANNEL_LAYERS = {
     "default": {
@@ -136,8 +138,6 @@ CHANNEL_LAYERS = {
 }
 
 ASGI_APPLICATION = "apollosarcade.asgi.application"
-
-DEVELOPMENT_MODE = os.environ.get("DEVELOPMENT_MODE", "False") == "True"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

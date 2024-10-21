@@ -1,9 +1,8 @@
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
 from guest.models import Guest
 from django.db.models import Q
-from channels.db import database_sync_to_async
 
 def get_player(request):
     try:
@@ -52,20 +51,14 @@ def get_app_model(request, model_name):
 def get_games(request, status=None, exclude_status=None, player_field=None):
     user = get_player(request)
     user_content_type = ContentType.objects.get_for_model(user)
-
-    # print(f"user_content_type: {user_content_type}, user.id: {user.id}")
     Game = get_app_model(request, 'game')
     games = Game.objects.filter((Q(player_one_content_type=user_content_type) & Q(player_one_object_id=user.id)) | (Q(player_two_content_type=user_content_type) & Q(player_two_object_id=user.id)))
-    # print(f"games after initial filter: {games}")
     if status:
         games = games.filter(status__in=status)
-        # print(f"games after status filter: {games}")
     if exclude_status:
         games = games.exclude(status__in=exclude_status)
-        # print(f"games after exclude_status filter: {games}")
     if player_field:
         games = games.filter(**{player_field: user})
-        # print(f"games after player_field filter: {games}")
     return games
 
 def game_archival(request, id):
