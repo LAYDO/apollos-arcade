@@ -4,12 +4,16 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.0",
+    "braces": "^3.0.3",
+    "micromatch": "^4.0.8",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.4",
-    "webpack": "^5.88.2",
+    "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "braces": "^3.0.3",
+    "micromatch": "^4.0.8",
     "webpack-bundle-tracker": "^2.0.1"
   }
 }

@@ -1,38 +1,17 @@
 import json, traceback
 from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from django.utils import timezone
 from django.apps import apps
 from guest.models import Guest
+from base_consumers.base_consumers import BaseGameConsumer, BaseLobbyConsumer, BasePostConsumer
 
-class GameConsumer(AsyncJsonWebsocketConsumer):
-    async def connect(self):
-        self.game_id = self.scope['url_route']['kwargs']['game_id']
-        self.game_group_id = 'game_%s' % self.game_id
-
-        await self.channel_layer.group_add(
-            self.game_group_id,
-            self.channel_name
-        )
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        print('Disconnected')
-        await self.channel_layer.group_discard(
-            self.game_group_id,
-            self.channel_name
-        )
+class GameConsumer(BaseGameConsumer):
 
     async def receive_json(self, response):
-        if (isinstance(response, str)):
-            try:
-                response = json.loads(response)
-            except json.JSONDecodeError:
-                traceback.print_exc()
-                return
+        await super().receive_json(response)
         try:
             if response['type'] == 'move':
                 message = response.get('message', {})
@@ -41,7 +20,7 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 space = message.get('space', None)
                 play = message.get('play', None)
 
-                game = await self.get_game_instance()
+                game = await self.get_game_instance(self.game_id)
 
                 if game is None:
                     raise Exception('Game not found')
@@ -120,8 +99,8 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                             'spaces': game.spaces,
                             'round': game.round,
                             'plays': game.plays,
-                            'p1': p1.id,
-                            'p2': p2.id,
+                            'p1': p1.id if p1 else None,
+                            'p2': p2.id if p2 else None,
                             'current': user_id,
                         }
                     })
@@ -151,27 +130,6 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                 "p2": event['message']['p2'],
             },
         }))
-
-    async def send_redirect(self, event):
-        await self.send(text_data=json.dumps({
-            'payload': {
-                'type': 'redirect',
-                'url': event['message']['url'],
-                'reason': event['message']['reason'],
-            }
-        }))
-
-    @database_sync_to_async
-    def get_game_instance(self):
-        app = self.scope['path'].split('/')[1]
-        Game = apps.get_model(app, 'Game')
-
-        # Retrieve the model instance from the database
-        try:
-            game = Game.objects.get(game_id=self.game_id)
-            return game
-        except Game.DoesNotExist:
-            return None
     
     def check_win(self, game):
         win = False
@@ -186,50 +144,11 @@ class GameConsumer(AsyncJsonWebsocketConsumer):
                     win = True
         print(f"Win: {win}")
         return win
-    
-    async def error_message(self, event):
-        await self.send(text_data=json.dumps({
-            'payload': {
-                'type': 'error',
-                'error': event['message']
-            }
-        }))
 
-    @database_sync_to_async
-    def save_game(self, game):
-        game.save()
-        print(f"Game saved: {game}")
-
-    @database_sync_to_async
-    def get_player_one(self, game):
-        return game.player_one
-    
-    @database_sync_to_async
-    def get_player_two(self, game):
-        return game.player_two
-    
-    @database_sync_to_async
-    def get_winner_name(self, game):
-        if (game.winner == game.player_one_object_id):
-            winner = game.player_one
-        else:
-            winner = game.player_two
-        if (str(ContentType.objects.get_for_model(winner)) == 'auth | user'):
-            return User.objects.get(id=game.winner).username
-        else:
-            return Guest.objects.get(id=game.winner).username
-
-class LobbyConsumer(AsyncJsonWebsocketConsumer):
+class LobbyConsumer(BaseLobbyConsumer):
     async def connect(self):
-        self.lobby_id = self.scope['url_route']['kwargs']['game_id']
-        self.lobby_group_id = 'lobby_%s' % self.lobby_id
-
-        await self.channel_layer.group_add(
-            self.lobby_group_id,
-            self.channel_name
-        )
-        await self.accept()
-        lobby = await self.get_game_instance()
+        await super().connect()
+        lobby = await self.get_game_instance(self.lobby_id)
         user = await self.get_player_by_username(self.scope["user"], lobby)
         if lobby:
             p1 = await self.get_player_one(lobby)
@@ -240,8 +159,8 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                     'message': {
                         'id': lobby.game_id,
                         'status': lobby.status,
-                        'p1': p1,
-                        'p2': p2,
+                        'p1': p1.username if p1 else None,
+                        'p2': p2.username if p2 else None,
                         'p1ID': lobby.player_one_object_id,
                         'p2ID': lobby.player_two_object_id,
                         'p1Status': lobby.p1_status,
@@ -252,25 +171,13 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                     }
                 })
 
-    async def disconnect(self, close_code):
-        print('Disconnected')
-        await self.channel_layer.group_discard(
-            self.lobby_group_id,
-            self.channel_name
-        )
-
     async def receive_json(self, response):
-        if (isinstance(response, str)):
-            try:
-                response = json.loads(response)
-            except json.JSONDecodeError:
-                traceback.print_exc()
-                return
+        await super().receive_json(response)
         try:
             message = response.get('message', {})
             lobby_id = message.get('game_id', None)
             user_id = message.get('user_id', None)
-            lobby = await self.get_game_instance()
+            lobby = await self.get_game_instance(self.lobby_id)
             if lobby:
                 p1 = await self.get_player_one(lobby)
                 p2 = await self.get_player_two(lobby)
@@ -302,15 +209,14 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                                     }
                                 }
                             )
-                    # else:
                     await self.channel_layer.group_send(
                         self.lobby_group_id, {
                             'type': 'send_message',
                             'message': {
                                 'id': lobby.game_id,
                                 'status': lobby.status,
-                                'p1': p1,
-                                'p2': p2,
+                                'p1': p1.username if p1 else None,
+                                'p2': p2.username if p2 else None,
                                 'p1ID': lobby.player_one_object_id,
                                 'p2ID': lobby.player_two_object_id,
                                 'p1Status': lobby.p1_status,
@@ -332,8 +238,8 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                             'message': {
                                 'id': lobby.game_id,
                                 'status': lobby.status,
-                                'p1': p1,
-                                'p2': p2,
+                                'p1': p1.username if p1 else None,
+                                'p2': p2.username if p2 else None,
                                 'p1ID': lobby.player_one_object_id,
                                 'p2ID': lobby.player_two_object_id,
                                 'p1Status': lobby.p1_status,
@@ -390,8 +296,8 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                             'message': {
                                 'id': lobby.game_id,
                                 'status': lobby.status,
-                                'p1': p1,
-                                'p2': p2,
+                                'p1': p1.username if p1 else None,
+                                'p2': p2.username if p2 else None,
                                 'p1ID': lobby.player_one_object_id,
                                 'p2ID': lobby.player_two_object_id,
                                 'p1Status': lobby.p1_status,
@@ -421,150 +327,18 @@ class LobbyConsumer(AsyncJsonWebsocketConsumer):
                 self.lobby_group_id, {
                     'type': 'error_message',
                     'message': f"User: {user_id}\nError: {str(e)}\nTraceback:\n{tb_str}",
-                })
-
-    async def send_message(self, event):
-        await self.send(text_data=json.dumps({
-            "payload": {
-                'type': 'update',
-                "id": event['message']['id'],
-                "status": event['message']['status'],
-                "p1": event['message']['p1'],
-                "p2": event['message']['p2'],
-                "p1ID": event['message']['p1ID'],
-                "p2ID": event['message']['p2ID'],
-                "p1Status": event['message']['p1Status'],
-                "p2Status": event['message']['p2Status'],
-                "privacy": event['message']['privacy'],
-                "current": event['message']['current'],
-                "round": event['message']['round'],
-            },
-        }))
-
-    async def send_redirect(self, event):
-        await self.send(text_data=json.dumps({
-            'payload': {
-                'type': 'redirect',
-                'url': event['message']['url'],
-                'reason': event['message']['reason'],
-            }
-        }))
-
-    async def send_leave(self, event):
-        await self.send(text_data=json.dumps({
-            'payload': {
-                'type': 'leave',
-                'url': event['message']['url'],
-                'reason': event['message']['reason'],
-                'current': event['message']['current'],
-            }
-        }))
-
-    async def send_continue(self, event):
-        await self.send(text_data=json.dumps({
-            'payload': {
-                'type': 'continue',
-                'url': event['message']['url'],
-                'reason': event['message']['reason'],
-                'current': event['message']['current'],
-            }
-        }))
-
-    @database_sync_to_async
-    def get_game_instance(self):
-        app = self.scope['path'].split('/')[1]
-        Game = apps.get_model(app, 'Game')
-        # Retrieve the model instance from the database
-        try:
-            game = Game.objects.get(game_id=self.lobby_id)
-            return game
-        except Game.DoesNotExist:
-            return None
-    
-    async def error_message(self, event):
-        await self.send(text_data=json.dumps({
-            'payload': {
-                'type': 'error',
-                'error': event['message']
-            }
-        }))
-
-    @database_sync_to_async
-    def save_game(self, lobby):
-        lobby.save()
-
-    @database_sync_to_async
-    def get_player_one(self, lobby):
-        player1 = None
-        if (lobby.player_one != None):
-                if (str(ContentType.objects.get_for_model(lobby.player_one)).lower() == 'auth | user'):
-                    player1 = User.objects.get(id=lobby.player_one_object_id).username
-                else:
-                    player1 = Guest.objects.get(id=lobby.player_one_object_id).username
-        return player1
-    
-    @database_sync_to_async
-    def get_player_two(self, lobby):
-        player2 = None
-        if (lobby.player_two != None):
-                if (str(ContentType.objects.get_for_model(lobby.player_two)).lower() == 'auth | user'):
-                    player2 = User.objects.get(id=lobby.player_two_object_id).username
-                else:
-                    player2 = Guest.objects.get(id=lobby.player_two_object_id).username
-        return player2
-    
-    @database_sync_to_async
-    def get_player_by_username(self, user, lobby):
-        try:
-            if user.is_authenticated:
-                # This is an authenticated user.
-                return User.objects.get(username=user.username)
-            elif isinstance(user, AnonymousUser):
-                # This is a guest.
-                if (ContentType.objects.get_for_model(lobby.player_one) == ContentType.objects.get_for_model(Guest)):
-                    return Guest.objects.get(id=lobby.player_one_object_id)
-                elif (ContentType.objects.get_for_model(lobby.player_two) == ContentType.objects.get_for_model(Guest)):
-                    return Guest.objects.get(id=lobby.player_two_object_id)
-            else:
-                # This is an unexpected situation, handle accordingly.
-                pass
-        except User.DoesNotExist:
-            raise Exception('Player not found')
-        except Guest.DoesNotExist:
-                raise Exception('Player not found')
-        
-class PostConsumer(AsyncJsonWebsocketConsumer):
-    async def connect(self):
-        self.post_id = self.scope['url_route']['kwargs']['game_id']
-        self.post_group_id = 'post_%s' % self.post_id
-
-        await self.channel_layer.group_add(
-            self.post_group_id,
-            self.channel_name
-        )
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        print('Disconnected')
-        await self.channel_layer.group_discard(
-            self.post_group_id,
-            self.channel_name
-        )
+                })   
+class PostConsumer(BasePostConsumer):
 
     async def receive_json(self, response):
-        if (isinstance(response, str)):
-            try:
-                response = json.loads(response)
-            except json.JSONDecodeError:
-                traceback.print_exc()
-                return
+        await super().receive_json(response)
         try:
             if response['type'] == 'rematch':
                 message = response.get('message', {})
                 post_id = message.get('game_id', None)
                 user_id = message.get('user_id', None)
 
-                game = await self.get_game_instance()
+                game = await self.get_game_instance(self.post_id)
 
                 if (game.player_one_object_id == user_id):
                     game.p1_status = 'REMATCH'
@@ -621,7 +395,7 @@ class PostConsumer(AsyncJsonWebsocketConsumer):
                 post_id = message.get('game_id', None)
                 user_id = message.get('user_id', None)
 
-                game = await self.get_game_instance()
+                game = await self.get_game_instance(post_id)
 
                 if (game.player_one_object_id == user_id):
                     game.p1_status = 'LEFT'
@@ -649,65 +423,3 @@ class PostConsumer(AsyncJsonWebsocketConsumer):
                     'type': 'error_message',
                     'message': f"User: {user_id}\nError: {str(e)}\nTraceback:\n{tb_str}",
                 })
-
-    async def send_message(self, event):
-        await self.send(text_data=json.dumps({
-            "payload": {
-                "type": "update",
-                "p1Status": event['message']['p1Status'],
-                "p2Status": event['message']['p2Status'],
-            },
-        }))
-
-    async def send_redirect(self, event):
-        await self.send(text_data=json.dumps({
-            'payload': {
-                'type': 'redirect',
-                'url': event['message']['url'],
-                'reason': event['message']['reason'],
-            }
-        }))
-
-    @database_sync_to_async
-    def get_game_instance(self):
-        app = self.scope['path'].split('/')[1]
-        Game = apps.get_model(app, 'Game')
-
-        # Retrieve the model instance from the database
-        try:
-            game = Game.objects.get(game_id=self.post_id)
-            return game
-        except Game.DoesNotExist:
-            return None
-    
-    async def error_message(self, event):
-        await self.send(text_data=json.dumps({
-            'payload': {
-                'type': 'error',
-                'error': event['message']
-            }
-        }))
-
-    @database_sync_to_async
-    def save_game(self, game):
-        game.save()
-
-    @database_sync_to_async
-    def get_player_one(self, lobby):
-        player1 = None
-        if (lobby.player_one != None):
-                if (str(ContentType.objects.get_for_model(lobby.player_one)).lower() == 'auth | user'):
-                    player1 = User.objects.get(id=lobby.player_one_object_id)
-                else:
-                    player1 = Guest.objects.get(id=lobby.player_one_object_id)
-        return player1
-    
-    @database_sync_to_async
-    def get_player_two(self, lobby):
-        player2 = None
-        if (lobby.player_two != None):
-                if (str(ContentType.objects.get_for_model(lobby.player_two)).lower() == 'auth | user'):
-                    player2 = User.objects.get(id=lobby.player_two_object_id)
-                else:
-                    player2 = Guest.objects.get(id=lobby.player_two_object_id)
-        return player2
