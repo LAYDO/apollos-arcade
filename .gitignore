@@ -177,3 +177,6 @@ staticfiles/
 /static/dist/
 webpack-stats.json
 *.bundle.js
+
+# Config
+config.json
