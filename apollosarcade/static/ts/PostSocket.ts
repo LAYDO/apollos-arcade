@@ -23,6 +23,8 @@ export class PostSocket extends ApollosSocket {
             document.getElementById('message_close')?.addEventListener('click', () => {
                 window.location.reload();
             });
+        } else {
+            console.warn("[PostSocket] Received unhandled message type:", data.type);
         }
     }
 }

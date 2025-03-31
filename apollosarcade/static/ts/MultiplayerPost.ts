@@ -1,7 +1,7 @@
 import { PostSocket } from "./PostSocket";
 import { getCurrentUserId } from "./utils";
 
-export abstract class MultiplayerPost {
+export class MultiplayerPost {
 
     protected app: Element;
     protected contextData: HTMLElement;
@@ -80,7 +80,7 @@ export abstract class MultiplayerPost {
         this.loserText = document.createElement('div');
         this.loserText.classList.add('apollos-flex-row');
 
-        if (this.round == 10 && this.winner != null) {
+        if (this.round == 10 && this.winner == null) {
             this.winnerElement.textContent = `Draw: ${this.winner}`;
             this.loserElement.textContent = `Draw: ${this.loser}`;
         } else {

@@ -30,7 +30,7 @@ body {
 .apollos-flex-home {
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
+    align-items: center;
     width: 100%;
     z-index: 10;
     text-align: center;
@@ -45,7 +45,6 @@ body {
     backdrop-filter: blur(5px);
     border-radius: 1rem;
     width: 96%;
-    margin: 0 0.5rem;
     margin-bottom: 1rem;
 }
 
@@ -131,7 +130,7 @@ body {
 
 #apollos_home {
     min-height: 90vh;
-    margin-top: 4rem;
+    margin: 4rem 0;
 }
 
 .apollos-bottom {
@@ -183,7 +182,8 @@ body {
 
 #apollos_navbar {
     background-color: var(--color-primary);
-    transition: top 0.3s;
+    transition: transform 0.3s ease-in-out;
+    will-change: transform;
 }
 
 .apollos-nav-menu {
@@ -465,7 +465,7 @@ body {
     background-color: rgba(0, 0, 0, 0.8);
     color: #fff8ed;
     border-radius: 1rem;
-    overflow-y: auto;
+    overflow: auto;
 }
 
 .apollos-title,

@@ -177,3 +177,12 @@ staticfiles/
 /static/dist/
 webpack-stats.json
 *.bundle.js
+
+# Config
+config.json
+
+# Redis
+dump.rdb
+
+# Cursor
+.cursor/

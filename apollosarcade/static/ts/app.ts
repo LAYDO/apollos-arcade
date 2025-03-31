@@ -26,11 +26,11 @@ let prevScrollPos = window.scrollY;
 window.onscroll = () => {
     let currentScrollPos = window.scrollY;
     if (prevScrollPos > currentScrollPos && navbar) {
-        navbar.style.top = "0px";
+        navbar.style.transform = "translateY(0)";
     } else if (home && navbar && home.getBoundingClientRect().top >= 0) {
-        navbar.style.top = "0px";
+        navbar.style.transform = "translateY(0)";
     } else if (navbar) {
-        navbar.style.top = "-50px";
+        navbar.style.transform = "translateY(-100%)";
     }
     prevScrollPos = currentScrollPos;
 }

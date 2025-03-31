@@ -1,5 +1,4 @@
 export function apollosLocalMessage(message: string, type: string) {
-    console.log(`${type}: ${message}`);
     let modal = document.getElementById("messageModal");
     let container = document.getElementById("modalContainer");
     let content = document.getElementById("messageContent");
@@ -18,7 +17,6 @@ export function apollosLocalMessage(message: string, type: string) {
 }
 
 export function apollosServerMessage(message: string, type: string, data: any) {
-    console.log(`${type}: ${message}`);
     let userIdRegex = /User:\s*(\d+)/;
     let matchedUserId = message.match(userIdRegex);
     let userIdFromMessage = matchedUserId ? parseInt(matchedUserId[1]) : null;

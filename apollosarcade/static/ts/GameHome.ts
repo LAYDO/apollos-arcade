@@ -5,6 +5,9 @@ export abstract class GameHome {
     private logo: SVGElement;
     private card: HTMLElement;
     private title: HTMLElement;
+    private inner: HTMLElement;
+    private front: HTMLElement;
+    private back: HTMLElement;
 
     constructor(app: HTMLElement, title: string) {
         this.app = app;
@@ -12,13 +15,13 @@ export abstract class GameHome {
         this.card.classList.add('apollos-card');
         this.card.id = 'apollos_card';
 
-        let inner = document.createElement('div');
-        inner.classList.add('apollos-card-inner');
+        this.inner = document.createElement('div');
+        this.inner.classList.add('apollos-card-inner');
 
-        let front = document.createElement('div');
-        front.classList.add('apollos-card-front');
-        front.classList.add('apollos-flex-col');
-        front.id = 'apollos_front';
+        this.front = document.createElement('div');
+        this.front.classList.add('apollos-card-front');
+        this.front.classList.add('apollos-flex-col');
+        this.front.id = 'apollos_front';
 
         this.logo = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this.logo.setAttribute('width', '400');
@@ -30,8 +33,8 @@ export abstract class GameHome {
         this.title.classList.add('apollos-flex-row');
         this.title.textContent = title;
 
-        front.append(this.logo);
-        front.append(this.title);
+        this.front.append(this.logo);
+        this.front.append(this.title);
 
         for (let i = 0; i < 3; i++) {
             let row = document.createElement('div');
@@ -62,18 +65,18 @@ export abstract class GameHome {
                     break;
             }
             row.append(button);
-            front.append(row);
+            this.front.append(row);
         }
 
-        let back = document.createElement('div');
-        back.classList.add('apollos-card-back');
-        back.id = 'apollos_back';
+        this.back = document.createElement('div');
+        this.back.classList.add('apollos-card-back');
+        this.back.id = 'apollos_back';
+        this.back.style.display = 'none';
+        this.fetchHowToPlay(this.back);
+        this.inner.append(this.front);
+        this.inner.append(this.back);
 
-        this.fetchHowToPlay(back);
-        inner.append(front);
-        inner.append(back);
-
-        this.card.append(inner);
+        this.card.append(this.inner);
         this.app.append(this.card);
     }
 
@@ -149,6 +152,11 @@ export abstract class GameHome {
 
     protected howToPlay(): void {
         this.card.classList.toggle('clicked');
+        if (this.back.style.display === 'block') {
+            this.back.style.display = 'none';
+        } else {
+            this.back.style.display = 'block';
+        }
     }
 
     public abstract drawLogo(logo: SVGElement): void;
