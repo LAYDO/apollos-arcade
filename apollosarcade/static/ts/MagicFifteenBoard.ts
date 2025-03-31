@@ -114,7 +114,7 @@ export class MagicFifteenBoard extends MultiplayerGame {
                         }
 
                         if (this.selectedSquare != -1 && this.selectedNumber != 0) {
-                            console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
+                            // console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
                             this.makeMove({
                                 'space': this.selectedSquare,
                                 'play': this.selectedNumber,
@@ -150,7 +150,7 @@ export class MagicFifteenBoard extends MultiplayerGame {
                     }
                     // callback to makeMove
                     if (this.selectedSquare != -1 && this.selectedNumber != 0) {
-                        console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
+                        // console.log(`Selected square: ${this.selectedSquare} and number: ${this.selectedNumber}`);
                         this.makeMove({
                             'space': this.selectedSquare,
                             'play': this.selectedNumber,

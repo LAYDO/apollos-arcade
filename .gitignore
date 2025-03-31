@@ -180,3 +180,9 @@ webpack-stats.json
 
 # Config
 config.json
+
+# Redis
+dump.rdb
+
+# Cursor
+.cursor/

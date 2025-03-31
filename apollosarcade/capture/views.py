@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from lobby.base_views import BaseCreateLobbyView, BaseJoinLobbyView, BaseLobbyView
+from post.base_views import BasePostView
 from apollosarcade.error_handler import LobbyError
 from guest.models import Guest
 from django.contrib.auth.models import User
@@ -115,3 +116,7 @@ class LobbyView(BaseLobbyView):
             "current": current_user.id,
             "round": game.round,
         }
+    
+class PostView(BasePostView):
+    def set_winner_loser(self, game):
+        return super().set_winner_loser(game)

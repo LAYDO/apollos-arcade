@@ -21,12 +21,12 @@ export abstract class ApollosSocket extends WebSocket {
 
     public connect() {
         this.onopen = () => {
-            console.log('Connected to websocket');
+            // console.log('Connected to websocket');
             this.sendHeartbeat();
         }
 
         this.onclose = (e) => {
-            console.log('Disconnected from websocket.  Reconnect attempt in 1 second...', e.reason);
+            // console.log('Disconnected from websocket.  Reconnect attempt in 1 second...', e.reason);
             setTimeout(() => {
                 this.connect();
                 this.retryInterval *= 2;
@@ -35,17 +35,24 @@ export abstract class ApollosSocket extends WebSocket {
         }
 
         this.onmessage = (e) => {
-            // console.log('Received message from websocket', e.data);
-            let data = JSON.parse(e.data);
-            if ('payload' in data) {
-                data = data.payload;
-                this.handleMessage(data);
-            } else {
-                console.warn('Received message from websocket without payload', data);
-                apollosLocalMessage('Received message from websocket without payload. See console for details.', 'warning');
-                document.getElementById('message_close')?.addEventListener('click', () => {
-                    window.location.reload();
-                });
+            // console.log('[ApollosSocket] Raw message received:', e.data);
+            try {
+                let data = JSON.parse(e.data);
+                // console.log('[ApollosSocket] Parsed data:', data);
+                if (data.payload) {
+                    // console.log('[ApollosSocket] Payload found, calling handleMessage...');
+                    this.handleMessage(data.payload);
+                } else {
+                    console.warn('[ApollosSocket] Parsed data has no payload key:', data);
+                    apollosLocalMessage('Received message structure error (no payload). See console.', 'warning');
+                    document.getElementById('message_close')?.addEventListener('click', () => {
+                        window.location.reload();
+                    });
+                }
+            } catch (error) {
+                console.error('[ApollosSocket] Failed to parse incoming message:', error);
+                // console.error('[ApollosSocket] Original message data:', e.data);
+                apollosLocalMessage('Failed to parse message from server. See console.', 'error');
             }
         }
         this.onerror = (e) => {

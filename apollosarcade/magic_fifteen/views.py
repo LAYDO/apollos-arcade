@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django import template
 from lobby.base_views import BaseCreateLobbyView, BaseJoinLobbyView, BaseLobbyView
-from apollosarcade.utils import get_app_model
+from post.base_views import BasePostView
+from apollosarcade.utils import get_app_model, get_player_by_content_type
 from guest.models import Guest
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from apollosarcade.error_handler import LobbyError
+from django.http import HttpResponseRedirect
 
 register = template.Library()
 
@@ -55,7 +57,7 @@ class JoinLobbyView(BaseJoinLobbyView):
                 raise LobbyError("Incorrect password")
         else:
             raise LobbyError("Invalid lobby privacy setting")
-        
+
 class LobbyView(BaseLobbyView):
     def get_lobby_context(self, game, current_user, app):
         if game.player_one == current_user:
@@ -92,3 +94,48 @@ class LobbyView(BaseLobbyView):
             'current': current_user.id,
             'round': game.round,
         }
+
+class PostView(BasePostView):
+    def build_post_context(self, app, current_user, game, post):
+        if game and game.status == "COMPLETED":
+            if game.round == 10 and game.winner == 0 and game.loser == 0:
+                winner = get_player_by_content_type(
+                    game.player_one_content_type, game.player_one_object_id
+                )
+                loser = get_player_by_content_type(
+                    game.player_two_content_type, game.player_two_object_id
+                )
+            else:
+                if game.winner == game.player_one_object_id:
+                    winner = get_player_by_content_type(
+                        game.player_one_content_type, game.winner
+                    )
+                    loser = get_player_by_content_type(
+                        game.player_two_content_type, game.loser
+                    )
+                else:
+                    winner = get_player_by_content_type(
+                        game.player_two_content_type, game.winner
+                    )
+                    loser = get_player_by_content_type(
+                        game.player_one_content_type, game.loser
+                    )
+            post.update(
+                {
+                    "id": game.game_id,
+                    "privacy": game.privacy,
+                    "player_one": game.player_one_object_id,
+                    "player_two": game.player_two_object_id,
+                    "winner_id": winner.id,
+                    "loser_id": loser.id,
+                    "winner": winner.username,
+                    "loser": loser.username,
+                    'spaces': game.spaces,
+                    "pw": game.password,
+                    "round": game.round,
+                    "current": current_user.id,
+                }
+            )
+            return post
+        else:
+            return HttpResponseRedirect(f'/{app}/')

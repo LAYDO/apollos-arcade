@@ -70,9 +70,8 @@ export class MagicFifteenPost extends MultiplayerPost {
 
     public drawLine() {
         if (this.spaces.reduce((a, b) => a + b, 0) > 0) {
-            console.log(`Drawing winning line of squares: ${this.spaces}`);
             let win: number[] | null = null;
-            if (this.round <= 9) {
+            if (this.round <= 10) {
                 for (let i of this.winningArrays) {
                     let temp: number[] = [];
                     for (let x of i) {
@@ -86,7 +85,6 @@ export class MagicFifteenPost extends MultiplayerPost {
                     }
                 }
             }
-            console.log(`Win: ${win}`);
             if (win) {
                 for (let x = 0; x < win?.length; x++) {
                     let square = document.getElementById(`square${win[x]}`);
