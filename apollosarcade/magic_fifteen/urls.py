@@ -3,7 +3,6 @@ from django.urls import path
 from . import views
 from local import views as local_views
 from game import views as game_views
-# from lobby import views as lobby_views
 from .views import CreateLobbyView, JoinLobbyView, LobbyView, PostView
 from home import views as home_views
 from start import views as start_views

@@ -464,6 +464,51 @@ class BaseLobbyConsumer(BaseConsumer, LockingMixin, GameStateMixin, PlayerManage
             
             await self.save_game(lobby)
 
+    async def handle_continue(self, lobby: Any, user_id: int) -> None:
+        """Handle continue request from a player in the lobby.
+        This method checks if the player is in a game and redirects them to the appropriate URL.
+        It does not change any game state."""
+        try:
+            # Get the current user
+            user = await self.get_player(user_id)
+            if not user:
+                raise ValueError("User not found")
+
+            # Verify user is a player in this lobby/game
+            if user_id != lobby.player_one_object_id and user_id != lobby.player_two_object_id:
+                raise ValueError("User is not a player in this lobby")
+
+            # If the game is in LOBBY, READY, or REMATCH state, redirect to lobby
+            if lobby.status in ['LOBBY', 'READY', 'REMATCH']:
+                await self.channel_layer.group_send(
+                    self.lobby_group_id,
+                    {
+                        "type": "send_redirect",
+                        "message": {
+                            "url": f"/{self.scope['path'].split('/')[1]}/lobby/{lobby.game_id}/",
+                            "reason": "Redirecting to lobby..."
+                        }
+                    }
+                )
+            # If the game is IN-GAME, redirect to game
+            elif lobby.status == 'IN-GAME':
+                await self.channel_layer.group_send(
+                    self.lobby_group_id,
+                    {
+                        "type": "send_redirect",
+                        "message": {
+                            "url": f"/{self.scope['path'].split('/')[1]}/game/{lobby.game_id}/",
+                            "reason": "Redirecting to game..."
+                        }
+                    }
+                )
+            else:
+                raise ValueError("You are not in a game lobby or active game")
+
+        except Exception as e:
+            print(f"Full traceback: {traceback.format_exc()}")
+            await self.handle_error(e, {"type": "continue", "user_id": user_id})
+
     async def handle_error(self, e: Exception, response: Dict[str, Any]):
         tb_str = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
         message = response.get('message', {})
