@@ -6,10 +6,8 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from .forms import RegisterForm
 
-
 class CustomLoginView(LoginView):
     template_name = "registration/login.html"
-
 
 class CustomLogoutView(LogoutView):
     template_name = "registration/logout.html"
